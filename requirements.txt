@@ -1,0 +1,3 @@
+setuptools
+PyYAML
+# You also need libvirt-python and libguestfs-python

@@ -1,0 +1,11 @@
+*.vagrant
+*.venv
+*.pyc
+*.egg-info
+*/__pycache__
+build
+dist
+.ropeproject
+.cache
+htmlcov
+.coverage
