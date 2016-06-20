@@ -1,0 +1,29 @@
+# vim: set ts=2 sw=2 tw=0 ft=yaml:
+---
+- crowbar_admin:
+    type: node
+    image: 'http://xii.schnizle.in/openSUSE-leap'
+
+    network:
+      - eth0:
+        network: crowbar
+        mode: static
+        ip_v4: 192.168.124.10
+      - eth1: default
+
+    user:
+      - xii: default
+      - felixsch:
+          password: linux
+          copy_pub_key: true
+      - root:
+          password: linux
+          copy_pub_key: true 
+    ssh: true 
+- crowbar_nodes:
+    type: node
+    network: crowbar
+    user: default
+    ssh: true
+
+
