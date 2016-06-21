@@ -1,13 +1,11 @@
-
-
-class CommandRegister(object):
+class Register(object):
     registered = []
 
     @classmethod
-    def get(cls, settings):
+    def get(cls, name, args, conf):
         for command in cls.registered:
-            if settings.name in command.name:
-                return command(settings.args)
+            if name in command.name:
+                return command(args, conf)
         return None
 
     @classmethod
@@ -26,8 +24,9 @@ class Command():
     name = ["invalidcommand"]
     help = "No help given"
 
-    def __init__(self, args=[]):
-        self.args    = args
+    def __init__(self, args, conf):
+        self.args = args
+        self.conf = conf
 
     def run(self):
-        raise RuntimeError("run() is not implemeted")
+        pass

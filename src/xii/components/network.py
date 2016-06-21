@@ -1,8 +1,7 @@
-from xii.component import Component, ComponentRegister
+from xii import component
 
-
-class NetworkComponent(Component):
+class NetworkComponent(component.Component):
     pass
 
 
-ComponentRegister.register('network', NetworkComponent)
+component.Register.register('network', NetworkComponent)

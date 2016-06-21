@@ -1,5 +1,6 @@
 import sys
-from .cli import run_cli
+import cli
+
 
 def main():
-   sys.exit(run_cli())
+    sys.exit(cli.run_cli())

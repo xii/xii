@@ -27,6 +27,7 @@ setupdict = dict(
    include_package_data = True,
    packages=find_packages('src'),
    package_dir={'': 'src'},
+   data_files=[('config', ['default/config.yml'])],
    extras_require={
         'test': ['pytest', 'coverage'],
    },

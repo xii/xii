@@ -21,6 +21,7 @@
           copy_pub_key: true 
     ssh: true 
 - crowbar_nodes:
+    image: 'http://xii.schnizle.in/openSUSE-leap'
     type: node
     network: crowbar
     user: default

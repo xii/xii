@@ -1,4 +1,4 @@
-
+import os
 
 OUTPUT_VERBOSE = False
 
@@ -9,8 +9,8 @@ def set_verbose():
 
 
 class colors:
-    HEADER = '\033[95m'
-    INFO = '\033[94m'
+    HEADER = '\033[34m'
+    SECTION = '\033[34m'
     OKGREEN = '\033[92m'
     WARNING = '\033[93m'
     FATAL = '\033[91m'
@@ -19,16 +19,41 @@ class colors:
     UNDERLINE = '\033[4m'
 
 
+def terminal_columns():
+    _, columns = os.popen('stty size', 'r').read().split()
+    return int(columns)
+
+
+def width():
+    columns = terminal_columns()
+    return int(columns - (columns * 0.25))
+
+
+def hr(msg):
+    return msg + '=' * (width() - len(msg))
+
+
+def header(msg):
+    print(colors.HEADER + colors.BOLD + hr(msg + " ") + colors.CLEAR)
+
+
+def section(msg):
+    print(colors.SECTION + " ===> " + msg + colors.CLEAR)
+
+
+def sep(msg):
+    return "   " + msg
+
 def fatal(msg):
     print(colors.FATAL + colors.BOLD + msg + colors.CLEAR)
 
 
 def info(msg):
-    print(colors.INFO + msg + colors.CLEAR)
+    print(sep(msg))
 
 
 def warn(msg):
-    print(colors.WARNING + msg + colors.CLEAR)
+    print(colors.WARNING + sep(msg) + colors.CLEAR)
 
 
 def debug(msg):
