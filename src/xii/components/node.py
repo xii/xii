@@ -5,33 +5,34 @@ from xii.output import info, warn
 
 
 class NodeComponent(component.Component):
-    require_properties = ['image']
+    require_attributes = ['image']
+    default_attributes = ['network', 'count']
 
-    libvirt_xml = []
+    xml_dfn = {}
 
-    def add_xml(self, xml):
-        self.libvirt_xml.append(xml)
-
-    def prepare(self):
-        self.count = self.attribute('count')
+    def add_xml(self, section, xml):
+        self.xml_dfn[section] += "\n" + xml
 
     def start(self):
-        self.prepare()
-
         domains = self.attribute('count').counted_names()
 
-        for domain_name in domains:
-            domain = util.libvirt_get_domain(self.virt(), domain_name)
+        caps = self.conn.get_capabilities()
 
+        for domain_name in domains:
+            self.xml_dfn = {'devices': ''}
+            self.attribute_action('start', domain_name)
+
+            domain = self.conn.get_domain(domain_name)
             if not domain:
                 info("Creating node {}...".format(domain_name))
 
                 xml = paths.template('node.xml')
-                replacements = {'name': domain_name}
+                self.xml_dfn['name'] = domain_name
+                self.xml_dfn.update(caps)
 
                 try:
-                    self.virt().defineXML(xml.safe_substitute(replacements))
-                    domain = util.libvirt_get_domain(self.virt(), domain_name)
+                    self.virt().defineXML(xml.safe_substitute(self.xml_dfn))
+                    domain = self.conn.get_domain(domain_name)
                 except libvirt.libvirtError as err:
                     raise error.LibvirtError(err, "Could not start "
                                                   "domain {}".format(domain_name))

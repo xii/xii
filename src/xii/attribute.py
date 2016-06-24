@@ -12,15 +12,6 @@ class Register():
         cls.registered[name] = attr
 
 
-class Priority():
-    lowest = 1000
-    low = 800
-    middle = 400
-    high = 200
-    highest = 100
-    first = 10
-
-
 class Attribute():
     name = "basic-attribute"
     allowed_components = []
@@ -42,6 +33,15 @@ class Attribute():
             return True
         return False
 
-    def __init__(self, settings, cmpnt):
+    def info(self):
+        pass
+
+    def __init__(self, value, cmpnt):
         self.cmpnt = cmpnt
-        self.settings = settings
+        self.value = value
+
+    def conn(self):
+        return self.cmpnt.conn
+
+    def virt(self):
+        return self.cmpnt.virt()

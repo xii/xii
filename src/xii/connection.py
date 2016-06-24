@@ -1,50 +1,20 @@
-import re
+from abc import ABCMeta, abstractmethod
+import xml.etree.ElementTree as etree
 
 import libvirt
 
 from xii import error
-from xii.output import debug, warn
-
-
-def establish(dfn, conf):
-    return Connection(dfn, conf)
+from xii.output import warn
 
 
 class Connection():
-    def __init__(self, dfn, conf):
+    __metaclass__ = ABCMeta
 
-        uri = dfn.settings('connection', conf.default_host())
-
-
-        self.uri = uri
-        self.dfn_file = dfn.file_path()
-        self.config = conf
-        self.hypervisor = 'qemu'
-        self.is_local = True
-        self.user = None
-        self.host = None
-        self.domain = 'session'
+    def __init__(self, uri, dfn, conf):
+        self.dfn = dfn
+        self.conf = conf
         self.libvirt = None
-
-        self.parse_uri(uri)
-
-    def parse_uri(self, uri):
-        matcher = re.compile(r'([a-z]+)(\+([a-z]+))?:\/\/\/([a-z.]+)(@([a-z0-9.]+)\/([a-z]+))?')
-        matched = matcher.match(uri)
-        if not matched:
-            raise error.ParseError(self.dfn_file, "Invalid connection URL specified")
-
-        # NOTE: Currently only qemu is supported
-        if matched.group(1) != 'qemu':
-            raise RuntimeError("Currently only qemu is supported.")
-
-        self.domain = matched.group(4)
-        if matched.group(3) == 'ssh':
-            self.is_local = False
-            self.user = matched.group(4)
-            self.host = matched.group(6)
-            self.domain = matched.group(7)
-
+        self.uri = uri
 
     def virt(self):
         def error_handler(_, err):
@@ -59,13 +29,91 @@ class Connection():
         self.libvirt = libvirt.open(self.uri)
 
         if not self.libvirt:
-            raise error.LibvirtError("Could not connection to `{}`".format(self.uri))
+            raise error.LibvirtError(None, "Could not connection to `{}`".format(self.uri))
         return self.libvirt
 
+    def get_domain(self, name):
+        try:
+            return self.virt().lookupByName(name)
+        except libvirt.libvirtError:
+            return None
 
- 
-    def run(self, command):
-        if self.is_local:
-            debug("[local] " + command)
-        else:
-            debug("[remote] " + command)
+    def get_pool(self, name):
+        try:
+            return self.virt().storagePoolLookupByName(name)
+        except libvirt.libvirtError:
+            return None
+
+    def get_capabilities(self, arch='x86_64', prefare_kvm=True):
+        try:
+            caps = etree.fromstring(self.virt().getCapabilities())
+            cpu_arch = caps.find('host/cpu/arch').text
+            cpu_model = caps.find('host/cpu/model').text
+            guests = {}
+
+            for guest in caps.findall('guest'):
+                guest_arch = guest.find('arch').attrib['name']
+                emu_type = 'qemu'
+                emu  = guest.find('arch/emulator').text
+                host = guest.find('arch/machine[@canonical]').attrib['canonical']
+
+                # prefare kvm if possible
+                kvm = guest.find("arch/domain[@type='kvm']")
+                if kvm is not None:
+                    emu_type = 'kvm'
+                    emu = kvm.find('emulator')
+                    host = kvm.find('machine[@canonical]').attrib['canonical']
+
+                guests[guest_arch] = {'emulator_type': emu_type,
+                                'emulator': emu.text,
+                                'host': host}
+            return {'arch': arch,
+                    'model': cpu_model,
+                    'emulator': guests[arch]['emulator'],
+                    'emulator_type': guests[arch]['emulator_type'],
+                    'host': guests[arch]['host']}
+        except libvirt.libvirtError as err:
+            raise error.LibvirtError(err)
+            
+    @abstractmethod
+    def mkdir(self, directory, recursive=False):
+        pass
+
+    @abstractmethod
+    def exists(self, path):
+        pass
+
+    @abstractmethod
+    def user(self):
+        pass
+
+    @abstractmethod
+    def user_home(self):
+        pass
+
+    @abstractmethod
+    def copy(self, msg, source, dest):
+        pass
+
+    @abstractmethod
+    def download(self, msg, source, dest):
+        pass
+
+    @abstractmethod
+    def chmod(self, path, new_mode, append=False):
+        pass
+
+
+
+
+def establish(dfn, conf):
+    from xii.connections.local import Local
+    uri = dfn.settings('connection', conf.default_host())
+
+    # if uri.startswith('qemu+ssh'):
+    #     return Remote(uri, dfn, conf)
+    if uri.startswith('qemu'):
+        return Local(uri, dfn, conf)
+
+    raise RuntimeError("Unsupported connection. Currently onlye qemu:// "
+                       "and qemu+ssh:// is supported")

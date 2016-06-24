@@ -1,29 +1,48 @@
 import os
+import subprocess
+import stat
 
-from xii import attribute, paths
+from urllib2 import urlparse
+
+from xii import attribute, paths, error
+from xii.output import info, show_setting
 
 
 class ImageAttribute(attribute.Attribute):
     name = "image"
     allowed_components = "node"
 
-    def start(self):
-        self.parse_source()
-        if not self.storage_exists():
-            self.prepare_storage()
+    def __init__(self, value, cmpnt):
+        attribute.Attribute.__init__(self, value, cmpnt)
+        self.local_image = False
+        self.image_name = os.path.basename(self.value)
+        self.storage_path = paths.storage_path(self.conn().user_home())
+        self.storage_image = os.path.join(self.storage_path, 'images/' + self.image_name)
+        self.storage_clone = None
 
-        if not self.image_exists():
-            self.prepare_image()
+    def info(self):
+        show_setting('image', self.image_name)
 
-        self.clone_image_to_storage()
+    def start(self, domain_name):
+        self.storage_clone = os.path.join(self.storage_path, 'storage/' + domain_name + '.qcow2')
 
-        self.cmpnt.add_xml(self.gen_xml())
 
-    def parse_source(self):
+        self._parse_source()
+        self._prepare_storage()
+        self._prepare_pool()
+
+        if not self.conn().exists(self.storage_image):
+            self._prepare_image()
+
+        if not self.conn().exists(self.storage_clone):
+            self.conn().copy("Clone image", self.storage_image, self.storage_clone)
+
+        self.cmpnt.add_xml('devices', self._gen_xml())
+
+    def _parse_source(self):
         self.local_image = True
-        self.name = os.path.basename(self.settings)
 
-        parsed = urlparse.urlparse(self.settings)
+        parsed = urlparse.urlparse(self.value)
 
         # Local file
         if parsed.scheme == "":
@@ -35,35 +54,64 @@ class ImageAttribute(attribute.Attribute):
             return
 
         raise error.InvalidSource("Not supported image "
-                                  "location: {}".format(self.settings))
+                                  "location: {}".format(self.value))
 
-    def storage_path(extend=None):
-        storage = paths.storage_path(self.conn().get_user_path())
+    def _fix_permissions(self):
+        user = self.conn().user()
+        storage = os.path.join(self.storage_path, 'storage')
 
-        if extend:
-            return os.path.join(storage, extend)
-        return storage
+        cmd = ["setfacl", "--modify", "user:{}:x".format(user), storage]
+        setfacl = subprocess.Popen(cmd,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
 
-    def storage_exists(self):
-        path = self.storage_path('images')
-        return self.conn().isdir(path)
+        _, err = setfacl.communicate()
 
-    def image_exists(self):
-        path = self.storage_path('images/' + self.
+        self.conn().chmod(storage, stat.S_IXOTH, append=True)
 
-        conn = self.cmpnt.conn
+        if setfacl.returncode != 0:
+            raise PermissionError(storage, err)
 
-        storage = paths.storage_path(conn.get_
-        pass
+    def _prepare_storage(self):
+        storage = os.path.join(self.storage_path, 'storage')
+        images = os.path.join(self.storage_path, 'images')
 
-    def prepare_image(self):
-        pass
+        if not self.conn().exists(storage):
+            self.conn().mkdir(storage, recursive=True)
 
-    def clone_image_to_storage(self):
-        pass
+        if not self.conn().exists(images):
+            self.conn().mkdir(images)
 
-    def gen_xml(self):
-        pass
+    def _prepare_pool(self):
+        pool = self.conn().get_pool('xii')
+
+        if not pool:
+            info("Local storage pool does not exist. Creating...")
+            xml = paths.template('pool.xml')
+            self.virt().storagePoolDefineXML(xml.safe_substitute({'storage': self.storage_path + '/storage'}))
+
+            # Add access rights
+            self._fix_permissions()
+
+            pool = self.conn().get_pool('xii')
+            pool.setAutostart(True)
+
+        if not pool.isActive():
+            pool.create()
+
+    def _prepare_image(self):
+        if self.local_image:
+            self.conn().copy("Copy {}".format(self.image_name),
+                             self.value,
+                             self.storage_image)
+        else:
+            self.conn().download("Downloading {}".format(self.image_name),
+                                 self.value,
+                                 self.storage_image)
+
+    def _gen_xml(self):
+        xml = paths.template('disk.xml')
+        return xml.safe_substitute({'image': self.storage_clone})
 
 
 attribute.Register.register('image', ImageAttribute)

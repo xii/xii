@@ -1,16 +1,8 @@
 # vim: set ts=2 sw=2 tw=0 ft=yaml:
 ---
-- crowbar_admin:
+- test_instance:
     type: node
-    image: 'http://xii.schnizle.in/openSUSE-leap'
-
-    network:
-      - eth0:
-        network: crowbar
-        mode: static
-        ip_v4: 192.168.124.10
-      - eth1: default
-
+    image: 'https://download.fedoraproject.org/pub/fedora/linux/releases/24/CloudImages/x86_64/images/Fedora-Cloud-Base-24-1.2.x86_64.qcow2'
     user:
       - xii: default
       - felixsch:
@@ -20,11 +12,26 @@
           password: linux
           copy_pub_key: true 
     ssh: true 
-- crowbar_nodes:
-    image: 'http://xii.schnizle.in/openSUSE-leap'
+
+
+- multiple:
     type: node
-    network: crowbar
-    user: default
-    ssh: true
+    count: 3
+    image: 'https://download.fedoraproject.org/pub/fedora/linux/releases/24/CloudImages/x86_64/images/Fedora-Cloud-Base-24-1.2.x86_64.qcow2'
+    user:
+      - xii: default
+      - felixsch:
+          password: linux
+          copy_pub_key: true
+      - root:
+          password: linux
+          copy_pub_key: true 
+    ssh: true 
+# - crowbar_nodes:
+#     image: 'http://download.suse.de/ibs/home:/fschnizlein:/images:/libvirt/images/sle12-sp1.x86_64.qcow2'
+#     type: node
+#     network: default
+#     user: default
+#     ssh: true
 
 

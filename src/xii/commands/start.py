@@ -2,7 +2,7 @@ import os
 import argparse
 
 from xii import definition, command, components, connection
-from xii.output import header, debug
+from xii.output import header, debug, hr, sep
 
 
 class StartCommand(command.Command):
@@ -27,9 +27,11 @@ class StartCommand(command.Command):
 
             map(lambda cpmnt: cpmnt.is_ready(), cmpnts)
 
-            header("Starting instances")
-            map(lambda cpmnt: cpmnt.action('start'), cmpnts)
-
+            for cmpnt in cmpnts:
+                header("Starting {}".format(cmpnt.name))
+                cmpnt.info()
+                hr(sep(""))
+                cmpnt.action('start')
 
     def parse_command(self):
         parser = argparse.ArgumentParser()

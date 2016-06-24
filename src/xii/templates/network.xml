@@ -1,0 +1,4 @@
+<interface type='network'>
+  <source network='$network'/>
+  <model type='virtio'/>
+</interface>

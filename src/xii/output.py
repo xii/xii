@@ -1,4 +1,5 @@
 import os
+import sys
 
 OUTPUT_VERBOSE = False
 
@@ -29,6 +30,19 @@ def width():
     return int(columns - (columns * 0.25))
 
 
+def progress(message, full, current):
+    perc = int(100 * (float(current) / full))
+    sys.stdout.write("\r{}".format(sep(":: {} {}%...".format(message, perc))))
+    if perc > 99:
+        sys.stdout.write("\n")
+    sys.stdout.flush()
+
+
+def show_setting(key, value):
+    key_max = 20
+    print(sep("{}{}: {}".format(key, ' ' * (key_max - len(key)), value)))
+
+
 def hr(msg):
     return msg + '=' * (width() - len(msg))
 
@@ -42,7 +56,8 @@ def section(msg):
 
 
 def sep(msg):
-    return "   " + msg
+    return "  " + msg
+
 
 def fatal(msg):
     print(colors.FATAL + colors.BOLD + msg + colors.CLEAR)

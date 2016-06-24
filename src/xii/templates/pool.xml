@@ -1,0 +1,6 @@
+<pool type="dir">
+  <name>xii</name>
+  <target>
+    <path>$storage</path>
+  </target>
+</pool>

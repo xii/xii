@@ -25,11 +25,10 @@ def local(file):
 def local_config_dir():
     return os.getenv("XDG_CONFIG_HOME", os.path.join(os.path.expanduser('~'), '.config/xii'))
 
-def xii_storage(connection):
-    pass
 
-def xii_images(connection):
-    pass
+def storage_path(user):
+    return os.path.join(user, '.local/share/xii')
+
 
 def prepare_local_paths():
 

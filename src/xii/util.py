@@ -39,10 +39,3 @@ def load_modules(path):
                 continue
             modules.append(name)
     return modules
-
-
-def libvirt_get_domain(lconn, name):
-    try:
-        return lconn.lookupByName(name)
-    except libvirt.libvirtError:
-        return None

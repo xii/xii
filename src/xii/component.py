@@ -1,5 +1,6 @@
 from xii import attribute, error
 
+
 class Register():
     registered = {}
 
@@ -15,7 +16,8 @@ class Register():
 
 
 class Component():
-    require_properties = []
+    require_attributes = []
+    default_attributes = []
 
     def __init__(self, name, conn, conf):
         self.conn = conn
@@ -31,16 +33,16 @@ class Component():
 
     def attribute(self, name):
         if name not in self.attrs:
-            klass = attribute.Register.get('count')
-            if not klass:
-                raise error.Bug(__file__, "Could not find attribute `{}`".format(name))
-            if klass.has_defaults():
-                return klass.default(self)
-            raise RuntimeError("Attribute `{}` has not defaults.".format(name))
+            raise error.Bug(__file__, "Can not find attribute {} but required".format(name))
         return self.attrs[name]
 
     def is_ready(self):
-        for required in self.require_properties:
+        for attr_name in self.default_attributes:
+            if attr_name not in self.attrs:
+                attr = attribute.Register.get(attr_name)
+                self.add_attribute(attr.default(self))
+
+        for required in self.require_attributes:
             if required not in self.attrs:
                 raise RuntimeError("Could not find required attribute `{}`. "
                                    "Add `{}` to `{}`.".format(required, required, self.name))
@@ -53,9 +55,13 @@ class Component():
             raise RuntimeError("Invalid componenten Command. This is a bug, "
                                "report it!")
 
-        for attr in self.attrs:
-            if command in dir(attr):
-                getattr(attr, command)()
-
         if command in dir(self):
             getattr(self, command)()
+
+    def attribute_action(self, command, settings):
+        for attr in self.attrs.values():
+            if command in dir(attr):
+                getattr(attr, command)(settings)
+
+    def info(self):
+        map(lambda attr: attr.info(), self.attrs.values())
