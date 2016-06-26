@@ -51,9 +51,10 @@ class Component():
                 attr.valid()
 
     def action(self, command):
-        if command not in ['start']:
-            raise RuntimeError("Invalid componenten Command. This is a bug, "
-                               "report it!")
+        if command not in ['start', 'stop']:
+            raise RuntimeError("Invalid component command {}. "
+                               "This is a bug, report "
+                               "it!".format(command))
 
         if command in dir(self):
             getattr(self, command)()

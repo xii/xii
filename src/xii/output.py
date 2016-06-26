@@ -60,7 +60,7 @@ def sep(msg):
 
 
 def fatal(msg):
-    print(colors.FATAL + colors.BOLD + msg + colors.CLEAR)
+    print(colors.FATAL + colors.BOLD + sep(msg) + colors.CLEAR)
 
 
 def info(msg):

@@ -1,8 +1,25 @@
+import os
+
 from xii import util, error
 
 
+def find_file(path=None):
+    if not path:
+        path = os.path.dirname(os.getcwd()) + ".xii"
+        if os.path.exists(path):
+            return path
+        else:
+            raise RuntimeError("Could not find a sustainable xii definition")
+    else:
+        path = os.path.abspath(path)
+        if not os.path.isfile(path):
+            raise RuntimeError("Could not open xii definition. "
+                                "No such file or directory")
+        return path
+
+
 def from_file(dfn_file, conf):
-    return Definition(dfn_file, conf)
+    return Definition(find_file(dfn_file), conf)
 
 
 class Definition():

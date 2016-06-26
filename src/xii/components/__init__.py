@@ -21,5 +21,10 @@ def from_definition(dfn, conf, conn):
                 debug("Unkown attribute `{}`. Skipping.".format(attr_name))
                 continue
             cmpnt.add_attribute(attr(attr_settings, cmpnt))
+
+        # check if component is correctly initialized
+        cmpnt.is_ready()
+
         cmpnts.append(cmpnt)
+    
     return cmpnts
