@@ -1,17 +1,16 @@
-import os
 import argparse
 
 from xii import definition, command, components, connection
 from xii.output import header, debug, hr, sep
 
 
-class SuspendCommand(command.Command):
-    name = ["suspend"]
-    help = "Suspend all running instances"
+class ResumeCommand(command.Command):
+    name = ["resume"]
+    help = "resume all paused domains"
 
     def run(self):
 
-        (dfn_path, forced_stop) = self.parse_command()
+        dfn_path = self.parse_command()
 
         dfn  = definition.from_file(dfn_path, self.conf)
         conn = connection.establish(dfn, self.conf)
@@ -19,20 +18,18 @@ class SuspendCommand(command.Command):
         cmpnts = components.from_definition(dfn, self.conf, conn)
 
         for cmpnt in cmpnts:
-            header("Suspending {}".format(cmpnt.name))
+            header("Resuming {}".format(cmpnt.name))
             cmpnt.info()
             hr(sep(""))
-            cmpnt.action('suspend')
+            cmpnt.action('resume')
 
     def parse_command(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument("--force", action='store_true', default=False,
-                            help="Force creation of new instances. Ignore statefile (will be overwritten)")
         parser.add_argument("dfn_file", nargs="?", default=None)
 
         args = parser.parse_args(self.args)
 
-        return (args.dfn_file, args.force)
+        return args.dfn_file
 
 
-command.Register.register(SuspendCommand)
+command.Register.register(ResumeCommand)

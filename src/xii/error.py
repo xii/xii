@@ -30,5 +30,11 @@ class InvalidSource(RuntimeError):
 
 
 class LibvirtError(RuntimeError):
-    def __init__(self, err, msg):
+    def __init__(self, err, msg=""):
         RuntimeError.__init__(self, "Libvirt action failed: {}.\n\n{}".format(msg, err))
+
+class DoesNotExist(RuntimeError):
+    pass
+
+class SSHError(RuntimeError):
+    pass

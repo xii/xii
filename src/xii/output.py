@@ -30,7 +30,7 @@ def width():
     return int(columns - (columns * 0.25))
 
 
-def progress(message, full, current):
+def progress(message, current, full):
     perc = int(100 * (float(current) / full))
     sys.stdout.write("\r{}".format(sep(":: {} {}%...".format(message, perc))))
     if perc > 99:
@@ -64,7 +64,7 @@ def fatal(msg):
 
 
 def info(msg):
-    print(sep(msg))
+    print(sep(">> " + msg))
 
 
 def warn(msg):

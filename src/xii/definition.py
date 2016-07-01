@@ -5,7 +5,10 @@ from xii import util, error
 
 def find_file(path=None):
     if not path:
-        path = os.path.dirname(os.getcwd()) + ".xii"
+
+        cwd = os.getcwd()
+        path = os.path.join(cwd, os.path.basename(cwd) + ".xii")
+
         if os.path.exists(path):
             return path
         else:
@@ -34,11 +37,9 @@ class Definition():
         return self.dfn[group][key]
 
     def items(self):
-        for cmpnt_dfn in self.dfn:
-            name = cmpnt_dfn.keys()[0]
-            settings = cmpnt_dfn.values()[0]
-            if name != 'xii':
-                yield (name, settings)
+        for (name, item) in self.dfn.items():
+            if name != "xii":
+                yield (name, item)
 
     def validate(self):
         for name, settings in self.items():

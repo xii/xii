@@ -20,7 +20,7 @@ class Component():
     default_attributes = []
 
     def __init__(self, name, conn, conf):
-        self.conn = conn
+        self.connection = conn
         self.attrs = {}
         self.name = name
         self.conf = conf
@@ -29,7 +29,10 @@ class Component():
         self.attrs[attr.name] = attr
 
     def virt(self):
-        return self.conn.virt()
+        return self.conn().virt()
+
+    def conn(self):
+        return self.connection
 
     def attribute(self, name):
         if name not in self.attrs:
@@ -51,7 +54,7 @@ class Component():
                 attr.valid()
 
     def action(self, command):
-        if command not in ['start', 'stop']:
+        if command not in dir(self):
             raise RuntimeError("Invalid component command {}. "
                                "This is a bug, report "
                                "it!".format(command))

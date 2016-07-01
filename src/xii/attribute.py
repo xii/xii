@@ -15,6 +15,8 @@ class Register():
 class Attribute():
     name = "basic-attribute"
     allowed_components = []
+    requires = []
+    need_guestfs = False
     defaults = None
 
     @classmethod
@@ -41,7 +43,10 @@ class Attribute():
         self.value = value
 
     def conn(self):
-        return self.cmpnt.conn
+        return self.cmpnt.conn()
 
     def virt(self):
         return self.cmpnt.virt()
+
+    def guest(self, image_path):
+        return self.conn().guest(image_path)

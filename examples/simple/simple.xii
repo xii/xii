@@ -1,0 +1,14 @@
+# vim: set ts=2 sw=2 tw=0 ft=yaml:
+---
+test_instance:
+  type: node
+  image: 'https://download.fedoraproject.org/pub/fedora/linux/releases/24/CloudImages/x86_64/images/Fedora-Cloud-Base-24-1.2.x86_64.qcow2'
+  user:
+    root:
+      password: root
+    felixsch:
+      password: moep
+  ssh:
+    copy-local-key:
+      - felixsch
+      - root

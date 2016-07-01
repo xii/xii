@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod
 import xml.etree.ElementTree as etree
 
 import libvirt
+import guestfs
 
 from xii import error
 from xii.output import warn
@@ -32,6 +33,18 @@ class Connection():
             raise error.LibvirtError(None, "Could not connection to `{}`".format(self.uri))
         return self.libvirt
 
+    def guest(self, image_path):
+        guest = guestfs.GuestFS()
+
+        if not self.exists(image_path):
+            raise error.DoesNotExist("unable to load image. {}: "
+                                     "No such file or directory".format(image_path))
+        guest.add_drive(image_path)
+        guest.launch()
+        guest.mount("/dev/sda1", "/")
+
+        return guest
+
     def get_domain(self, name):
         try:
             return self.virt().lookupByName(name)
@@ -44,37 +57,64 @@ class Connection():
         except libvirt.libvirtError:
             return None
 
-    def get_capabilities(self, arch='x86_64', prefare_kvm=True):
+    def get_network(self, name):
         try:
-            caps = etree.fromstring(self.virt().getCapabilities())
-            cpu_arch = caps.find('host/cpu/arch').text
-            cpu_model = caps.find('host/cpu/model').text
-            guests = {}
+            return self.virt().networkLookupByName(name)
+        except libvirt.libvirtError:
+            return None
 
-            for guest in caps.findall('guest'):
-                guest_arch = guest.find('arch').attrib['name']
-                emu_type = 'qemu'
-                emu  = guest.find('arch/emulator').text
-                host = guest.find('arch/machine[@canonical]').attrib['canonical']
-
-                # prefare kvm if possible
-                kvm = guest.find("arch/domain[@type='kvm']")
-                if kvm is not None:
-                    emu_type = 'kvm'
-                    emu = kvm.find('emulator')
-                    host = kvm.find('machine[@canonical]').attrib['canonical']
-
-                guests[guest_arch] = {'emulator_type': emu_type,
-                                'emulator': emu.text,
-                                'host': host}
-            return {'arch': arch,
-                    'model': cpu_model,
-                    'emulator': guests[arch]['emulator'],
-                    'emulator_type': guests[arch]['emulator_type'],
-                    'host': guests[arch]['host']}
+    def get_capabilities(self, arch='x86_64', prefer_kvm=True):
+        try:
+            capabilities = self.virt().getCapabilities()
         except libvirt.libvirtError as err:
             raise error.LibvirtError(err)
-            
+
+        emulators = self._parse_capabilities(capabilities, prefer_kvm)
+
+        if arch not in emulators:
+            raise error.LibvirtError("Checkout your qemu installation",
+                                     "Could not find requiered archtitecture "
+                                     "`{}`".format(arch))
+        return emulators[arch]
+
+    def _parse_capabilities(self, text, prefer_kvm=True):
+        caps = etree.fromstring(text)
+        emulators = {}
+
+        # get basic host informations
+        cpu = caps.find('host/cpu/model').text
+        secmodel = caps.find('host/secmodel/model').text
+
+        # iterate trough emulators
+
+        for emulator in caps.findall('guest'):
+            emulator = emulator.find('arch')
+
+            arch = emulator.attrib['name']
+            domain_type = emulator.find('domain').attrib['type']
+
+            if prefer_kvm:
+                kvm = emulator.find("domain[@type='kvm']")
+                if kvm is not None:
+                    emulator = kvm
+                    domain_type = 'kvm'
+
+            emu = emulator.find('emulator').text
+
+            # check if there is a canonical machine available. If not
+            # get the first of the list
+            machine = emulator.find('machine[@canonical]')
+            if machine is None:
+                machine = emulator.find('machine')
+
+            emulators[arch] = {'arch': arch,
+                               'cpu': cpu,
+                               'secmodel': secmodel,
+                               'domain_type': domain_type,
+                               'emulator': emu,
+                               'machine': machine.text}
+        return emulators
+
     @abstractmethod
     def mkdir(self, directory, recursive=False):
         pass
@@ -96,6 +136,10 @@ class Connection():
         pass
 
     @abstractmethod
+    def remove(self, path):
+        pass
+
+    @abstractmethod
     def download(self, msg, source, dest):
         pass
 
@@ -103,15 +147,18 @@ class Connection():
     def chmod(self, path, new_mode, append=False):
         pass
 
-
+    @abstractmethod
+    def chown(self, path, uid=None, guid=None):
+        pass
 
 
 def establish(dfn, conf):
     from xii.connections.local import Local
+    from xii.connections.ssh import Ssh
     uri = dfn.settings('connection', conf.default_host())
 
-    # if uri.startswith('qemu+ssh'):
-    #     return Remote(uri, dfn, conf)
+    if uri.startswith('qemu+ssh'):
+        return Ssh(uri, dfn, conf)
     if uri.startswith('qemu'):
         return Local(uri, dfn, conf)
 

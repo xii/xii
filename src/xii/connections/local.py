@@ -33,6 +33,9 @@ class Local(connection.Connection):
             raise
         return True
 
+    def remove(self, path):
+        return os.remove(path)
+
     def user(self):
         return getpass.getuser()
 
@@ -49,10 +52,12 @@ class Local(connection.Connection):
             raise error.FileError(source_path, "Could not copy file: {}".format(err))
 
     def chmod(self, path, new_mode, append=False):
-        mode = new_mode
         if append:
-            mode = os.stat(path).st_mode | new_mode
-        os.chmod(path, mode)
+            new_mode = os.stat(path).st_mode | new_mode
+        os.chmod(path, new_mode)
+
+    def chown(self, path, uid, gid):
+        os.chown(path, uid, gid)
 
     def download(self, msg, url, dest_path):
         source = urllib2.urlopen(url)
@@ -69,4 +74,4 @@ class Local(connection.Connection):
                 break
             dest.write(buf)
             copied += len(buf)
-            progress(msg, size, copied)
+            progress(msg, copied, size)

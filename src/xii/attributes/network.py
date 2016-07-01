@@ -1,5 +1,5 @@
-from xii import attribute, paths
-from xii.output import show_setting
+from xii import attribute, paths, error
+from xii.output import show_setting, info
 
 
 class NetworkAttribute(attribute.Attribute):
@@ -14,11 +14,21 @@ class NetworkAttribute(attribute.Attribute):
     def info(self):
         show_setting('network', self.network)
 
-    def start(self, _):
+    def spawn(self, domain_name):
         if isinstance(self.value, dict):
             self.network = self._fetch_network_name()
             self._prepare_network_interface()
 
+        network = self.conn().get_network(self.value)
+
+        if not network:
+            raise error.DoesNotExist("Network {} for domain "
+                                     "{}".format(self.value, domain_name))
+
+        if not network.isActive():
+            info("Starting network {}".format(self.value))
+            network.create()
+            
         self.cmpnt.add_xml('devices', self._gen_xml())
 
     def _fetch_network_name(self):

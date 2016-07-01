@@ -1,4 +1,4 @@
-<domain type='$emulator_type'>
+<domain type='$domain_type'>
   <name>$name</name>
   <memory unit='KiB'>2097152</memory>
   <currentMemory unit='KiB'>2097152</currentMemory>
@@ -7,7 +7,7 @@
     <partition>/machine</partition>
   </resource>
   <os>
-    <type arch='$arch' machine='$host'>hvm</type>
+    <type arch='$arch' machine='$machine'>hvm</type>
     <boot dev='hd'/>
   </os>
   <features>
@@ -16,7 +16,7 @@
     <vmport state='off'/>
   </features>
   <cpu mode='custom' match='exact'>
-    <model fallback='allow'>$model</model>
+    <model fallback='allow'>$cpu</model>
   </cpu>
   <clock offset='utc'>
     <timer name='rtc' tickpolicy='catchup'/>
@@ -33,11 +33,11 @@
   <devices>
     <emulator>$emulator</emulator>
     $devices
+    <controller type='pci' index='0' model='pci-root'/>
     <memballoon model='virtio'>
     </memballoon>
     <rng model='virtio'>
       <backend model='random'>/dev/random</backend>
     </rng>
   </devices>
-  <seclabel type='none' model='apparmor'/>
 </domain>

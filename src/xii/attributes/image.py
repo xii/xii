@@ -23,9 +23,8 @@ class ImageAttribute(attribute.Attribute):
     def info(self):
         show_setting('image', self.image_name)
 
-    def start(self, domain_name):
+    def spawn(self, domain_name):
         self.storage_clone = os.path.join(self.storage_path, 'storage/' + domain_name + '.qcow2')
-
 
         self._parse_source()
         self._prepare_storage()
@@ -36,8 +35,19 @@ class ImageAttribute(attribute.Attribute):
 
         if not self.conn().exists(self.storage_clone):
             self.conn().copy("Clone image", self.storage_image, self.storage_clone)
+            self.conn().chmod(self.storage_clone, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR, append=True)
+            self.conn().chmod(self.storage_clone, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH, append=True)
 
         self.cmpnt.add_xml('devices', self._gen_xml())
+
+    def destroy(self, domain_name):
+        self.storage_clone = os.path.join(self.storage_path, 'storage/' + domain_name + '.qcow2')
+
+        if self.conn().exists(self.storage_clone):
+            self.conn().remove(self.storage_clone)
+
+    def clone(self, domain_name):
+        return os.path.join(self.storage_path, 'storage/' + domain_name + '.qcow2')
 
     def _parse_source(self):
         self.local_image = True
