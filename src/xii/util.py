@@ -21,7 +21,7 @@ def yaml_read(path):
             return yaml.load(stream)
     except IOError:
         raise error.FileError(path, "Could not open definition file")
-    except yaml.YamlError as err:
+    except yaml.YAMLError as err:
         raise error.ParseError(path, err)
 
 

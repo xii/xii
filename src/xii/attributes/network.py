@@ -14,6 +14,16 @@ class NetworkAttribute(attribute.Attribute):
     def info(self):
         show_setting('network', self.network)
 
+    def start(self, domain_name):
+        self.network = self._fetch_network_name()
+
+        network = self.conn().get_network(self.value)
+
+        if not network.isActive():
+            info("Starting network {}".format(self.value))
+            network.create()
+
+
     def spawn(self, domain_name):
         if isinstance(self.value, dict):
             self.network = self._fetch_network_name()
@@ -28,7 +38,7 @@ class NetworkAttribute(attribute.Attribute):
         if not network.isActive():
             info("Starting network {}".format(self.value))
             network.create()
-            
+
         self.cmpnt.add_xml('devices', self._gen_xml())
 
     def _fetch_network_name(self):

@@ -2,13 +2,23 @@
 ---
 test_instance:
   type: node
-  image: 'https://download.fedoraproject.org/pub/fedora/linux/releases/24/CloudImages/x86_64/images/Fedora-Cloud-Base-24-1.2.x86_64.qcow2'
+
+  # opensuse Leap 42.1 (x86_64)
+  #image: http://download.opensuse.org/repositories/Cloud:/Images:/Leap_42.1/images/openSUSE-Leap-42.1-OpenStack.x86_64.qcow2
+
+  # fedora 24 - cloud image (x86_64)
+  #image: 'https://download.fedoraproject.org/pub/fedora/linux/releases/24/CloudImages/x86_64/images/Fedora-Cloud-Base-24-1.2.x86_64.qcow2'
+
+  # centos 7 - generic cloud (x86_64)
+  image: http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2
+
+  graphic: true
   user:
-    root:
-      password: root
     felixsch:
-      password: moep
+      password: felix
+    root:
+      password: linux
   ssh:
-    copy-local-key:
+    copy-key:
       - felixsch
       - root

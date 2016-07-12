@@ -34,5 +34,4 @@ def each(conn, names):
         if not valid(domain):
             fatal("Could not find domain {}". format(name))
             continue
-
         yield (name, domain)

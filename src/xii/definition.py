@@ -41,6 +41,11 @@ class Definition():
             if name != "xii":
                 yield (name, item)
 
+    def item(self, name):
+        if name not in self.dfn:
+            return None
+        return self.dfn[name]
+
     def validate(self):
         for name, settings in self.items():
             if 'type' not in settings:

@@ -11,6 +11,11 @@ class ParseError(RuntimeError):
                                     "\n\n(file was: {})".format(msg, file))
 
 
+class InvalidSettings(RuntimeError):
+    def __init__(self, typ, msg):
+        RuntimeError.__init__(self, "Invalid configuration in {}: {} ".format(typ, msg))
+
+
 class InvalidAttribute(RuntimeError):
     def __init__(self, file, prop, invalid):
         RuntimeError.__init__(self, "Attribute `{}` is invalid (unknown value: {}) "

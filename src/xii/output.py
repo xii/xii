@@ -39,8 +39,12 @@ def progress(message, current, full):
 
 
 def show_setting(key, value):
-    key_max = 20
-    print(sep("{}{}: {}".format(key, ' ' * (key_max - len(key)), value)))
+    if isinstance(value, list):
+        print(sep("{:25}: {}".format(key, value[0])))
+        for line in value[1:]:
+            print(sep("{:25}    {}".format("", line)))
+    else:
+        print(sep("{:25}: {}".format(key, value)))
 
 
 def hr(msg):
@@ -55,16 +59,16 @@ def section(msg):
     print(colors.SECTION + " ===> " + msg + colors.CLEAR)
 
 
-def sep(msg):
-    return "  " + msg
+def sep(msg, sep=0):
+    return " " * (2 + sep) + msg
 
 
 def fatal(msg):
     print(colors.FATAL + colors.BOLD + sep(msg) + colors.CLEAR)
 
 
-def info(msg):
-    print(sep(">> " + msg))
+def info(msg, ext=0):
+    print(sep(">> " + msg, ext))
 
 
 def warn(msg):

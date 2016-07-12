@@ -1,0 +1,16 @@
+<graphics type='spice' autoport='yes'/>
+  <listen type='address'/>
+  <image compression='off'/>
+<video>
+  <model type='qxl' />
+</video>
+<channel type='spicevmc'>
+  <target type='virtio'/>
+</channel>
+<input type='mouse' bus='ps2'/>
+<input type='keyboard' bus='ps2'/>
+<redirdev bus='usb' type='spicevmc'>
+</redirdev>
+<redirdev bus='usb' type='spicevmc'>
+</redirdev>
+

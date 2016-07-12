@@ -32,25 +32,14 @@ class NodeComponent(component.Component):
             self.attribute_action('start', domain_name)
             info("Starting {}...".format(domain_name))
             domain.create()
-            import pdb; pdb.set_trace()
 
-    def stop(self):
+    def stop(self, force=False):
         domains = self.attribute('count').counted_names()
 
         for (name, dmn) in domain.each(self.conn(), domains):
-            self.attribute_action('stop', name)
+            self.attribute_action('stop', name, force)
+            self._stop_domain(name, dmn, force)
 
-            if not dmn.isActive():
-                info("{} is already stopped".format(name))
-                continue
-
-            dmn.shutdown()
-
-            if not domain.wait_active(dmn, False):
-                fatal("Could not stop {}".format(name))
-                continue
-
-            info("{} stopped".format(name))
 
     def destroy(self):
         domains = self.attribute('count').counted_names()
@@ -60,9 +49,7 @@ class NodeComponent(component.Component):
                 dmn.resume()
 
             if domain.has_state(dmn, libvirt.VIR_DOMAIN_RUNNING):
-                info("{} is running. Stopping...".format(name))
-                dmn.shutdown()
-                domain.wait_active(dmn, False)
+                self._stop_domain(name, dmn, force=True)
 
             if dmn.isActive():
                 fatal("Could not remove running domain {}.".format(name))
@@ -111,7 +98,11 @@ class NodeComponent(component.Component):
 
     def _spawn_domain(self, domain_name):
         self.xml_dfn = {'devices': ''}
+
         self.attribute_action('spawn', domain_name)
+
+        # Close open guest connection for this domain
+        self.conn().close_guest(domain_name)
 
         caps = self.conn().get_capabilities()
 
@@ -127,7 +118,27 @@ class NodeComponent(component.Component):
             return domain
         except libvirt.libvirtError as err:
             raise error.LibvirtError(err, "Could not start "
-                    "domain {}".format(domain_name))
+                                          "domain {}".format(domain_name))
+
+    def _stop_domain(self, name, dmn, force=False):
+            if not dmn.isActive():
+                info("{} is already stopped".format(name))
+                return
+
+            dmn.shutdown()
+
+            if not domain.wait_active(dmn, False):
+                if not force:
+                    fatal("Could not stop {}".format(name))
+                    fatal("If you want to force shutdown. Try --force")
+                    return
+
+                # Try to force off
+                dmn.destroy()
+                if not domain.wait_active(dmn, False):
+                    fatal("Could not stop {}".format(name))
+                    return
+            info("{} stopped".format(name))
 
 
 component.Register.register('node', NodeComponent)
