@@ -49,7 +49,8 @@ class Component():
             if required not in self.attrs:
                 raise RuntimeError("Could not find required attribute `{}`. "
                                    "Add `{}` to `{}`.".format(required, required, self.name))
-        for attr in self.attrs:
+        for attr in self.attrs.values():
+            attr.validate_settings()
             if 'valid' in dir(attr):
                 attr.valid()
 

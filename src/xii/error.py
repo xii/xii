@@ -43,3 +43,6 @@ class DoesNotExist(RuntimeError):
 
 class SSHError(RuntimeError):
     pass
+
+class DefError(RuntimeError):
+    pass

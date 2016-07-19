@@ -1,2 +1,2 @@
 [MESSAGE CONTROL]
-disable=missing-docstring, too-many-function-args
+disable=missing-docstring, too-many-function-args,bad-continuation

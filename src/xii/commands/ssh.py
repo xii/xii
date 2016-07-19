@@ -44,7 +44,14 @@ class SSHCommand(command.Command):
         if not len(net['addrs']):
             raise error.LibvirtError("No ip address was accociated with {}".format(domain_name))
 
-        command = "ssh {}@{}".format(user, net['addrs'][0]['addr'])
+        ip = net['addrs'][0]['addr']
+
+        # scan key first
+        subprocess.call("ssh-keygen -R {}".format(ip), shell=True)
+        subprocess.call("ssh-keyscan -H {} >> ~/.ssh/known_hosts".format(ip), shell=True)
+
+        options = ""
+        command = "ssh {} {}@{}".format(options, user, ip)
         print(command)
         subprocess.call(command, shell=True)
 

@@ -1,13 +1,31 @@
 import os
 
-from xii import attribute, paths, error
-from xii.output import info, show_setting
+from xii import attribute, error
+from xii.attribute import Key
+from xii.output import info, show_setting, warn
 
 
 class SSHAttribute(attribute.Attribute):
     name = "ssh"
     allowed_components = "node"
     defaults = None
+
+    keys = {'copy-key': {
+                'type': Key.Dict,
+                'keys': {
+                    'ssh-key': {'type': Key.String},
+                    'domains': {
+                        'required': True,
+                        'type': Key.Array,
+                        'keys': Key.String
+                        }
+                    }
+                },
+            'distribute-keys': {
+                'type': Key.Array,
+                'keys': Key.String
+                }
+            }
 
     def __init__(self, value, cmpnt):
         attribute.Attribute.__init__(self, value, cmpnt)
@@ -16,9 +34,9 @@ class SSHAttribute(attribute.Attribute):
         if not self.value:
             return
 
-        if 'copy-key' in self.value:
-            show_setting('distribute pub key', ", ".join(self.value['copy-key']))
-
+        copy_key = self.setting('copy-key')
+        if copy_key:
+            show_setting('copy keys to host', ", ".join(copy_key['domains']))
 
     def spawn(self, domain_name):
         if not self.value:
@@ -26,15 +44,16 @@ class SSHAttribute(attribute.Attribute):
 
         guest = self.conn().guest(self.cmpnt.attribute('image').clone(domain_name))
 
-        if 'copy-key' in self.value:
-            info("Distributing public keys")
-            self._add_keys_to_domain(guest, domain_name)
+        copy_key = self.setting('copy-key')
+        if copy_key:
+            info("Copy key to domains")
+            self._add_keys_to_domain(guest, copy_key, domain_name)
 
-    def _add_keys_to_domain(self, guest, domain_name):
+    def _add_keys_to_domain(self, guest, copy_key, domain_name):
         key = self._get_public_key()
         passwd = self._parse_passwd(guest.cat("/etc/passwd").split("\n"))
 
-        for user in self.value['copy-key']:
+        for user in copy_key['domains']:
             if user not in passwd:
                 warn("Try to add ssh key to not existing user {}. Ignoring!".format(user))
                 continue
@@ -46,8 +65,6 @@ class SSHAttribute(attribute.Attribute):
             authorized_file = os.path.join(ssh_dir, "authorized_keys")
             info("local => {}/{}".format(domain_name, user), 2)
             guest.write_append(authorized_file, key)
-
-        import pdb; pdb.set_trace()
 
     def _get_public_key(self):
         if 'public-key' in self.value:
@@ -72,11 +89,6 @@ class SSHAttribute(attribute.Attribute):
                 continue
             parsed[split[0]] = split[-2]
         return parsed
-
-
-
-
-
 
 
 attribute.Register.register("ssh", SSHAttribute)

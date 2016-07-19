@@ -20,5 +20,6 @@ test_instance:
       password: linux
   ssh:
     copy-key:
-      - felixsch
-      - root
+      domains:
+        - felixsch
+        - root
