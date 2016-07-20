@@ -5,6 +5,7 @@ import stat
 from urllib2 import urlparse
 
 from xii import attribute, paths, error
+from xii.attribute import Key
 from xii.output import info, show_setting
 
 
@@ -12,10 +13,12 @@ class ImageAttribute(attribute.Attribute):
     name = "image"
     allowed_components = "node"
 
+    keys = Key.String
+
     def __init__(self, value, cmpnt):
         attribute.Attribute.__init__(self, value, cmpnt)
         self.local_image = False
-        self.image_name = os.path.basename(self.value)
+        self.image_name = os.path.basename(self.settings)
         self.storage_path = paths.storage_path(self.conn().user_home())
         self.storage_image = os.path.join(self.storage_path, 'images/' + self.image_name)
         self.storage_clone = None
@@ -52,7 +55,7 @@ class ImageAttribute(attribute.Attribute):
     def _parse_source(self):
         self.local_image = True
 
-        parsed = urlparse.urlparse(self.value)
+        parsed = urlparse.urlparse(self.settings)
 
         # Local file
         if parsed.scheme == "":
@@ -64,7 +67,7 @@ class ImageAttribute(attribute.Attribute):
             return
 
         raise error.InvalidSource("Not supported image "
-                                  "location: {}".format(self.value))
+                                  "location: {}".format(self.settings))
 
     def _fix_permissions(self):
         user = self.conn().user()
@@ -112,11 +115,11 @@ class ImageAttribute(attribute.Attribute):
     def _prepare_image(self):
         if self.local_image:
             self.conn().copy("Copy {}".format(self.image_name),
-                             self.value,
+                             self.settings,
                              self.storage_image)
         else:
             self.conn().download("Downloading {}".format(self.image_name),
-                                 self.value,
+                                 self.settings,
                                  self.storage_image)
 
     def _gen_xml(self):

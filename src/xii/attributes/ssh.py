@@ -1,6 +1,6 @@
 import os
 
-from xii import attribute, error
+from xii import attribute, error, guest_util
 from xii.attribute import Key
 from xii.output import info, show_setting, warn
 
@@ -13,7 +13,10 @@ class SSHAttribute(attribute.Attribute):
     keys = {'copy-key': {
                 'type': Key.Dict,
                 'keys': {
-                    'ssh-key': {'type': Key.String},
+                    'ssh-keys': {
+                        'type': Key.Array,
+                        'keys': Key.String
+                        },
                     'domains': {
                         'required': True,
                         'type': Key.Array,
@@ -31,7 +34,7 @@ class SSHAttribute(attribute.Attribute):
         attribute.Attribute.__init__(self, value, cmpnt)
 
     def info(self):
-        if not self.value:
+        if not self.settings:
             return
 
         copy_key = self.setting('copy-key')
@@ -39,7 +42,7 @@ class SSHAttribute(attribute.Attribute):
             show_setting('copy keys to host', ", ".join(copy_key['domains']))
 
     def spawn(self, domain_name):
-        if not self.value:
+        if not self.settings:
             return
 
         guest = self.conn().guest(self.cmpnt.attribute('image').clone(domain_name))
@@ -50,36 +53,44 @@ class SSHAttribute(attribute.Attribute):
             self._add_keys_to_domain(guest, copy_key, domain_name)
 
     def _add_keys_to_domain(self, guest, copy_key, domain_name):
-        key = self._get_public_key()
-        passwd = self._parse_passwd(guest.cat("/etc/passwd").split("\n"))
+        keys = self._get_public_keys()
+        users = guest_util.get_users(guest)
 
-        for user in copy_key['domains']:
-            if user not in passwd:
-                warn("Try to add ssh key to not existing user {}. Ignoring!".format(user))
+        for target in copy_key['domains']:
+            if target not in users:
+                warn("Try to add ssh key to not existing user {}. Ignoring!".format(target))
                 continue
-            ssh_dir = os.path.join(passwd[user], ".ssh")
+
+            user = users[target]
+            ssh_dir = os.path.join(user['home'], ".ssh")
 
             if not guest.is_dir(ssh_dir):
                 guest.mkdir(ssh_dir)
+                guest.chown(user['uid'], user['gid'], ssh_dir)
 
             authorized_file = os.path.join(ssh_dir, "authorized_keys")
-            info("local => {}/{}".format(domain_name, user), 2)
-            guest.write_append(authorized_file, key)
+            info("local => {}/{}".format(domain_name, target), 2)
+            guest.write_append(authorized_file, "".join(keys))
+            guest.chown(user['uid'], user['gid'], authorized_file)
+            guest.touch('/.autorelabel')
 
-    def _get_public_key(self):
-        if 'public-key' in self.value:
-            return self.value['public-key']
+    def _get_public_keys(self):
+        ssh_keys = self.setting('copy-key/ssh-keys')
+        if ssh_keys:
+            return ssh_keys
 
+        # fetch keys from local user
+        ssh_keys = []
         home = os.path.expanduser('~')
-        pub_key = os.path.join(home, '.ssh/id_rsa.pub')
-        if not os.path.isfile(pub_key):
-            raise error.DoesNotExist("Could not find public key "
-                                        "(search file: {})".format(pub_key))
 
-        with open(pub_key, 'r') as hdl:
-            key = hdl.read()
+        pub_keys = [os.path.join(home, '.ssh/id_rsa.pub'),
+                    os.path.join(home, '.ssh/id_ecdsa.pub')]
 
-        return key
+        for key_path in pub_keys:
+            if os.path.isfile(key_path):
+                with open(key_path, 'r') as hdl:
+                    ssh_keys.append(hdl.read())
+        return ssh_keys
 
     def _parse_passwd(self, passwd):
         parsed = {}

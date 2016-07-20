@@ -4,7 +4,7 @@ import xml.etree.ElementTree as etree
 import libvirt
 import guestfs
 
-import time
+import os
 
 from xii import error
 from xii.output import warn
@@ -37,8 +37,9 @@ class Connection():
         return self.libvirt
 
     def guest(self, image_path):
-        if image_path in self.guests:
-            return self.guests[image_path]
+        name = os.path.basename(os.path.splitext(image_path)[0])
+        if name in self.guests:
+            return self.guests[name]
 
         guest = guestfs.GuestFS()
 
@@ -49,9 +50,9 @@ class Connection():
         guest.launch()
         guest.mount("/dev/sda1", "/")
 
-        self.guests[image_path] = guest
+        self.guests[name] = guest
 
-        return self.guests[image_path]
+        return self.guests[name]
 
     def close_guest(self, image_path):
         if image_path in self.guests:
@@ -60,7 +61,6 @@ class Connection():
             guest.sync()
             guest.umount("/")
             guest.close()
-            time.sleep(4)
 
     def get_domain(self, name):
         try:

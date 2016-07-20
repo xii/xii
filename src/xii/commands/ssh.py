@@ -52,7 +52,7 @@ class SSHCommand(command.Command):
 
         options = ""
         command = "ssh {} {}@{}".format(options, user, ip)
-        print(command)
+        #print(command)
         subprocess.call(command, shell=True)
 
     def _parse_command(self):

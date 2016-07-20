@@ -3,7 +3,8 @@ import random
 import string
 import os
 
-from xii import attribute, paths, error
+from xii import attribute, error
+from xii.attribute import Key
 from xii.output import info, show_setting
 
 
@@ -19,23 +20,22 @@ class UserAttribute(attribute.Attribute):
                     "skel": True,
                     "n": 0}
 
-    def __init__(self, value, cmpnt):
-        attribute.Attribute.__init__(self, value, cmpnt)
+    keys = Key.Dict
 
-        if (not isinstance(self.value, dict) and self.value is not defaults):
-            raise error.InvalidSetting("attribute", "user need to be a dictonary")
+    def __init__(self, settings, cmpnt):
+        attribute.Attribute.__init__(self, settings, cmpnt)
 
     def info(self):
-        if self.value:
-            show_setting("user", ", ".join(self.value.keys()))
+        if self.settings:
+            show_setting("user", ", ".join(self.settings.keys()))
 
     def get_default_user(self):
-        if not self.value:
+        if not self.settings:
             return "xii"
-        return self.value.iterkeys().next()
+        return self.settings.iterkeys().next()
 
     def spawn(self, domain_name):
-        if not self.value:
+        if not self.settings:
             return
 
         info("Adding user to domain")
@@ -45,7 +45,7 @@ class UserAttribute(attribute.Attribute):
         groups = guest.cat("/etc/group").split("\n")
 
         user_index = 0
-        for name, settings in self.value.items():
+        for name, settings in self.settings.items():
             info("Adding {}".format(name), 2)
             user = self.default_user.copy()
             user['username'] = name
