@@ -42,6 +42,11 @@ class Definition():
                 yield (name, item)
 
     def item(self, name):
+        # Support components with more than one instance
+        find_counted= name.split("#")
+        if len(find_counted) != 1:
+            name = "".join(find_counted[:-1])
+
         if name not in self.dfn:
             return None
         return self.dfn[name]

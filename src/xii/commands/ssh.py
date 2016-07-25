@@ -46,13 +46,15 @@ class SSHCommand(command.Command):
 
         ip = net['addrs'][0]['addr']
 
-        # scan key first
-        subprocess.call("ssh-keygen -R {}".format(ip), shell=True)
-        subprocess.call("ssh-keyscan -H {} >> ~/.ssh/known_hosts".format(ip), shell=True)
+        null = open(os.devnull, 'w')
 
-        options = ""
+        # scan key first
+        subprocess.call("ssh-keygen -R {}".format(ip), shell=True, stdout=null, stderr=null)
+        subprocess.call("ssh-keyscan -H {} >> ~/.ssh/known_hosts".format(ip), shell=True, stdout=null, stderr=null)
+
+        #options = "-o HostKeyAlgorithms=ssh-rsa"
+        options=""
         command = "ssh {} {}@{}".format(options, user, ip)
-        #print(command)
         subprocess.call(command, shell=True)
 
     def _parse_command(self):

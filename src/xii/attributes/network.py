@@ -12,14 +12,11 @@ class NetworkAttribute(attribute.Attribute):
 
     def __init__(self, settings, cmpnt):
         attribute.Attribute.__init__(self, settings, cmpnt)
-        self.network = self.settings
 
     def info(self):
-        show_setting('network', self.network)
+        show_setting('network', self.settings)
 
     def start(self, _):
-        self.network = self._fetch_network_name()
-
         network = self.conn().get_network(self.settings)
 
         if not network.isActive():
@@ -27,12 +24,7 @@ class NetworkAttribute(attribute.Attribute):
             network.create()
 
     def spawn(self, domain_name):
-        if isinstance(self.settings, dict):
-            self.network = self._fetch_network_name()
-            self._prepare_network_interface()
-
         network = self.conn().get_network(self.settings)
-
         if not network:
             raise error.DoesNotExist("Network {} for domain "
                                      "{}".format(self.settings, domain_name))
@@ -43,15 +35,9 @@ class NetworkAttribute(attribute.Attribute):
 
         self.cmpnt.add_xml('devices', self._gen_xml())
 
-    def _fetch_network_name(self):
-        pass
-
-    def _prepare_network_interface(self):
-        pass
-
     def _gen_xml(self):
         xml = paths.template('network.xml')
-        return xml.safe_substitute({'network': self.network})
+        return xml.safe_substitute({'network': self.settings})
 
 
 attribute.Register.register('network', NetworkAttribute)

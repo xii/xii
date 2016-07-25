@@ -8,6 +8,7 @@ from xii.output import info, show_setting, warn
 class SSHAttribute(attribute.Attribute):
     name = "ssh"
     allowed_components = "node"
+    requires = ["image", "user"]
     defaults = None
 
     keys = {'copy-key': {
@@ -17,7 +18,7 @@ class SSHAttribute(attribute.Attribute):
                         'type': Key.Array,
                         'keys': Key.String
                         },
-                    'domains': {
+                    'users': {
                         'required': True,
                         'type': Key.Array,
                         'keys': Key.String
@@ -25,10 +26,20 @@ class SSHAttribute(attribute.Attribute):
                     }
                 },
             'distribute-keys': {
-                'type': Key.Array,
-                'keys': Key.String
+                'type': Key.Dict,
+                'keys': {
+                    'ssh-keys': {
+                        'type': Key.Dict,
+                        'keys': Key.String
+                        },
+                    'domains': {
+                        'required': True,
+                        'type': Key.Array,
+                        'keys': Key.String
+                    }
                 }
             }
+        }
 
     def __init__(self, value, cmpnt):
         attribute.Attribute.__init__(self, value, cmpnt)
@@ -39,7 +50,7 @@ class SSHAttribute(attribute.Attribute):
 
         copy_key = self.setting('copy-key')
         if copy_key:
-            show_setting('copy keys to host', ", ".join(copy_key['domains']))
+            show_setting('copy keys', ", ".join(copy_key['users']))
 
     def spawn(self, domain_name):
         if not self.settings:
@@ -56,7 +67,7 @@ class SSHAttribute(attribute.Attribute):
         keys = self._get_public_keys()
         users = guest_util.get_users(guest)
 
-        for target in copy_key['domains']:
+        for target in copy_key['users']:
             if target not in users:
                 warn("Try to add ssh key to not existing user {}. Ignoring!".format(target))
                 continue
@@ -72,7 +83,10 @@ class SSHAttribute(attribute.Attribute):
             info("local => {}/{}".format(domain_name, target), 2)
             guest.write_append(authorized_file, "".join(keys))
             guest.chown(user['uid'], user['gid'], authorized_file)
-            guest.touch('/.autorelabel')
+
+            # FIXME: Find better way to deal with selinux labels
+            if guest.get_selinux():
+                guest.sh("chcon -R unconfined_u:object_r:user_home_t:s0 {}".format(ssh_dir))
 
     def _get_public_keys(self):
         ssh_keys = self.setting('copy-key/ssh-keys')

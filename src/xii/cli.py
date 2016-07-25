@@ -8,7 +8,7 @@ from xii.output import fatal, set_verbose, hr
 def usage_text():
     usage = ["xii [OPTIONS] COMMAND [ARGS] ", "", "Commands available:"]
     for command_help in command.Register.available():
-        usage.append("  " + command_help)
+        usage.append(command_help)
     return "\n".join(usage)
 
 

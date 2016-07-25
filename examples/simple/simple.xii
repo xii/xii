@@ -1,19 +1,21 @@
 # vim: set ts=2 sw=2 tw=0 ft=yaml:
 ---
-test_instance:
+test-single:
   type: node
+  network: default
 
   # opensuse Leap 42.1 (x86_64)
   #image: http://download.opensuse.org/repositories/home:/fschnizlein:/images:/libvirt/images/openSUSE-Leap-42.1.x86_64.qcow2
 
   # arch
-  image: http://images.tuxfixer.com/archlinux-2016-06-01-base-x86_64.qcow2
+  #image: http://images.tuxfixer.com/archlinux-2016-06-01-base-x86_64.qcow2
 
   # fedora 24 - cloud image (x86_64)
   #image: 'https://download.fedoraproject.org/pub/fedora/linux/releases/24/CloudImages/x86_64/images/Fedora-Cloud-Base-24-1.2.x86_64.qcow2'
 
   # centos 7 - generic cloud (x86_64)
-  #image: http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2
+  image: http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2
+  #image: /home/felixsch/CentOS-7-x86_64-GenericCloud-no-selinux.qcow2
 
   graphic: yes
   user:
@@ -23,6 +25,6 @@ test_instance:
       password: linux
   ssh:
     copy-key:
-      domains:
+      users:
         - felixsch
         - root

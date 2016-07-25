@@ -10,9 +10,11 @@ class Register(object):
 
     @classmethod
     def available(cls):
-        output = []
+        output = ["", "shortcut  action    description",
+                  "-------------------------------"]
         for command in cls.registered:
-            output.append(', '.join(command.name) + "    " + command.help)
+            output.append(" {:9}{:10}{}".format(", ".join(command.name[1:]), command.name[0], command.help))
+        output.append(" ")
         return output
 
     @classmethod

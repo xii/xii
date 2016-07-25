@@ -7,7 +7,7 @@ import guestfs
 import os
 
 from xii import error
-from xii.output import warn
+from xii.output import warn, info
 
 
 class Connection():
@@ -41,7 +41,26 @@ class Connection():
         if name in self.guests:
             return self.guests[name]
 
+        info("Mounting image...", ext=2 )
+        guest = self._init_guest(image_path)
+
+        if guest.exists('/etc/sysconfig/selinux'):
+            info("Remounting image with selinux capabilities...", ext=4)
+            # evil hack. overwrite function
+            guest.get_selinux = lambda: True
+            #guest.close()
+            #guest = self._init_guest(image_path, selinux=1)
+
+        self.guests[name] = guest
+
+        return self.guests[name]
+
+    def _init_guest(self, image_path, selinux=False):
         guest = guestfs.GuestFS()
+
+        if selinux:
+            guest.set_selinux(1)
+        guest.add_drive(image_path)
 
         if not self.exists(image_path):
             raise error.DoesNotExist("unable to load image. {}: "
@@ -50,9 +69,7 @@ class Connection():
         guest.launch()
         guest.mount("/dev/sda1", "/")
 
-        self.guests[name] = guest
-
-        return self.guests[name]
+        return guest
 
     def close_guest(self, image_path):
         if image_path in self.guests:

@@ -56,7 +56,7 @@ def header(msg):
 
 
 def section(msg):
-    print(colors.SECTION + " ===> " + msg + colors.CLEAR)
+    print(colors.SECTION + "  ===> " + msg + colors.CLEAR)
 
 
 def sep(msg, sep=0):

@@ -22,6 +22,6 @@ class CountAttribute(attribute.Attribute):
         if self.settings == 1:
             return [name]
 
-        return ["{}-{}".format(name, i) for i in range(1, self.settings + 1)]
+        return ["{}#{}".format(name, i) for i in range(1, self.settings + 1)]
 
 attribute.Register.register('count', CountAttribute)

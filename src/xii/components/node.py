@@ -3,18 +3,17 @@ import time
 import libvirt
 
 from xii import component, paths, error, domain
-from xii.output import info, warn, fatal
+from xii.output import info, warn, fatal, section
 
 
 class NodeComponent(component.Component):
     require_attributes = ['image']
-    default_attributes = ['network', 'count']
+    default_attributes = ['network', 'count', 'hostname']
 
     xml_dfn = {}
 
     def add_xml(self, section, xml):
         self.xml_dfn[section] += "\n" + xml
-
 
     def start(self):
         domains = self.attribute('count').counted_names()
@@ -30,13 +29,14 @@ class NodeComponent(component.Component):
                 continue
 
             self.attribute_action('start', domain_name)
-            info("Starting {}...".format(domain_name))
+            section("Starting {}".format(domain_name))
             domain.create()
 
     def stop(self, force=False):
         domains = self.attribute('count').counted_names()
 
         for (name, dmn) in domain.each(self.conn(), domains):
+            section("Stopping {}".format(name))
             self.attribute_action('stop', name, force)
             self._stop_domain(name, dmn, force)
 
@@ -45,6 +45,7 @@ class NodeComponent(component.Component):
         domains = self.attribute('count').counted_names()
 
         for (name, dmn) in domain.each(self.conn(), domains):
+            section("Destroying {}".format(name))
             if domain.has_state(dmn, libvirt.VIR_DOMAIN_PAUSED):
                 dmn.resume()
 
@@ -63,6 +64,7 @@ class NodeComponent(component.Component):
         domains = self.attribute('count').counted_names()
 
         for (name, dmn) in domain.each(self.conn(), domains):
+            section("Suspending {}".format(name))
             if domain.has_state(dmn, libvirt.VIR_DOMAIN_PAUSED):
                 info("{} is already suspended".format(name))
                 continue
@@ -79,6 +81,7 @@ class NodeComponent(component.Component):
         domains = self.attribute('count').counted_names()
 
         for (name, d) in domain.each(self.conn(), domains):
+            section("Resuming {}".format(name))
 
             if domain.has_state(d, libvirt.VIR_DOMAIN_RUNNING):
                 info("{} is already running".format(name))
@@ -97,6 +100,7 @@ class NodeComponent(component.Component):
             info("{} resumed".format(name))
 
     def _spawn_domain(self, domain_name):
+        section("Spawning {}".format(domain_name))
         self.xml_dfn = {'devices': ''}
 
         self.attribute_action('spawn', domain_name)

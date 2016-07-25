@@ -1,0 +1,20 @@
+# vim: set ts=2 sw=2 tw=0 ft=yaml:
+---
+
+multiple:
+  type: node
+  network: default
+  image: http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2
+  count: 3
+  #graphic: yes
+  #
+  user:
+    felixsch:
+      password: felix
+    root:
+      password: linux
+  ssh:
+    copy-key:
+      users:
+        - felixsch
+        - root
