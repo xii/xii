@@ -1,0 +1,11 @@
+# vim: set ts=2 sw=2 tw=0 ft=yaml:
+---
+
+test-network:
+  type: network
+  mode: nat
+  ipv4:
+    ip: 192.168.124.1
+    dhcp:
+      start: 192.168.124.2
+      end: 192.168.124.255

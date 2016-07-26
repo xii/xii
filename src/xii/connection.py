@@ -79,11 +79,11 @@ class Connection():
             guest.umount("/")
             guest.close()
 
-    def get_domain(self, name, raise_execption=True):
+    def get_domain(self, name, raise_exception=True):
         try:
             return self.virt().lookupByName(name)
         except libvirt.libvirtError:
-            if raise_execption:
+            if raise_exception:
                 raise error.DoesNotExist("Can not find {}".format(name))
             else:
                 return None
@@ -94,11 +94,14 @@ class Connection():
         except libvirt.libvirtError:
             return None
 
-    def get_network(self, name):
+    def get_network(self, name, raise_exception=True):
         try:
             return self.virt().networkLookupByName(name)
         except libvirt.libvirtError:
-            return None
+            if raise_exception:
+                raise error.DoesNotExist("Can not find network {}".format(name))
+            else:
+                return None
 
     def get_capabilities(self, arch='x86_64', prefer_kvm=True):
         try:
