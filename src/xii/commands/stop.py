@@ -21,7 +21,7 @@ class StopCommand(command.Command):
             header("Stoping {}".format(cmpnt.name))
             cmpnt.info()
             hr(sep(""))
-            cmpnt.action('stop', force)
+            cmpnt.action('stop')
 
     def parse_command(self):
         parser = argparse.ArgumentParser()

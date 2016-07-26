@@ -6,7 +6,6 @@ from xii.output import info, show_setting, warn
 
 
 class SSHAttribute(attribute.Attribute):
-    name = "ssh"
     allowed_components = "node"
     requires = ["image", "user"]
     defaults = None
@@ -52,18 +51,18 @@ class SSHAttribute(attribute.Attribute):
         if copy_key:
             show_setting('copy keys', ", ".join(copy_key['users']))
 
-    def spawn(self, domain_name):
+    def spawn(self):
         if not self.settings:
             return
 
-        guest = self.conn().guest(self.cmpnt.attribute('image').clone(domain_name))
+        guest = self.conn().guest(self.cmpnt.attribute('image').image_path())
 
         copy_key = self.setting('copy-key')
         if copy_key:
             info("Copy key to domains")
-            self._add_keys_to_domain(guest, copy_key, domain_name)
+            self._add_keys_to_domain(guest, copy_key)
 
-    def _add_keys_to_domain(self, guest, copy_key, domain_name):
+    def _add_keys_to_domain(self, guest, copy_key):
         keys = self._get_public_keys()
         users = guest_util.get_users(guest)
 
@@ -80,7 +79,7 @@ class SSHAttribute(attribute.Attribute):
                 guest.chown(user['uid'], user['gid'], ssh_dir)
 
             authorized_file = os.path.join(ssh_dir, "authorized_keys")
-            info("local => {}/{}".format(domain_name, target), 2)
+            info("local => {}/{}".format(self.name, target), 2)
             guest.write_append(authorized_file, "".join(keys))
             guest.chown(user['uid'], user['gid'], authorized_file)
 

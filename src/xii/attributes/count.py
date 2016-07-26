@@ -24,4 +24,4 @@ class CountAttribute(attribute.Attribute):
 
         return ["{}#{}".format(name, i) for i in range(1, self.settings + 1)]
 
-attribute.Register.register('count', CountAttribute)
+#attribute.Register.register('count', CountAttribute)

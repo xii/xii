@@ -79,11 +79,14 @@ class Connection():
             guest.umount("/")
             guest.close()
 
-    def get_domain(self, name):
+    def get_domain(self, name, raise_execption=True):
         try:
             return self.virt().lookupByName(name)
         except libvirt.libvirtError:
-            return None
+            if raise_execption:
+                raise error.DoesNotExist("Can not find {}".format(name))
+            else:
+                return None
 
     def get_pool(self, name):
         try:

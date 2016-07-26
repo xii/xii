@@ -24,7 +24,6 @@ class Key():
 
 
 class Attribute():
-    name = ""
     allowed_components = []
     requires = []
 
@@ -34,9 +33,9 @@ class Attribute():
 
     @classmethod
     def has_defaults(cls):
-        if cls.defaults:
-            return True
-        return False
+        if cls.defaults is None:
+            return False
+        return True
 
     @classmethod
     def default(cls, cmpnt):
@@ -53,6 +52,7 @@ class Attribute():
 
     def __init__(self, settings, cmpnt):
         self.cmpnt = cmpnt
+        self.name = cmpnt.name
         self.settings = settings
 
     def conn(self):

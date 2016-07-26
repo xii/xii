@@ -13,15 +13,16 @@ class HostnameAttribute(attribute.Attribute):
         if self.settings:
             show_setting("set hostname", "yes")
 
-    def spawn(self, domain_name):
+    def spawn(self):
+        name = self.name
 
         info("Setting hostname")
-        guest = self.conn().guest(self.cmpnt.attribute('image').clone(domain_name))
+        guest = self.conn().guest(self.cmpnt.attribute('image').image_path())
 
         for replace in ["#", "."]:
-            domain_name = domain_name.replace(replace, "-")
+            name = name.replace(replace, "-")
 
-        guest.write('/etc/hostname', domain_name)
+        guest.write('/etc/hostname', name)
 
 
 attribute.Register.register('hostname', HostnameAttribute)

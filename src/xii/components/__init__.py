@@ -23,6 +23,8 @@ def get(dfn, name, conn, conf):
 def _create_component(settings, name, conn, conf):
     cmpnt = component.Register.get(settings['type'])(name, conn, conf)
 
+    cmpnt.add_default_attributes()
+
     for attr_name, attr_settings in settings.items():
         if attr_name in ['type']:
             continue
@@ -32,7 +34,7 @@ def _create_component(settings, name, conn, conf):
         if not attr:
             debug("Unkown attribute `{}`. Skipping.".format(attr_name))
             continue
-        cmpnt.add_attribute(attr(attr_settings, cmpnt))
+        cmpnt.add_attribute(attr_name, attr(attr_settings, cmpnt))
 
     # check if component is correctly initialized
     cmpnt.is_ready()

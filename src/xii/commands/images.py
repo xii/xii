@@ -9,7 +9,6 @@ class ImagesCommand(command.Command):
     name = ['images', 'i']
     help = "Manipulate already downloaded local images"
 
-
     def run(self):
         (action, image) = self.parse_command()
 
@@ -30,7 +29,7 @@ class ImagesCommand(command.Command):
 
         return (args.action, args.image)
 
-    def _list_images(self): 
+    def _list_images(self):
         user = os.path.expanduser('~')
         images_path = os.path.join(paths.storage_path(user), "images")
         for image in os.listdir(images_path):

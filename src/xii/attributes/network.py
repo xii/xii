@@ -4,7 +4,6 @@ from xii.output import show_setting, info
 
 
 class NetworkAttribute(attribute.Attribute):
-    name = "network"
     allowed_components = "node"
     defaults = 'default'
 
@@ -16,18 +15,18 @@ class NetworkAttribute(attribute.Attribute):
     def info(self):
         show_setting('network', self.settings)
 
-    def start(self, _):
+    def start(self):
         network = self.conn().get_network(self.settings)
 
         if not network.isActive():
             info("Starting network {}".format(self.settings))
             network.create()
 
-    def spawn(self, domain_name):
+    def spawn(self):
         network = self.conn().get_network(self.settings)
         if not network:
             raise error.DoesNotExist("Network {} for domain "
-                                     "{}".format(self.settings, domain_name))
+                                     "{}".format(self.settings, self.name))
 
         if not network.isActive():
             info("Starting network {}".format(self.settings))

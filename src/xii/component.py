@@ -26,8 +26,12 @@ class Component():
         self.name = name
         self.conf = conf
 
-    def add_attribute(self, attr):
-        self.attrs.append((attr.name, attr))
+    def add_attribute(self, name, attr):
+        try:
+            idx = [a[0] for a in self.attrs].index(name)
+            self.attrs[idx] = (name, attr)
+        except ValueError:
+            self.attrs.append((name, attr))
 
     def virt(self):
         return self.conn().virt()
@@ -42,14 +46,15 @@ class Component():
         debug("Could not find attribute {}".format(name))
         return None
 
-    def is_ready(self):
+    def add_default_attributes(self):
         for attr_name in self.default_attributes:
-            if attr_name not in self.attrs:
-                attr = attribute.Register.get(attr_name)
-                self.add_attribute(attr.default(self))
+            # Assume default attributes must exist
+            attr = attribute.Register.get(attr_name)
+            if attr.has_defaults():
+                self.add_attribute(attr_name, attr.default(self))
 
+    def is_ready(self):
         self.sort_attributes()
-
         for required in self.require_attributes:
             if not self.attribute(required):
                 raise RuntimeError("Could not find required attribute `{}`. "
@@ -68,10 +73,10 @@ class Component():
         if command in dir(self):
             getattr(self, command)()
 
-    def attribute_action(self, command, settings):
+    def attribute_action(self, command):
         for _, attr in self.attrs:
             if command in dir(attr):
-                getattr(attr, command)(settings)
+                getattr(attr, command)()
 
     def info(self):
         map(lambda attr: attr[1].info(), self.attrs)
@@ -87,11 +92,13 @@ class Component():
                 raise error.Bug("Cyclic attribute dependency. "
                                 "This should never happen")
 
-            for required in [attr[1].requires for attr in self.attrs]:
+            for required in self.attrs[idx][1].requires:
+
                 try:
                     move = [attr[0] for attr in self.attrs].index(required)
 
                     if move > idx:
+
                         self.attrs.insert(idx, self.attrs.pop(move))
                         has_moved = True
                 except ValueError:

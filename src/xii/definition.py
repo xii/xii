@@ -36,14 +36,27 @@ class Definition():
             return default
         return self.dfn[group][key]
 
+    def name_separator(self):
+        if 'xii' in self.dfn:
+            if 'seperator' in self.dfn['xii']:
+                return self.dfn['xii']['seperator']
+        return '-'
+
     def items(self):
         for (name, item) in self.dfn.items():
-            if name != "xii":
+            # skip global namespace
+            if name == "xii":
+                continue
+
+            if 'count' in item:
+                for i in range(1, item['count']+1):
+                    yield ("{}-{}".format(name, i), item)
+            else:
                 yield (name, item)
 
     def item(self, name):
         # Support components with more than one instance
-        find_counted= name.split("#")
+        find_counted= name.split(self.name_separator())
         if len(find_counted) != 1:
             name = "".join(find_counted[:-1])
 

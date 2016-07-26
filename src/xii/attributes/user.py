@@ -9,7 +9,6 @@ from xii.output import info, show_setting
 
 
 class UserAttribute(attribute.Attribute):
-    name = "user"
     allowed_components = "node"
     defaults = None
 
@@ -34,12 +33,12 @@ class UserAttribute(attribute.Attribute):
             return "xii"
         return self.settings.iterkeys().next()
 
-    def spawn(self, domain_name):
+    def spawn(self):
         if not self.settings:
             return
 
         info("Adding user to domain")
-        guest = self.conn().guest(self.cmpnt.attribute('image').clone(domain_name))
+        guest = self.conn().guest(self.cmpnt.attribute('image').image_path())
         shadow = guest.cat("/etc/shadow").split("\n")
         passwd = guest.cat("/etc/passwd").split("\n")
         groups = guest.cat("/etc/group").split("\n")

@@ -5,7 +5,6 @@ from xii.output import show_setting
 
 
 class GraphicAttribute(attribute.Attribute):
-    name = "graphic"
     allowed_components = "node"
     defaults = None
 
@@ -15,7 +14,7 @@ class GraphicAttribute(attribute.Attribute):
         if self.settings:
             show_setting("graphic", "enabled")
 
-    def spawn(self, _):
+    def spawn(self):
         if not self.settings:
             return
 
