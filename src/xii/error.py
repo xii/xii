@@ -1,51 +1,52 @@
 
-class FileError(RuntimeError):
-    def __init__(self, file, msg):
-        RuntimeError.__init__(self, "File error: {}. "
-                                    "\n\n(file was: {})".format(msg, file))
+def _to_list(string_or_list):
+    if isinstance(string_or_list, basestring):
+        return [string_or_list]
+    return string_or_list
 
 
-class ParseError(RuntimeError):
-    def __init__(self, file, msg):
-        RuntimeError.__init__(self, "Could not parse file: {}. "
-                                    "\n\n(file was: {})".format(msg, file))
+class XiiError(RuntimeError):
+    title = "Unkown Error"
+
+    def __init__(self, lines):
+        self.lines = _to_list(lines)
+
+    def error_title(self):
+        return self.title
+
+    def error(self):
+        return self.lines
 
 
-class InvalidSettings(RuntimeError):
-    def __init__(self, typ, msg):
-        RuntimeError.__init__(self, "Invalid configuration in {}: {} ".format(typ, msg))
-
-
-class InvalidAttribute(RuntimeError):
-    def __init__(self, file, prop, invalid):
-        RuntimeError.__init__(self, "Attribute `{}` is invalid (unknown value: {}) "
-                                    "\n\n(file was: {})".format(prop, invalid, file))
-
-
-class Bug(RuntimeError):
-    def __init__(self, file, msg):
-        RuntimeError.__init__(self, "BUG: {}. This indicates there is something "
-                                    "terrible wrong.\nIf you nice, please report this "
-                                    "to the github issue tracker. "
-                                    "\n\n(file was: {})".format(msg, file))
-
-class ValidatorError(RuntimeError):
+class ValidatorError(XiiError):
+    title = "Xii definition error"
     pass
 
 
-class InvalidSource(RuntimeError):
+class DefError(XiiError):
+    title = "Xii definition error"
     pass
 
 
-class LibvirtError(RuntimeError):
-    def __init__(self, err, msg=""):
-        RuntimeError.__init__(self, "Libvirt action failed: {}.\n\n{}".format(msg, err))
-
-class DoesNotExist(RuntimeError):
+class ExecError(XiiError):
+    title = "Runtime Error"
     pass
 
-class SSHError(RuntimeError):
+
+class ConnError(XiiError):
+    title = "Connection Error"
     pass
 
-class DefError(RuntimeError):
+
+class NotFound(XiiError):
+    title = "Not found"
     pass
+
+
+class Bug(XiiError):
+    title = "Bug"
+
+    def __init__(self, message):
+        XiiError.__init__(self, _to_list(message)
+                                + ["This should never happen."]
+                                + ["Please report this issue."])

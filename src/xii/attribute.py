@@ -1,3 +1,5 @@
+from xii.output import HasOutput
+
 class Register():
     registered = {}
 
@@ -12,7 +14,7 @@ class Register():
         cls.registered[attr.attr_name] = attr
 
 
-class Attribute():
+class Attribute(HasOutput):
     attr_name = ""
     allowed_components = []
     requires = []
@@ -41,8 +43,12 @@ class Attribute():
     def register(cls):
         Register().register(cls)
 
-    def info(self):
-        pass
+    def ident(self):
+        return [self.cmpnt.name, self.attr_name]
+
+    def add_info(self, key, value):
+        print("adding {}".format(key))
+        self.cmpnt.add_info(key, value)
 
     def __init__(self, settings, cmpnt):
         self.cmpnt = cmpnt
@@ -58,11 +64,14 @@ class Attribute():
     def guest(self, image_path):
         return self.conn().guest(image_path)
 
-    def setting(self, path):
+    def prepare(self):
+        pass
+
+    def setting(self, path, default_value=None):
         value = self.settings
         for key in path.split("/"):
             if key not in value:
-                return None
+                return default_value
             value = value[key]
         return value
 

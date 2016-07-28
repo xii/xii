@@ -1,8 +1,9 @@
 
 import argparse
 
-from xii import commands, components, attributes, paths, config, command
-from xii.output import fatal, set_verbose, hr
+from xii import commands, components, attributes, paths, config, command, error
+from xii.error import XiiError
+from xii.output import fatal, set_verbose, hr, sep
 
 
 def usage_text():
@@ -37,10 +38,14 @@ def run_cli():
         if cli_args.verbose:
             set_verbose()
 
+       # try:
         return instance.run()
-    except RuntimeError as e:
-        print("")
-        fatal(hr("FATAL: "))
-        fatal(str(e))
-        fatal(hr(""))
+       # except RuntimeError as e:
+       #     raise error.Bug(str(e))
+    except XiiError as e:
+        it = iter(e.error())
+        fatal(e.error_title() + ": " + next(it))
+
+        for line in it:
+            fatal(sep(line))
         return 1

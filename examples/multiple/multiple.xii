@@ -6,15 +6,14 @@ multiple:
   network: default
   image: http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2
   count: 3
-  #graphic: yes
-  #
-  user:
-    felixsch:
-      password: "1"
-    root:
-      password: linux
+  graphic: yes
   ssh:
     copy-key:
       users:
         - felixsch
         - root
+  user:
+    felixsch:
+      password: "1"
+    root:
+      password: linux

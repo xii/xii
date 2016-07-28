@@ -19,28 +19,42 @@ class ModeAttribute(Attribute):
             ])
         ])
 
-    def info(self):
+    def prepare(self):
         if self.settings:
-            state = self.settings['type']
+            state = self._get_mode()
 
-            if self.settings['type'] == 'route' and 'dev' in self.settings:
-                state += " (" + self.settings['dev'] + ")"
-            show_setting('mode', state)
+            if self._get_dev():
+                state += " (" + self._get_dev() + ")"
+            self.add_info('mode', state)
 
     def validate_settings(self):
         Attribute.validate_settings(self)
 
-        if self.settings['type'] not in ['nat', 'route']:
-            raise error.DefError("Unknown network mode '{}'".format(self.settings['type']))
+        if self._get_mode() not in ['nat', 'route']:
+            raise error.DefError("Unknown network mode '{}'".format(self._get_mode()))
 
     def spawn(self):
         template = 'mode.xml'
 
-        if self.settings['type'] == "route" and 'dev' in self.settings:
+        if self._get_dev():
             template = 'mode_route_dev.xml'
 
         xml = paths.template(template)
-        self.cmpnt.add_xml(xml.safe_substitute(self.settings))
+        self.cmpnt.add_xml(xml.safe_substitute({
+            'type': self._get_mode(),
+            'dev': self._get_dev()
+        }))
+
+    def _get_mode(self):
+        if isinstance(self.settings, dict):
+            return self.settings['type']
+        return self.settings
+
+    def _get_dev(self):
+        if isinstance(self.settings, dict):
+            if 'dev' in self.settings:
+                return self.settings['dev']
+        return None
 
 
 ModeAttribute.register()

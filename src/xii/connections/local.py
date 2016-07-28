@@ -42,12 +42,12 @@ class Local(connection.Connection):
     def user_home(self):
         return os.path.expanduser('~')
 
-    def copy(self, msg, source_path, dest_path):
+    def copy(self, source_path, dest_path):
         size = os.path.getsize(source_path)
         try:
             with open(source_path, 'rb') as source:
                 with open(dest_path, 'wb') as dest:
-                    self._copy_stream(msg, size, source, dest)
+                    self._copy_stream(size, source, dest)
         except OSError as err:
             raise error.FileError(source_path, "Could not copy file: {}".format(err))
 
@@ -59,14 +59,14 @@ class Local(connection.Connection):
     def chown(self, path, uid, gid):
         os.chown(path, uid, gid)
 
-    def download(self, msg, url, dest_path):
+    def download(self, url, dest_path):
         source = urllib2.urlopen(url)
         size = int(source.info().getheaders("Content-Length")[0])
 
         with open(dest_path, 'wb') as dest:
-            self._copy_stream(msg, size, source, dest)
+            self._copy_stream(size, source, dest)
 
-    def _copy_stream(self, msg, size, source, dest):
+    def _copy_stream(self, size, source, dest):
         copied = 0
         while True:
             buf = source.read(BUF_SIZE)
@@ -74,4 +74,3 @@ class Local(connection.Connection):
                 break
             dest.write(buf)
             copied += len(buf)
-            progress(msg, copied, size)

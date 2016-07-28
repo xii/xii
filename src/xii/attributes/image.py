@@ -7,7 +7,6 @@ from urllib2 import urlparse
 from xii import paths, error
 from xii.attribute import Attribute
 from xii.validator import String
-from xii.output import info, show_setting
 
 
 class ImageAttribute(Attribute):
@@ -24,8 +23,9 @@ class ImageAttribute(Attribute):
         self.storage_image = os.path.join(self.storage_path, 'images/' + self.image_name)
         self.storage_clone = None
 
-    def info(self):
-        show_setting('image', self.image_name)
+    def prepare(self):
+        self.add_info("image", self.image_name)
+
 
     def spawn(self):
         self.storage_clone = os.path.join(self.storage_path, 'storage/' + self.name + '.qcow2')
@@ -38,7 +38,8 @@ class ImageAttribute(Attribute):
             self._prepare_image()
 
         if not self.conn().exists(self.storage_clone):
-            self.conn().copy("Clone image", self.storage_image, self.storage_clone)
+            self.say("cloning image...")
+            self.conn().copy(self.storage_image, self.storage_clone)
             self.conn().chmod(self.storage_clone, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR, append=True)
             self.conn().chmod(self.storage_clone, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH, append=True)
 
@@ -100,7 +101,7 @@ class ImageAttribute(Attribute):
         pool = self.conn().get_pool('xii')
 
         if not pool:
-            info("Local storage pool does not exist. Creating...")
+            self.say("local storage pool does not exist. Creating a new one")
             xml = paths.template('pool.xml')
             self.virt().storagePoolDefineXML(xml.safe_substitute({'storage': self.storage_path + '/storage'}))
 
@@ -114,14 +115,11 @@ class ImageAttribute(Attribute):
             pool.create()
 
     def _prepare_image(self):
+        self.say("importing {}...".format(self.image_name))
         if self.local_image:
-            self.conn().copy("Copy {}".format(self.image_name),
-                             self.settings,
-                             self.storage_image)
+            self.conn().copy(self.settings, self.storage_image)
         else:
-            self.conn().download("Downloading {}".format(self.image_name),
-                                 self.settings,
-                                 self.storage_image)
+            self.conn().download(self.settings, self.storage_image)
 
     def _gen_xml(self):
         xml = paths.template('disk.xml')

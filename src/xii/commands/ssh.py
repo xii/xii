@@ -3,7 +3,7 @@ import argparse
 import libvirt
 import subprocess
 
-from xii import definition, command, components, connection, domain, error
+from xii import definition, command, components, connection, error
 from xii.output import header, debug, hr, sep
 
 

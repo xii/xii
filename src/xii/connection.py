@@ -7,7 +7,7 @@ import guestfs
 import os
 
 from xii import error
-from xii.output import warn, info
+from xii.output import warn
 
 
 class Connection():
@@ -33,7 +33,7 @@ class Connection():
         self.libvirt = libvirt.open(self.uri)
 
         if not self.libvirt:
-            raise error.LibvirtError(None, "Could not connection to `{}`".format(self.uri))
+            raise error.ConnError(None, "Could not connection to `{}`".format(self.uri))
         return self.libvirt
 
     def guest(self, image_path):
@@ -41,15 +41,10 @@ class Connection():
         if name in self.guests:
             return self.guests[name]
 
-        info("Mounting image...", ext=2 )
         guest = self._init_guest(image_path)
 
         if guest.exists('/etc/sysconfig/selinux'):
-            info("Remounting image with selinux capabilities...", ext=4)
-            # evil hack. overwrite function
             guest.get_selinux = lambda: True
-            #guest.close()
-            #guest = self._init_guest(image_path, selinux=1)
 
         self.guests[name] = guest
 
@@ -60,12 +55,12 @@ class Connection():
 
         if selinux:
             guest.set_selinux(1)
-        guest.add_drive(image_path)
 
         if not self.exists(image_path):
-            raise error.DoesNotExist("unable to load image. {}: "
+            raise error.Bug("unable to load image. {}: "
                                      "No such file or directory".format(image_path))
         guest.add_drive(image_path)
+
         guest.launch()
         guest.mount("/dev/sda1", "/")
 
@@ -84,7 +79,7 @@ class Connection():
             return self.virt().lookupByName(name)
         except libvirt.libvirtError:
             if raise_exception:
-                raise error.DoesNotExist("Can not find {}".format(name))
+                raise error.NotFound("Can not find {}".format(name))
             else:
                 return None
 
@@ -99,7 +94,7 @@ class Connection():
             return self.virt().networkLookupByName(name)
         except libvirt.libvirtError:
             if raise_exception:
-                raise error.DoesNotExist("Can not find network {}".format(name))
+                raise error.NotFound("Can not find network {}".format(name))
             else:
                 return None
 

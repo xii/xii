@@ -1,5 +1,7 @@
-from xii import attribute, error
-from xii.output import debug
+from xii import attribute, error, util
+from xii.output import debug, HasOutput
+
+from multiprocessing import Process
 
 
 class Register():
@@ -16,22 +18,27 @@ class Register():
         cls.registered[name] = klass
 
 
-class Component():
+class Component(HasOutput, Process):
     require_attributes = []
     default_attributes = []
+
+    def ident(self):
+        return [self.component_name]
 
     def __init__(self, name, conn, conf):
         self.connection = conn
         self.attrs = []
         self.name = name
+        self.component_name = name
         self.conf = conf
+        self.prepare()
 
     def add_attribute(self, name, attr):
-        try:
-            idx = [a[0] for a in self.attrs].index(name)
-            self.attrs[idx] = (name, attr)
-        except ValueError:
-            self.attrs.append((name, attr))
+        for idx, a in enumerate(self.attrs):
+            if a.attr_name == name:
+                self.attrs[idx] = attr
+                return
+        self.attrs.append(attr)
 
     def virt(self):
         return self.conn().virt()
@@ -40,8 +47,8 @@ class Component():
         return self.connection
 
     def attribute(self, name):
-        for attr_name, attr in self.attrs:
-            if attr_name == name:
+        for attr in self.attrs:
+            if attr.attr_name == name:
                 return attr
         debug("Could not find attribute {}".format(name))
         return None
@@ -57,16 +64,16 @@ class Component():
         self.sort_attributes()
         for required in self.require_attributes:
             if not self.attribute(required):
-                raise RuntimeError("Could not find required attribute `{}`. "
+                raise error.NotFound("Could not find required attribute `{}`. "
                                    "Add `{}` to `{}`.".format(required, required, self.name))
         for attr in self.attrs:
-            attr[1].validate_settings()
-            if 'valid' in dir(attr[1]):
-                attr[1].valid()
+            attr.validate_settings()
+            if 'valid' in dir(attr):
+                attr.valid()
 
     def action(self, command):
         if command not in dir(self):
-            raise RuntimeError("Invalid component command {}. "
+            raise error.Bug("Invalid component command {}. "
                                "This is a bug, report "
                                "it!".format(command))
 
@@ -74,37 +81,20 @@ class Component():
             getattr(self, command)()
 
     def attribute_action(self, command):
-        for _, attr in self.attrs:
+        for attr in self.attrs:
             if command in dir(attr):
                 getattr(attr, command)()
 
-    def info(self):
-        map(lambda attr: attr[1].info(), self.attrs)
+    def prepare(self):
+        map(lambda attr: attr.prepare(), self.attrs)
 
     def sort_attributes(self):
-        idx = 0
-        rounds = 0
-        size = len(self.attrs)
+        def name_extractor(objs, name):
+            for idx, obj in enumerate(objs):
+                if obj.attr_name == name:
+                    return idx
+            return None
 
-        while idx != size:
-            has_moved = False
-            if rounds > size * 2:
-                raise error.Bug("Cyclic attribute dependency. "
-                                "This should never happen")
-
-            for required in self.attrs[idx][1].requires:
-
-                try:
-                    move = [attr[0] for attr in self.attrs].index(required)
-
-                    if move > idx:
-
-                        self.attrs.insert(idx, self.attrs.pop(move))
-                        has_moved = True
-                except ValueError:
-                    debug("Required attribute {} not found. "
-                          "Skipping!".format(required))
-                    continue
-            if not has_moved:
-                idx += 1
-            rounds += 1
+        def requirement_extractor(objs, idx):
+            return objs[idx].requires
+        util.order(self.attrs, requirement_extractor, name_extractor)

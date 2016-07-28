@@ -1,0 +1,5 @@
+<ip address="$ip" netmask="$netmask">
+  <dhcp>
+    <range start="$start" end="$end" />
+  </dhcp>
+</ip>

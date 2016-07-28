@@ -5,7 +5,6 @@ import os
 
 from xii.attribute import Attribute
 from xii.validator import Dict, String, VariableKeys, Key, Required
-from xii.output import info, show_setting
 
 
 class UserAttribute(Attribute):
@@ -31,9 +30,9 @@ class UserAttribute(Attribute):
     def __init__(self, settings, cmpnt):
         Attribute.__init__(self, settings, cmpnt)
 
-    def info(self):
+    def prepare(self):
         if self.settings:
-            show_setting("user", ", ".join(self.settings.keys()))
+            self.add_info("user", ", ".join(self.settings.keys()))
 
     def get_default_user(self):
         if not self.settings:
@@ -44,7 +43,8 @@ class UserAttribute(Attribute):
         if not self.settings:
             return
 
-        info("Adding user to domain")
+        self.say("adding user/s...")
+
         guest = self.conn().guest(self.cmpnt.attribute('image').image_path())
         shadow = guest.cat("/etc/shadow").split("\n")
         passwd = guest.cat("/etc/passwd").split("\n")
@@ -52,7 +52,7 @@ class UserAttribute(Attribute):
 
         user_index = 0
         for name, settings in self.settings.items():
-            info("Adding {}".format(name), 2)
+            self.add("adding {}".format(name))
             user = self.default_user.copy()
             user['username'] = name
             user['n'] = user_index

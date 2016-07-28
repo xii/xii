@@ -1,9 +1,14 @@
 import os
 import argparse
 
+from multiprocessing import Pool
+
 from xii import definition, command, components, connection
 from xii.output import header, debug, hr, sep
 
+def start_component(c):
+    c.show_info("configuration:")
+    c.action("start")
 
 class StartCommand(command.Command):
     name = ['start', 's']
@@ -18,11 +23,7 @@ class StartCommand(command.Command):
 
         cmpnts = components.from_definition(dfn, self.conf, conn)
 
-        for cmpnt in cmpnts:
-            header("Starting {}".format(cmpnt.name))
-            cmpnt.info()
-            hr(sep(""))
-            cmpnt.action('start')
+        map(start_component, cmpnts)
 
     def parse_command(self):
         parser = argparse.ArgumentParser()

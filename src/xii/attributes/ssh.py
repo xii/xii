@@ -1,12 +1,12 @@
 import os
 
-from xii import guest_util
+from xii import util
 from xii.attribute import Attribute
 from xii.validator import Dict, List, String, Required, Key
-from xii.output import info, show_setting, warn
 
 
 class SSHAttribute(Attribute):
+    attr_name = "ssh"
     allowed_components = "node"
     requires = ["image", "user"]
     defaults = None
@@ -21,13 +21,13 @@ class SSHAttribute(Attribute):
     def __init__(self, value, cmpnt):
         Attribute.__init__(self, value, cmpnt)
 
-    def info(self):
+    def prepare(self):
         if not self.settings:
             return
 
         copy_key = self.setting('copy-key')
         if copy_key:
-            show_setting('copy keys', ", ".join(copy_key['users']))
+            self.add_info('copy keys', ", ".join(copy_key['users']))
 
     def spawn(self):
         if not self.settings:
@@ -37,18 +37,19 @@ class SSHAttribute(Attribute):
 
         copy_key = self.setting('copy-key')
         if copy_key:
-            info("Copy key to domains")
+            self.say("copy key to domains")
             self._add_keys_to_domain(guest, copy_key)
 
     def _add_keys_to_domain(self, guest, copy_key):
         keys = self._get_public_keys()
-        users = guest_util.get_users(guest)
+        users = util.get_users(guest)
 
         for target in copy_key['users']:
             if target not in users:
-                warn("Try to add ssh key to not existing user {}. Ignoring!".format(target))
+                self.warn("try to add ssh key to not existing user {}. Ignoring!".format(target))
                 continue
 
+            self.add("adding key to {}".format(target))
             user = users[target]
             ssh_dir = os.path.join(user['home'], ".ssh")
 
@@ -57,13 +58,13 @@ class SSHAttribute(Attribute):
                 guest.chown(user['uid'], user['gid'], ssh_dir)
 
             authorized_file = os.path.join(ssh_dir, "authorized_keys")
-            info("local => {}/{}".format(self.name, target), 2)
             guest.write_append(authorized_file, "".join(keys))
             guest.chown(user['uid'], user['gid'], authorized_file)
 
             # FIXME: Find better way to deal with selinux labels
             if guest.get_selinux():
                 guest.sh("chcon -R unconfined_u:object_r:user_home_t:s0 {}".format(ssh_dir))
+
 
     def _get_public_keys(self):
         ssh_keys = self.setting('copy-key/ssh-keys')

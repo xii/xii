@@ -1,5 +1,8 @@
-from xii import component, error, paths
-from xii.output import show_setting, section
+import libvirt
+
+from xii import component, error, paths, util
+from xii.output import show_setting, warn, info, fatal
+
 
 class NetworkComponent(component.Component):
     default_attributes = ['stay']
@@ -16,8 +19,30 @@ class NetworkComponent(component.Component):
         if not net:
             net = self._spawn_network()
 
+        if net.isActive():
+            info("{} is already started".format(self.name))
+            return True
+
+        net.create()
+
+        if not util.wait_until_active(net):
+            fatal("Could not start network {}".format(self.name))
+            return False
+
+
+    def stop(self):
+        net = self.conn().get_network(self.name)
+        self._stop_network(net)
+
+
     def destroy(self):
-        pass
+        net = self.conn().get_network(self.name)
+
+        if net.isActive():
+            self._stop_network(net)
+
+        net.undefine()
+        info("{} removed".format(self.name))
 
     def suspend(self):
         pass
@@ -32,8 +57,30 @@ class NetworkComponent(component.Component):
 
         tpl = paths.template('network-component.xml')
         xml = tpl.safe_substitute(replace)
-        print(xml)
 
+        # FIXME: Handle case where the network already is used by another
+        # device
+        try:
+            self.virt().networkDefineXML(xml)
+            net = self.conn().get_network(self.name)
+            return net
+        except libvirt.libvirtError as err:
+            raise error.ExecError("Could not define {}: {}".format(self.name, err))
+
+    def _stop_network(self, net):
+        self.attribute_action('stop')
+
+        if not net.isActive():
+            info("{} is already stopped".format(self.name))
+            return
+
+        net.destroy()
+
+        if not util.wait_until_inactive(net):
+            fatal("Could not stop {}".format(self.name))
+            return
+        info("{} stopped".format(self.name))
+        return
 
 
 component.Register.register('network', NetworkComponent)

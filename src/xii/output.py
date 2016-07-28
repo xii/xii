@@ -1,6 +1,8 @@
 import os
 import sys
 
+from abc import ABCMeta, abstractmethod
+
 OUTPUT_VERBOSE = False
 
 
@@ -10,14 +12,64 @@ def set_verbose():
 
 
 class colors:
+    TAG = '\033[34m'
+    CLEAR = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    WARN = '\033[91m'
+    SUCCESS = '\033[92m'
+
     HEADER = '\033[34m'
     SECTION = '\033[34m'
     OKGREEN = '\033[92m'
     WARNING = '\033[93m'
     FATAL = '\033[91m'
-    CLEAR = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+
+
+class HasOutput():
+    __metaclass__ = ABCMeta
+
+    _infos = {}
+
+    @abstractmethod
+    def ident(self):
+        pass
+
+    def add_info(self, key, value):
+        self._infos[key] = value
+
+    def say(self, msg):
+        tag = colors.TAG + self._generate_tag() + colors.CLEAR
+        print("{:30} {}".format(tag, msg))
+
+    def add(self, msg, sp=0):
+        self.say((" " * sp) + ":: " + msg)
+
+    def warn(self, msg):
+        output = "{:30} {}".format(self._generate_tag(), msg)
+        print(colors.WARN + colors.BOLD + output + colors.CLEAR)
+
+    def success(self, msg):
+        output = "{:21} {}".format(self._generate_tag(), msg)
+        print(colors.SUCCESS  + colors.BOLD + output + colors.CLEAR)
+
+
+    def show_info(self, msg):
+        self.say(msg)
+        for key, key in self._infos.items():
+            if isinstance(key, list):
+                print(sep("{:25}: {}".format(key, key[0])))
+                for line in key[1:]:
+                    print(sep("{:25}    {}".format("", line)))
+            else:
+                print(sep("{:25}: {}".format(key, key)))
+
+
+    def _generate_tag(self):
+        tag = ""
+        for i in self.ident():
+            tag += "[" + i + "]"
+        return tag
 
 
 def terminal_columns():
@@ -64,7 +116,7 @@ def sep(msg, sep=0):
 
 
 def fatal(msg):
-    print(colors.FATAL + colors.BOLD + sep(msg) + colors.CLEAR)
+    print(colors.FATAL + colors.BOLD + msg + colors.CLEAR)
 
 
 def info(msg, ext=0):

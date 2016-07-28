@@ -1,5 +1,5 @@
-
 from xii import error, util
+from xii.output import sep
 
 
 class TypeCheck():
@@ -68,8 +68,14 @@ class Or():
         state = sum(map(_validate_each, self.schemas))
 
         if self.exclusive and state > 1 or state == 0:
-            msgs = " or ".join(map(str, errors))
-            raise error.ValidatorError("{} is ambigous. {}".format(pre, msgs))
+            def _error_lines():
+                it = iter(errors)
+                yield sep(" ".join(next(it).error()))
+                for err in it:
+                    yield sep("or")
+                    yield sep(" ".join(err.error()))
+            raise error.ValidatorError(["{} is ambigous:".format(pre)]
+                                       + list(_error_lines()))
         return True
 
 
