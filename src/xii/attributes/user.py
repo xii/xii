@@ -3,12 +3,13 @@ import random
 import string
 import os
 
-from xii import attribute, error
-from xii.attribute import Key
+from xii.attribute import Attribute
+from xii.validator import Dict, String, VariableKeys, Key, Required
 from xii.output import info, show_setting
 
 
-class UserAttribute(attribute.Attribute):
+class UserAttribute(Attribute):
+    attr_name = "user"
     allowed_components = "node"
     defaults = None
 
@@ -19,10 +20,16 @@ class UserAttribute(attribute.Attribute):
                     "skel": True,
                     "n": 0}
 
-    keys = Key.Dict
+    keys = Dict([VariableKeys(
+        Dict([
+            Required(Key('password', String())),
+            Key('description', String()),
+            Key('shell', String())
+            ])
+        )])
 
     def __init__(self, settings, cmpnt):
-        attribute.Attribute.__init__(self, settings, cmpnt)
+        Attribute.__init__(self, settings, cmpnt)
 
     def info(self):
         if self.settings:
@@ -169,4 +176,4 @@ class UserAttribute(attribute.Attribute):
         return ''.join([random.choice(chars) for _ in range(length)])
 
 
-attribute.Register.register("user", UserAttribute)
+UserAttribute.register()

@@ -1,16 +1,18 @@
-from xii import attribute, paths, error
-from xii.attribute import Key
+from xii import paths, error
+from xii.attribute import Attribute
+from xii.validator import String
 from xii.output import show_setting, info
 
 
-class NetworkAttribute(attribute.Attribute):
+class NetworkAttribute(Attribute):
+    attr_name = "network"
     allowed_components = "node"
     defaults = 'default'
 
-    keys = Key.String
+    keys = String()
 
     def __init__(self, settings, cmpnt):
-        attribute.Attribute.__init__(self, settings, cmpnt)
+        Attribute.__init__(self, settings, cmpnt)
 
     def info(self):
         show_setting('network', self.settings)
@@ -39,4 +41,4 @@ class NetworkAttribute(attribute.Attribute):
         return xml.safe_substitute({'network': self.settings})
 
 
-attribute.Register.register('network', NetworkAttribute)
+NetworkAttribute.register()

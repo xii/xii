@@ -4,18 +4,20 @@ import stat
 
 from urllib2 import urlparse
 
-from xii import attribute, paths, error
-from xii.attribute import Key
+from xii import paths, error
+from xii.attribute import Attribute
+from xii.validator import String
 from xii.output import info, show_setting
 
 
-class ImageAttribute(attribute.Attribute):
+class ImageAttribute(Attribute):
+    attr_name = "image"
     allowed_components = "node"
 
-    keys = Key.String
+    keys = String()
 
     def __init__(self, value, cmpnt):
-        attribute.Attribute.__init__(self, value, cmpnt)
+        Attribute.__init__(self, value, cmpnt)
         self.local_image = False
         self.image_name = os.path.basename(self.settings)
         self.storage_path = paths.storage_path(self.conn().user_home())
@@ -126,4 +128,4 @@ class ImageAttribute(attribute.Attribute):
         return xml.safe_substitute({'image': self.storage_clone})
 
 
-attribute.Register.register('image', ImageAttribute)
+ImageAttribute.register()

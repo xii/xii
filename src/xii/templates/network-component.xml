@@ -1,0 +1,4 @@
+<network>
+  <name>$name</name>
+  $config
+</network>

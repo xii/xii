@@ -1,6 +1,6 @@
 # vim: set ts=2 sw=2 tw=0 ft=yaml:
 ---
-test-single:
+single:
   type: node
   network: default
 

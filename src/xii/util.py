@@ -2,9 +2,14 @@ import pkgutil
 import inspect
 import yaml
 
-import libvirt
 
 from xii import error
+
+
+def safe_get(name, structure):
+    if name not in structure:
+        return None
+    return structure[name]
 
 
 def file_read(path):
@@ -23,10 +28,6 @@ def yaml_read(path):
         raise error.FileError(path, "Could not open definition file")
     except yaml.YAMLError as err:
         raise error.ParseError(path, err)
-
-
-def yaml_write(path, value):
-    pass
 
 
 def load_modules(path):

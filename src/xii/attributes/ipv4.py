@@ -1,14 +1,20 @@
-
-from xii import attribute, paths
-from xii.attribute import Key
+from xii.attribute import Attribute
+from xii.validator import Dict, String, Key, Required
 from xii.output import show_setting
 
 
-class IPv4Attribute(attribute.Attribute):
+class IPv4Attribute(Attribute):
+    attr_name = "ipv4"
     allowed_components = "network"
-    defaults = False
+    defaults = {}
 
-    keys = Key.Bool
+    keys = Dict([
+        Required(Key('ip', String())),
+        Required(Key('dhcp', Dict([
+            Required(Key('start', String())),
+            Required(Key('end', String()))
+            ]))),
+        ])
 
     def info(self):
         pass
@@ -17,4 +23,4 @@ class IPv4Attribute(attribute.Attribute):
         pass
 
 
-attribute.Register.register("ipv4", IPv4Attribute)
+IPv4Attribute.register()

@@ -1,14 +1,13 @@
-
-from xii import attribute, paths
-from xii.attribute import Key
+from xii.attribute import Attribute
+from xii.validator import Dict, String, Required, Key
 from xii.output import show_setting
 
 
-class IPv6Attribute(attribute.Attribute):
+class IPv6Attribute(Attribute):
     allowed_components = "network"
     defaults = False
 
-    keys = Key.Bool
+    keys = String()
 
     def info(self):
         pass
@@ -17,4 +16,4 @@ class IPv6Attribute(attribute.Attribute):
         pass
 
 
-attribute.Register.register("ipv6", IPv6Attribute)
+IPv6Attribute.register()

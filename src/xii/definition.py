@@ -55,14 +55,10 @@ class Definition():
                 yield (name, item)
 
     def item(self, name):
-        # Support components with more than one instance
-        find_counted= name.split(self.name_separator())
-        if len(find_counted) != 1:
-            name = "".join(find_counted[:-1])
-
-        if name not in self.dfn:
-            return None
-        return self.dfn[name]
+        for (item_name, item) in self.items():
+            if item_name == name:
+                return item
+        return False
 
     def validate(self):
         for name, settings in self.items():

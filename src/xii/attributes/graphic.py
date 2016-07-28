@@ -1,14 +1,16 @@
 
-from xii import attribute, paths
-from xii.attribute import Key
+from xii import paths
+from xii.attribute import Attribute
+from xii.validator import Bool
 from xii.output import show_setting
 
 
-class GraphicAttribute(attribute.Attribute):
+class GraphicAttribute(Attribute):
+    attr_name = "graphic"
     allowed_components = "node"
     defaults = None
 
-    keys = Key.Bool
+    keys = Bool()
 
     def info(self):
         if self.settings:
@@ -22,4 +24,4 @@ class GraphicAttribute(attribute.Attribute):
         self.cmpnt.add_xml('devices', xml.safe_substitute())
 
 
-attribute.Register.register("graphic", GraphicAttribute)
+GraphicAttribute.register()

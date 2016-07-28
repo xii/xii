@@ -16,7 +16,7 @@ class NodeComponent(component.Component):
         self.xml_dfn[section] += "\n" + xml
 
     def start(self):
-        dmn = self.conn().get_domain(self.name, raise_execption=False)
+        dmn = self.conn().get_domain(self.name, raise_exception=False)
 
         if not dmn:
             dmn = self._spawn_domain()

@@ -29,6 +29,9 @@ class Bug(RuntimeError):
                                     "to the github issue tracker. "
                                     "\n\n(file was: {})".format(msg, file))
 
+class ValidatorError(RuntimeError):
+    pass
+
 
 class InvalidSource(RuntimeError):
     pass

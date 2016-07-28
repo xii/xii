@@ -1,13 +1,16 @@
-from xii import attribute, error, guest_util
-from xii.attribute import Key
+from xii import error, guest_util
+from xii.attribute import Attribute
+from xii.validator import Bool
 from xii.output import info, show_setting, warn
 
 
-class HostnameAttribute(attribute.Attribute):
-    name = "hostname"
+class HostnameAttribute(Attribute):
+    attr_name = "hostname"
     allowed_components = "node"
     requires = ["image"]
     defaults = True
+
+    keys = Bool()
 
     def info(self):
         if self.settings:
@@ -25,4 +28,4 @@ class HostnameAttribute(attribute.Attribute):
         guest.write('/etc/hostname', name)
 
 
-attribute.Register.register('hostname', HostnameAttribute)
+HostnameAttribute.register()

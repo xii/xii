@@ -1,14 +1,14 @@
-
-from xii import attribute, paths
-from xii.attribute import Key
+from xii.attribute import Attribute
+from xii.validator import Bool
 from xii.output import show_setting
 
 
-class StayAttribute(attribute.Attribute):
+class StayAttribute(Attribute):
+    attr_name = "stay"
     allowed_components = "network"
     defaults = False
 
-    keys = Key.Bool
+    keys = Bool()
 
     def info(self):
         if self.settings:
@@ -18,4 +18,4 @@ class StayAttribute(attribute.Attribute):
         return self.settings
 
 
-attribute.Register.register("stay", StayAttribute)
+StayAttribute.register()

@@ -10,7 +10,7 @@ multiple:
   #
   user:
     felixsch:
-      password: felix
+      password: "1"
     root:
       password: linux
   ssh:

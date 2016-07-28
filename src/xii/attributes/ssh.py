@@ -1,47 +1,25 @@
 import os
 
-from xii import attribute, error, guest_util
-from xii.attribute import Key
+from xii import guest_util
+from xii.attribute import Attribute
+from xii.validator import Dict, List, String, Required, Key
 from xii.output import info, show_setting, warn
 
 
-class SSHAttribute(attribute.Attribute):
+class SSHAttribute(Attribute):
     allowed_components = "node"
     requires = ["image", "user"]
     defaults = None
 
-    keys = {'copy-key': {
-                'type': Key.Dict,
-                'keys': {
-                    'ssh-keys': {
-                        'type': Key.Array,
-                        'keys': Key.String
-                        },
-                    'users': {
-                        'required': True,
-                        'type': Key.Array,
-                        'keys': Key.String
-                        }
-                    }
-                },
-            'distribute-keys': {
-                'type': Key.Dict,
-                'keys': {
-                    'ssh-keys': {
-                        'type': Key.Dict,
-                        'keys': Key.String
-                        },
-                    'domains': {
-                        'required': True,
-                        'type': Key.Array,
-                        'keys': Key.String
-                    }
-                }
-            }
-        }
+    keys = Dict([
+        Key('copy-key', Dict([
+            Key('ssh-keys', List(String())),
+            Required(Key('users', List(String())))
+        ]))
+    ])
 
     def __init__(self, value, cmpnt):
-        attribute.Attribute.__init__(self, value, cmpnt)
+        Attribute.__init__(self, value, cmpnt)
 
     def info(self):
         if not self.settings:
@@ -115,4 +93,4 @@ class SSHAttribute(attribute.Attribute):
         return parsed
 
 
-attribute.Register.register("ssh", SSHAttribute)
+SSHAttribute.register()
