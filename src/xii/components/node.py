@@ -1,20 +1,26 @@
 import libvirt
 
+from xii.component import Component
+from xii.need_libvirt import NeedLibvirt
+from xii.need_io import NeedIO
+
 from xii import component, paths, error
 from xii.util import domain_has_state, domain_wait_state, wait_until_inactive
 
 
-class NodeComponent(component.Component):
-    require_attributes = ['image']
-    default_attributes = ['network', 'hostname']
+class NodeComponent(Component, NeedLibvirt):
+    entity = "node"
 
-    xml_dfn = {}
+    requires = ["image"]
+    defaults = ["network", "hostname"]
+
+    xml_dfn = {'devices': ""}
 
     def add_xml(self, section, xml):
         self.xml_dfn[section] += "\n" + xml
 
     def start(self):
-        domain = self.conn().get_domain(self.name, raise_exception=False)
+        domain = self.get_domain(self.name, raise_exception=False)
 
         if not domain:
             domain = self._spawn_domain()
@@ -23,20 +29,20 @@ class NodeComponent(component.Component):
             self.say("is already started")
             return
 
-        self.say("starting {}...".format(self.name))
-        self.attribute_action('start')
+        self.say("starting {}...".format(self.ident()))
+        self.childs_run("start")
         domain.create()
         self.success("started!")
 
     def stop(self, force=False):
-        domain = self.conn().get_domain(self.name)
+        domain = self.get_domain(self.name)
 
-        self.attribute_action('stop')
+        self.childs_run("stop")
         self._stop_domain(domain, force)
 
     def destroy(self):
         self.say("destroying...")
-        domain = self.conn().get_domain(self.name)
+        domain = self.get_domain(self.name)
 
         if domain_has_state(domain, libvirt.VIR_DOMAIN_PAUSED):
             domain.resume()
@@ -46,15 +52,15 @@ class NodeComponent(component.Component):
 
         if domain.isActive():
             raise error.Bug("Could not remove running "
-                            "domain {}".format(self.name))
+                            "domain {}".format(self.ident()))
 
-        self.attribute_action('destroy')
+        self.childs_run("destroy")
         domain.undefine()
         self.success("removed!")
 
     def suspend(self):
         self.say("suspending...")
-        domain = self.conn().get_domain(self.name)
+        domain = self.get_domain(self.name)
 
         if domain_has_state(domain, libvirt.VIR_DOMAIN_PAUSED):
             self.warn("is already suspended")
@@ -69,7 +75,7 @@ class NodeComponent(component.Component):
 
     def resume(self):
         self.say("resuming...")
-        domain = self.conn().get_domain(self.name)
+        domain = self.get_domain(self.name)
 
         if domain_has_state(domain, libvirt.VIR_DOMAIN_RUNNING):
             self.add("is already running")
@@ -91,12 +97,12 @@ class NodeComponent(component.Component):
         self.say("spawning...")
         self.xml_dfn = {'devices': ''}
 
-        self.attribute_action('spawn')
+        self.childs_run("spawn")
 
         # Close open guest connection for this domain
-        self.conn().close_guest(self.name)
+        self.conn().close_guest(self.ident())
 
-        caps = self.conn().get_capabilities()
+        caps = self.get_capabilities()
 
         xml = paths.template('node.xml')
         self.xml_dfn['name'] = self.name
@@ -104,10 +110,10 @@ class NodeComponent(component.Component):
 
         try:
             self.virt().defineXML(xml.safe_substitute(self.xml_dfn))
-            domain = self.conn().get_domain(self.name)
+            domain = self.get_domain(self.name)
             return domain
         except libvirt.libvirtError as err:
-            raise error.LibvirtError(err, "Could not start "
+            raise error.ExecError(err, "Could not start "
                                           "domain {}".format(self.name))
 
     def _stop_domain(self, domain, force=False):
@@ -134,4 +140,4 @@ class NodeComponent(component.Component):
         self.success("stopped!")
 
 
-component.Register.register('node', NodeComponent)
+NodeComponent.register()

@@ -19,18 +19,17 @@ import pdb;
 
 class Ssh(connection.Connection):
 
-    def __init__(self, uri, dfn, conf):
-        connection.Connection.__init__(self, uri, dfn, conf)
+    def __init__(self, url):
+        Connection.__init__(self)
         self.ssh_conn = None
         self.username = None
         self.host = None
-        self.uri = uri
-        self.dfn_file = dfn.file_path()
+        self.url = url
 
         self.client = None
         self.sftp_client = None
 
-        self._parse_uri(uri)
+        self._parse_url(url)
 
     def ssh(self, timeout=5):
         if self.client:
@@ -48,10 +47,10 @@ class Ssh(connection.Connection):
                 self.client.connect(self.host, username=self.username)
                 return self.client
             except paramiko.AuthenticationException:
-                raise error.SSHError("Could not connect to {} failed: "
+                raise error.ConnError("Could not connect to {} failed: "
                                      "Authentication failed".format(self.host))
             except paramiko.BadHostKeyException:
-                raise error.SSHError("Could not connect to {} failed: "
+                raise error.ConnError("Could not connect to {} failed: "
                                      "Bad host key".format(self.host))
 
             except socket.error as err:
@@ -141,12 +140,11 @@ class Ssh(connection.Connection):
     def chown(self, path, uid, gid):
         self.sftp().chown(path, uid, gid)
 
-    def _parse_uri(self, uri):
+    def _parse_url(self, url):
         matcher = re.compile(r"qemu\+ssh:\/\/((.+)@)?(((.+)\.(.+))|(.+))\/system")
-        matched = matcher.match(uri)
+        matched = matcher.match(url)
         if not matched:
-            raise error.ParseError(self.dfn_file, "Invalid connection URL specified\n"
-                                                  "Invalid Uri: {}".format(uri))
+            raise error.ConnError("[io] Invalid connection URL specified.")
 
         self.host = matched.group(3)
         
@@ -156,7 +154,7 @@ class Ssh(connection.Connection):
     def _shell(self, command, timeout=None, multiline=False):
         _, out, _ = self.ssh().exec_command(command, timeout=timeout)
         if not out:
-            raise error.SSHError("Could not execute remote command "
+            raise error.ExecError("Could not execute remote command "
                                  "`{}`".format(command))
 
         if multiline:

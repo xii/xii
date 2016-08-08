@@ -1,23 +1,21 @@
 from xii import paths, error
+from xii.need_libvirt import NeedLibvirt
 from xii.attribute import Attribute
 from xii.validator import String
 
 
-class NetworkAttribute(Attribute):
-    attr_name = "network"
-    allowed_components = "node"
+class NetworkAttribute(Attribute, NeedLibvirt):
+    entity = "network"
+    needs = ["node"]
     defaults = 'default'
 
     keys = String()
-
-    def __init__(self, settings, cmpnt):
-        Attribute.__init__(self, settings, cmpnt)
 
     def prepare(self):
         self.add_info("network", self.settings)
 
     def start(self):
-        network = self.conn().get_network(self.settings)
+        network = self.get_network(self.settings)
 
         if network.isActive():
             return
@@ -27,7 +25,7 @@ class NetworkAttribute(Attribute):
         self.success("network {} started!".format(self.settings))
 
     def spawn(self):
-        network = self.conn().get_network(self.settings)
+        network = self.get_network(self.settings)
         if not network:
             raise error.NotFound("Network {} for domain "
                                  "{}".format(self.settings, self.name))
@@ -35,7 +33,7 @@ class NetworkAttribute(Attribute):
         if not network.isActive():
             self.start()
 
-        self.cmpnt.add_xml('devices', self._gen_xml())
+        self.get_parent().add_xml('devices', self._gen_xml())
 
     def _gen_xml(self):
         xml = paths.template('network.xml')

@@ -4,7 +4,10 @@ from xii.output import show_setting
 
 
 class IPv6Attribute(Attribute):
-    allowed_components = "network"
+    entity = "ipv6"
+
+    needs = ["network"]
+
     defaults = False
 
     keys = String()

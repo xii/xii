@@ -6,9 +6,6 @@ from multiprocessing import Pool
 from xii import definition, command, components, connection
 from xii.output import header, debug, hr, sep
 
-def start_component(c):
-    c.show_info("configuration:")
-    c.action("start")
 
 class StartCommand(command.Command):
     name = ['start', 's']
@@ -16,14 +13,21 @@ class StartCommand(command.Command):
 
     def run(self):
 
-        (dfn_path, forced_stop) = self.parse_command()
+        (dfn_path, forced_destroy) = self.parse_command()
 
-        dfn  = definition.from_file(dfn_path, self.conf)
-        conn = connection.establish(dfn, self.conf)
+        dfn  = definition.from_file(dfn_path, self.config)
 
-        cmpnts = components.from_definition(dfn, self.conf, conn)
+        runtime = {
+                'definition': dfn,
+                'config': self.config,
+                'userinterface': self.userinterface
+        }
 
-        map(start_component, cmpnts)
+        cmpnts = components.from_definition(runtime)
+
+        for cmpnt in cmpnts:
+            cmpnt.run("start")
+
 
     def parse_command(self):
         parser = argparse.ArgumentParser()

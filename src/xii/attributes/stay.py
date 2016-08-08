@@ -4,8 +4,9 @@ from xii.output import show_setting
 
 
 class StayAttribute(Attribute):
-    attr_name = "stay"
-    allowed_components = "network"
+    entity = "stay"
+    needs = ["network"]
+
     defaults = False
 
     keys = Bool()

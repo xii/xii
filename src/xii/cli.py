@@ -3,6 +3,7 @@ import argparse
 
 from xii import commands, components, attributes, paths, config, command, error
 from xii.error import XiiError
+from xii.ui import UI
 from xii.output import fatal, set_verbose, hr, sep
 
 
@@ -27,8 +28,9 @@ def run_cli():
 
         cli_args = parser.parse_args()
         conf = config.Config(cli_args.config)
+        userinterface   = UI()
 
-        instance = command.Register.get(cli_args.command, cli_args.command_args, conf)
+        instance = command.Register.get(cli_args.command, cli_args.command_args, conf, userinterface)
 
         if not instance:
             fatal("Invalid command `{}`. Command not found.".format(cli_args.command))

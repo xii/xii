@@ -17,6 +17,9 @@ class XiiError(RuntimeError):
     def error(self):
         return self.lines
 
+    def __str__(self):
+        return ". ".join(self.lines)
+
 
 class ValidatorError(XiiError):
     title = "Xii definition error"

@@ -8,9 +8,8 @@ from xii.validator import Dict, String, VariableKeys, Key, Required
 
 
 class UserAttribute(Attribute):
-    attr_name = "user"
-    allowed_components = "node"
-    defaults = None
+    entity = "user"
+    needs = ["node"]
 
     default_user = {"username": "xii",
                     "description": "xii generated user",

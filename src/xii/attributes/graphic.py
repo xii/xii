@@ -6,9 +6,9 @@ from xii.output import show_setting
 
 
 class GraphicAttribute(Attribute):
-    attr_name = "graphic"
-    allowed_components = "node"
-    defaults = None
+    entity = "graphic"
+
+    needs = ["node"]
 
     keys = Bool()
 

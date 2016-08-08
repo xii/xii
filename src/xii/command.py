@@ -2,10 +2,10 @@ class Register(object):
     registered = []
 
     @classmethod
-    def get(cls, name, args, conf):
+    def get(cls, name, args, config, userinterface):
         for command in cls.registered:
             if name in command.name:
-                return command(args, conf)
+                return command(args, config, userinterface)
         return None
 
     @classmethod
@@ -26,9 +26,10 @@ class Command():
     name = ["invalidcommand"]
     help = "No help given"
 
-    def __init__(self, args, conf):
+    def __init__(self, args, config, userinterface):
         self.args = args
-        self.conf = conf
+        self.config = config
+        self.userinterface  = userinterface
 
     def run(self):
         pass

@@ -1,14 +1,11 @@
 import os
 import argparse
 
-from multiprocessing import Pool
+from multiprocessing import Pool, Manager
 
 from xii import definition, command, components, connection
 from xii.output import header, debug, hr, sep
 
-
-def destroy_component(c):
-    c.action("destroy")
 
 class DestroyCommand(command.Command):
     name = ['destroy', 'd']
@@ -18,13 +15,19 @@ class DestroyCommand(command.Command):
 
         (dfn_path, forced_destroy) = self.parse_command()
 
-        dfn  = definition.from_file(dfn_path, self.conf)
-        conn = connection.establish(dfn, self.conf)
+        dfn  = definition.from_file(dfn_path, self.config)
 
-        cmpnts = components.from_definition(dfn, self.conf, conn)
+        runtime = {
+                'definition': dfn,
+                'config': self.config,
+                'userinterface': self.userinterface
+        }
 
-        map(destroy_component, cmpnts)
+        cmpnts = components.from_definition(runtime)
 
+        for cmpnt in cmpnts:
+            cmpnt.run("destroy")
+        
 
     def parse_command(self):
         parser = argparse.ArgumentParser()

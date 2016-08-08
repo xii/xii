@@ -6,8 +6,9 @@ from xii.validator import Dict, List, String, Required, Key
 
 
 class SSHAttribute(Attribute):
-    attr_name = "ssh"
-    allowed_components = "node"
+    entity = "ssh"
+    needs = ["node"]
+
     requires = ["image", "user"]
     defaults = None
 

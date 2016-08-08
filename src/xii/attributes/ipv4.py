@@ -5,8 +5,10 @@ from xii.output import show_setting
 
 
 class IPv4Attribute(Attribute):
-    attr_name = "ipv4"
-    allowed_components = "network"
+    entity = "ipv"
+
+    needs = ["network"]
+
     defaults = {}
 
     keys = Dict([

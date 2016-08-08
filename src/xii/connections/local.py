@@ -4,14 +4,14 @@ import urllib2
 import errno
 import stat
 
-from xii import connection, error
-from xii.output import progress
+from xii import error
+from xii.connection import Connection
 
 
 BUF_SIZE = 16 * 1024
 
 
-class Local(connection.Connection):
+class Local(Connection):
     def mkdir(self, directory, recursive=False):
         try:
             if recursive:

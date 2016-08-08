@@ -1,41 +1,43 @@
-from xii import component, attribute, util
+from xii import util
 from xii.output import debug
+from xii.entity import EntityRegister
 
 
 # Load all modules in components/ subdirectory
 __all__ = util.load_modules(__path__)
 
 
-def from_definition(dfn, conf, conn):
+def from_definition(runtime):
     cmpnts = []
-    for name, settings in dfn.items():
-        cmpnts.append(_create_component(settings, name, conn, conf))
+    for name, settings in runtime['definition'].items():
+        cmpnts.append(_create_component(settings, name, runtime))
     return cmpnts
 
 
-def get(dfn, name, conn, conf):
-    settings = dfn.item(name)
+def get(name, runtime):
+    settings = runtime['definition'].item(name)
     if not settings:
         return None
-    return _create_component(settings, name, conn, conf)
+    return _create_component(settings, name, runtime)
 
 
-def _create_component(settings, name, conn, conf):
-    cmpnt = component.Register.get(settings['type'])(name, conn, conf)
+def _create_component(settings, name, runtime):
+    component_class = EntityRegister.get_entity("component", settings["type"])
+    component = component_class(name, runtime)
 
-    cmpnt.add_default_attributes()
+    component.load_defaults()
 
     for attr_name, attr_settings in settings.items():
-        if attr_name in ['type']:
+        if attr_name in ["type", "count"]:
             continue
 
-        attr = attribute.Register.get(attr_name)
+        attr = EntityRegister.get_entity("attribute", attr_name)
 
         if not attr:
             debug("Unkown attribute `{}`. Skipping.".format(attr_name))
             continue
-        cmpnt.add_attribute(attr_name, attr(attr_settings, cmpnt))
+        component.add(attr(attr_settings, component))
 
     # check if component is correctly initialized
-    cmpnt.is_ready()
-    return cmpnt
+    component.validate()
+    return component

@@ -5,8 +5,9 @@ from xii.output import info, show_setting, warn
 
 
 class HostnameAttribute(Attribute):
-    attr_name = "hostname"
-    allowed_components = "node"
+    entity = "hostname"
+    needs = "node"
+
     requires = ["image"]
     defaults = True
 

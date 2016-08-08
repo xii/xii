@@ -5,8 +5,8 @@ from xii.output import show_setting
 
 
 class ModeAttribute(Attribute):
-    attr_name = "mode"
-    allowed_components = "network"
+    entity = "mode"
+    needs = ["network"]
     defaults = {
         'type': 'nat'
     }

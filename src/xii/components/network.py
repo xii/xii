@@ -1,12 +1,15 @@
 import libvirt
 
-from xii import component, error, paths, util
-from xii.output import show_setting, warn, info, fatal
+from xii.component import Component
+from xii import error, paths, util
+from xii.output import info, fatal
 
 
-class NetworkComponent(component.Component):
-    default_attributes = ['stay']
-    require_attributes = ['mode']
+class NetworkComponent(Component):
+    entity = "network"
+
+    defaults = ['stay']
+    requires = ['mode']
 
     xml_net = []
 
@@ -83,4 +86,4 @@ class NetworkComponent(component.Component):
         return
 
 
-component.Register.register('network', NetworkComponent)
+NetworkComponent.register()
