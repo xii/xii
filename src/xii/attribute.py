@@ -22,10 +22,8 @@ class Attribute(Entity):
         EntityRegister.register("attribute", cls)
 
     def __init__(self, settings, component):
-        print("initialize {}".format(self.entity))
         Entity.__init__(self, name=self.entity,
                               parent=component)
-        print(self._parent)
         self.settings = settings
 
     def share(self, name, creator, finalizer=None):
@@ -38,6 +36,9 @@ class Attribute(Entity):
                 return default_value
             value = value[key]
         return value
+
+    def component_name(self):
+        return self.get_parent().name
 
     def validate(self):
         self.keys.validate(self.get_parent().name + " > " + self.name, self.settings)

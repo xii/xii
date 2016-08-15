@@ -1,10 +1,11 @@
 from xii import error
-from xii.attribute import Attribute
+from xii.attributes.nodeattribute import NodeAttribute
 from xii.validator import Bool
+from xii.need import NeedGuestFS
 from xii.output import info, show_setting, warn
 
 
-class HostnameAttribute(Attribute):
+class HostnameAttribute(NodeAttribute, NeedGuestFS):
     entity = "hostname"
     needs = "node"
 
@@ -22,15 +23,13 @@ class HostnameAttribute(Attribute):
         if not self.settings:
             return
 
-
-        name = self.name
-        guest = self.conn().guest(self.cmpnt.attribute('image').image_path())
+        name = self.component_name()
 
         for replace in ["#", "."]:
             name = name.replace(replace, "-")
 
         self.say("setting hostname to {}...".format(name))
-        guest.write('/etc/hostname', name)
+        self.guest().write('/etc/hostname', name)
 
 
 HostnameAttribute.register()

@@ -1,14 +1,12 @@
 
 from xii import paths
-from xii.attribute import Attribute
+from xii.attributes.nodeattribute import NodeAttribute
 from xii.validator import Bool
 from xii.output import show_setting
 
 
-class GraphicAttribute(Attribute):
+class GraphicAttribute(NodeAttribute):
     entity = "graphic"
-
-    needs = ["node"]
 
     keys = Bool()
 
@@ -21,7 +19,7 @@ class GraphicAttribute(Attribute):
         if not self.settings:
             return
         xml = paths.template('graphic.xml')
-        self.cmpnt.add_xml('devices', xml.safe_substitute())
+        self.get_parent().add_xml('devices', xml.safe_substitute())
 
 
 GraphicAttribute.register()

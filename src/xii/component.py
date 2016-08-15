@@ -26,8 +26,6 @@ class Component(Entity):
         if action in dir(self):
             getattr(self, action)()
 
-
-
 # class Component(HasOutput, Managed, Register):
 #     require_attributes = []
 #     default_attributes = []

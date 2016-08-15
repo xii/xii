@@ -26,7 +26,9 @@ class StartCommand(command.Command):
         cmpnts = components.from_definition(runtime)
 
         for cmpnt in cmpnts:
+            print("========= START: {} =========".format(cmpnt.name))
             cmpnt.run("start")
+            print("========= END: {} =========".format(cmpnt.name))
 
 
     def parse_command(self):

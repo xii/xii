@@ -1,7 +1,6 @@
 import argparse
 
-from xii import definition, command, components, connection
-from xii.output import header, debug, hr, sep
+from xii import definition, command, components
 
 
 class ResumeCommand(command.Command):
@@ -12,16 +11,18 @@ class ResumeCommand(command.Command):
 
         dfn_path = self.parse_command()
 
-        dfn  = definition.from_file(dfn_path, self.conf)
-        conn = connection.establish(dfn, self.conf)
+        dfn = definition.from_file(dfn_path, self.config)
 
-        cmpnts = components.from_definition(dfn, self.conf, conn)
+        runtime = {
+            "definition": dfn,
+            "config": self.config,
+            "userinterface": self.userinterface
+        }
+
+        cmpnts = components.from_definition(runtime)
 
         for cmpnt in cmpnts:
-            header("Resuming {}".format(cmpnt.name))
-            cmpnt.info()
-            hr(sep(""))
-            cmpnt.action('resume')
+            cmpnt.run("resume")
 
     def parse_command(self):
         parser = argparse.ArgumentParser()

@@ -3,13 +3,13 @@ import random
 import string
 import os
 
-from xii.attribute import Attribute
+from xii.attributes.nodeattribute import NodeAttribute
 from xii.validator import Dict, String, VariableKeys, Key, Required
+from xii.need import NeedGuestFS
 
 
-class UserAttribute(Attribute):
+class UserAttribute(NodeAttribute, NeedGuestFS):
     entity = "user"
-    needs = ["node"]
 
     default_user = {"username": "xii",
                     "description": "xii generated user",
@@ -26,9 +26,6 @@ class UserAttribute(Attribute):
             ])
         )])
 
-    def __init__(self, settings, cmpnt):
-        Attribute.__init__(self, settings, cmpnt)
-
     def prepare(self):
         if self.settings:
             self.add_info("user", ", ".join(self.settings.keys()))
@@ -44,14 +41,14 @@ class UserAttribute(Attribute):
 
         self.say("adding user/s...")
 
-        guest = self.conn().guest(self.cmpnt.attribute('image').image_path())
+        guest = self.guest()
         shadow = guest.cat("/etc/shadow").split("\n")
         passwd = guest.cat("/etc/passwd").split("\n")
         groups = guest.cat("/etc/group").split("\n")
 
         user_index = 0
         for name, settings in self.settings.items():
-            self.add("adding {}".format(name))
+            self.say("adding {}".format(name))
             user = self.default_user.copy()
             user['username'] = name
             user['n'] = user_index

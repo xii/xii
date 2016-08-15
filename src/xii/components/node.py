@@ -19,6 +19,10 @@ class NodeComponent(Component, NeedLibvirt):
     def add_xml(self, section, xml):
         self.xml_dfn[section] += "\n" + xml
 
+    # every node has an image (only currently)
+    def get_domain_image_path(self):
+        return self.get_child('image').get_domain_image_path()
+
     def start(self):
         domain = self.get_domain(self.name, raise_exception=False)
 
@@ -29,9 +33,10 @@ class NodeComponent(Component, NeedLibvirt):
             self.say("is already started")
             return
 
-        self.say("starting {}...".format(self.ident()))
+        self.say("starting ...")
         self.childs_run("start")
         domain.create()
+        self.finalize()
         self.success("started!")
 
     def stop(self, force=False):
@@ -78,11 +83,11 @@ class NodeComponent(Component, NeedLibvirt):
         domain = self.get_domain(self.name)
 
         if domain_has_state(domain, libvirt.VIR_DOMAIN_RUNNING):
-            self.add("is already running")
+            self.say("is already running")
             return
 
         if not domain_has_state(domain, libvirt.VIR_DOMAIN_PAUSED):
-            self.add("is not suspended")
+            self.say("is not suspended")
             return
 
         domain.resume()
@@ -98,9 +103,6 @@ class NodeComponent(Component, NeedLibvirt):
         self.xml_dfn = {'devices': ''}
 
         self.childs_run("spawn")
-
-        # Close open guest connection for this domain
-        self.conn().close_guest(self.ident())
 
         caps = self.get_capabilities()
 

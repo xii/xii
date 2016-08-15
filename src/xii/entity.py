@@ -23,7 +23,6 @@ class Entity(HasOutput):
 
         self.name = name
         self._parent = parent
-        print(self._parent)
         self._runtime = runtime
 
     def full_name(self):
@@ -97,10 +96,11 @@ class Entity(HasOutput):
             }
         return self._shares[name]['value']
 
-    def _finalize(self):
-        for shared in self._shares:
+    def finalize(self):
+        for name, shared in self._shares.items():
             if shared["finalizer"] is not None:
-                shared["finalizer"]()
+                shared["finalizer"](shared['value'])
+            del self._shares[name]
 
     def _child_index(self, name):
         for idx, child in enumerate(self._childs):
@@ -150,6 +150,5 @@ class EntityRegister():
     @classmethod
     def get_entity(cls, group, name):
         if name not in cls._registered[group]:
-            print(cls._registered)
             raise error.NotFound("Could not find `{}/{}`. Maybe misspelled?".format(group, name))
         return cls._registered[group][name]

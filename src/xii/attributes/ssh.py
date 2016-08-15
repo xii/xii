@@ -1,13 +1,13 @@
 import os
 
 from xii import util
-from xii.attribute import Attribute
+from xii.attributes.nodeattribute import NodeAttribute
+from xii.need import NeedGuestFS
 from xii.validator import Dict, List, String, Required, Key
 
 
-class SSHAttribute(Attribute):
+class SSHAttribute(NodeAttribute, NeedGuestFS):
     entity = "ssh"
-    needs = ["node"]
 
     requires = ["image", "user"]
     defaults = None
@@ -18,9 +18,6 @@ class SSHAttribute(Attribute):
             Required(Key('users', List(String())))
         ]))
     ])
-
-    def __init__(self, value, cmpnt):
-        Attribute.__init__(self, value, cmpnt)
 
     def prepare(self):
         if not self.settings:
@@ -34,7 +31,7 @@ class SSHAttribute(Attribute):
         if not self.settings:
             return
 
-        guest = self.conn().guest(self.cmpnt.attribute('image').image_path())
+        guest = self.guest()
 
         copy_key = self.setting('copy-key')
         if copy_key:
@@ -50,7 +47,7 @@ class SSHAttribute(Attribute):
                 self.warn("try to add ssh key to not existing user {}. Ignoring!".format(target))
                 continue
 
-            self.add("adding key to {}".format(target))
+            self.say("adding key to {}".format(target))
             user = users[target]
             ssh_dir = os.path.join(user['home'], ".ssh")
 
