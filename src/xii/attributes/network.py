@@ -1,5 +1,5 @@
 from xii import paths, error
-from xii.need_libvirt import NeedLibvirt
+from xii.need import NeedLibvirt
 from xii.attribute import Attribute
 from xii.validator import String
 

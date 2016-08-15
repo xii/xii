@@ -1,6 +1,5 @@
 from xii.attribute import Attribute
 from xii.validator import Dict, String, Required, Key
-from xii.output import show_setting
 
 
 class IPv6Attribute(Attribute):

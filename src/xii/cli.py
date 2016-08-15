@@ -3,8 +3,7 @@ import argparse
 
 from xii import commands, components, attributes, paths, config, command, error
 from xii.error import XiiError
-from xii.ui import UI
-from xii.output import fatal, set_verbose, hr, sep
+from xii.ui import UI, warn
 
 
 def usage_text():
@@ -33,21 +32,18 @@ def run_cli():
         instance = command.Register.get(cli_args.command, cli_args.command_args, conf, userinterface)
 
         if not instance:
-            fatal("Invalid command `{}`. Command not found.".format(cli_args.command))
+            warn("Invalid command `{}`. Command not found.".format(cli_args.command))
             parser.print_help()
             return 1
 
-        if cli_args.verbose:
-            set_verbose()
+        # if cli_args.verbose:
+        #     set_verbose()
 
-       # try:
         return instance.run()
-       # except RuntimeError as e:
-       #     raise error.Bug(str(e))
     except XiiError as e:
         it = iter(e.error())
-        fatal(e.error_title() + ": " + next(it))
+        warn(e.error_title() + ": " + next(it))
 
         for line in it:
-            fatal(sep(line))
+            warn(line)
         return 1

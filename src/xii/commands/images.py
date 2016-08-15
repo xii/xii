@@ -2,7 +2,6 @@ import os
 import argparse
 
 from xii import definition, command, paths
-from xii.output import header, debug, hr, sep
 
 
 class ImagesCommand(command.Command):

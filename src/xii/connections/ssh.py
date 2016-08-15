@@ -8,14 +8,13 @@ import functools
 import stat
 
 from xii import connection, error
-from xii.output import progress, warn, info
+from xii.ui import warn
 
 import paramiko
 
 
 BUF_SIZE = 16 * 1024
 
-import pdb;
 
 class Ssh(connection.Connection):
 
@@ -39,7 +38,7 @@ class Ssh(connection.Connection):
 
         if self.user:
             conn_args['user'] = self.username
-        
+
         for i in range(timeout):
             try:
                 self.client = paramiko.SSHClient()
@@ -72,7 +71,7 @@ class Ssh(connection.Connection):
 
     def mkdir(self, directory, recursive=False):
         paths = [directory]
-        
+
         if recursive:
             dirs = directory.split("/")
             curr = "/"
@@ -84,19 +83,19 @@ class Ssh(connection.Connection):
         for path in paths:
             if not self.exists(path):
                 self.sftp().mkdir(path)
-                    
+
     def exists(self, path):
         try:
             self.sftp().stat(path)
         except IOError, e:
             if e[0] == 2:
                 return False
-            raise        
+            raise
         return True
 
     def user(self):
         return self._shell("whoami")
-        
+
     def user_home(self):
         return self._shell("echo $HOME")
 
@@ -147,7 +146,7 @@ class Ssh(connection.Connection):
             raise error.ConnError("[io] Invalid connection URL specified.")
 
         self.host = matched.group(3)
-        
+
         if matched.group(2):
             self.username = matched.group(2)
 

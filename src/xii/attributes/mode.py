@@ -1,7 +1,6 @@
 from xii import error, paths
 from xii.attribute import Attribute
 from xii.validator import Dict, Key, String, Required, Or
-from xii.output import show_setting
 
 
 class ModeAttribute(Attribute):

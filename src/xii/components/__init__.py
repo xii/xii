@@ -1,5 +1,5 @@
 from xii import util
-from xii.output import debug
+from xii.ui import warn
 from xii.entity import EntityRegister
 
 
@@ -34,7 +34,7 @@ def _create_component(settings, name, runtime):
         attr = EntityRegister.get_entity("attribute", attr_name)
 
         if not attr:
-            debug("Unkown attribute `{}`. Skipping.".format(attr_name))
+            warn("Unkown attribute `{}`. Skipping.".format(attr_name))
             continue
         component.add(attr(attr_settings, component))
 

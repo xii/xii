@@ -1,7 +1,6 @@
 import inspect
 
 from xii import error
-from xii.output import debug
 from xii.ui import HasOutput
 
 
@@ -121,7 +120,6 @@ class Entity(HasOutput):
             for requirement in self._childs[idx].requires:
                 move = self._child_index(requirement)
                 if move is None:
-                    debug("Requirement {} does not exist".format(requirement))
                     continue
 
                 if move > idx:

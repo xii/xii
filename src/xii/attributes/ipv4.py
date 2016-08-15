@@ -1,7 +1,6 @@
 from xii import paths
 from xii.attribute import Attribute
 from xii.validator import Dict, String, Key, Required
-from xii.output import show_setting
 
 
 class IPv4Attribute(Attribute):

@@ -5,7 +5,7 @@ import time
 
 
 from xii import error
-from xii.output import debug
+from xii.ui import warn
 
 
 def safe_get(name, structure):
@@ -118,7 +118,7 @@ def order(objs, requirement_extractor, name_extractor):
         for requirement in requirement_extractor(objs, idx):
             move = name_extractor(objs, requirement)
             if move is None:
-                debug("Requirement {} does not exist".format(requirement))
+                warn("Requirement {} does not exist".format(requirement))
                 continue
 
             if move > idx:

@@ -1,3 +1,55 @@
+import argparse
+
+from multiprocessing import Pool, Queue
+
+
+def run_action_on_obj((obj, action)):
+    obj.run(action)
+
+class Command():
+    name = ["invalidcommand"]
+    help = "No help given"
+
+    def __init__(self, args, config, userinterface):
+        self.args = args
+        self.config = config
+        self.userinterface = userinterface
+
+    def run(self):
+        pass
+
+    def action_each(self, action, objs):
+
+
+        if self.config.is_parallel():
+
+            pool = Pool(self.config.workers())
+            table = []
+
+            for obj in objs:
+                table.append((obj, action))
+
+            result = pool.map_async(run_action_on_obj, table).get()
+        else:
+            for obj in objs:
+                obj.run(action)
+
+    def make_runtime(self, additional={}):
+        runtime = {
+            "config": self.config,
+            "userinterface": self.userinterface
+        }
+        runtime.update(additional)
+        return runtime
+
+    def default_arg_parser(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument("dfn_file", nargs="?", default=None)
+
+        return parser
+
+
+
 class Register(object):
     registered = []
 
@@ -20,16 +72,3 @@ class Register(object):
     @classmethod
     def register(cls, command):
         cls.registered.append(command)
-
-
-class Command():
-    name = ["invalidcommand"]
-    help = "No help given"
-
-    def __init__(self, args, config, userinterface):
-        self.args = args
-        self.config = config
-        self.userinterface  = userinterface
-
-    def run(self):
-        pass

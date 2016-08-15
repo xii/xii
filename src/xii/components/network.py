@@ -2,7 +2,6 @@ import libvirt
 
 from xii.component import Component
 from xii import error, paths, util
-from xii.output import info, fatal
 
 
 class NetworkComponent(Component):
@@ -23,13 +22,13 @@ class NetworkComponent(Component):
             net = self._spawn_network()
 
         if net.isActive():
-            info("{} is already started".format(self.name))
+            self.info("{} is already started".format(self.name))
             return True
 
         net.create()
 
         if not util.wait_until_active(net):
-            fatal("Could not start network {}".format(self.name))
+            self.warn("Could not start network {}".format(self.name))
             return False
 
 
@@ -45,7 +44,7 @@ class NetworkComponent(Component):
             self._stop_network(net)
 
         net.undefine()
-        info("{} removed".format(self.name))
+        self.info("{} removed".format(self.name))
 
     def suspend(self):
         pass
@@ -74,15 +73,15 @@ class NetworkComponent(Component):
         self.attribute_action('stop')
 
         if not net.isActive():
-            info("{} is already stopped".format(self.name))
+            self.info("{} is already stopped".format(self.name))
             return
 
         net.destroy()
 
         if not util.wait_until_inactive(net):
-            fatal("Could not stop {}".format(self.name))
+            self.warn("Could not stop {}".format(self.name))
             return
-        info("{} stopped".format(self.name))
+        self.info("{} stopped".format(self.name))
         return
 
 

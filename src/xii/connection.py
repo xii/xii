@@ -1,13 +1,4 @@
 from abc import ABCMeta, abstractmethod
-import xml.etree.ElementTree as etree
-
-import libvirt
-import guestfs
-
-import os
-
-from xii import error
-from xii.output import warn
 
 
 class Connection():

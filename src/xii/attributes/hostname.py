@@ -2,7 +2,6 @@ from xii import error
 from xii.attributes.nodeattribute import NodeAttribute
 from xii.validator import Bool
 from xii.need import NeedGuestFS
-from xii.output import info, show_setting, warn
 
 
 class HostnameAttribute(NodeAttribute, NeedGuestFS):

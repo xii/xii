@@ -10,6 +10,7 @@ class XiiError(RuntimeError):
 
     def __init__(self, lines):
         self.lines = _to_list(lines)
+        RuntimeError.__init__(self, str(self))
 
     def error_title(self):
         return self.title

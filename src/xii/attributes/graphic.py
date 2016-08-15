@@ -2,7 +2,6 @@
 from xii import paths
 from xii.attributes.nodeattribute import NodeAttribute
 from xii.validator import Bool
-from xii.output import show_setting
 
 
 class GraphicAttribute(NodeAttribute):

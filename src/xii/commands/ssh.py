@@ -4,7 +4,6 @@ import libvirt
 import subprocess
 
 from xii import definition, command, components, error
-from xii.output import warn
 
 
 class SSHCommand(command.Command):
@@ -33,7 +32,7 @@ class SSHCommand(command.Command):
             raise error.NotFound("Could not find {}".format(domain_name))
 
         if not domain.isActive():
-            warn("{} is not running. Try starting the domain first".format(domain_name))
+            self.userinterface.warn("{} is not running. Try starting the domain first".format(domain_name))
             return
 
         # Currently there is no way to determine net name (like vnet0) from a networkname

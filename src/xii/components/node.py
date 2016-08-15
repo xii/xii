@@ -1,10 +1,8 @@
 import libvirt
 
+from xii import paths, error
 from xii.component import Component
-from xii.need_libvirt import NeedLibvirt
-from xii.need_io import NeedIO
-
-from xii import component, paths, error
+from xii.need import NeedLibvirt
 from xii.util import domain_has_state, domain_wait_state, wait_until_inactive
 
 
@@ -47,7 +45,11 @@ class NodeComponent(Component, NeedLibvirt):
 
     def destroy(self):
         self.say("destroying...")
-        domain = self.get_domain(self.name)
+        domain = self.get_domain(self.name, raise_exception=False)
+
+        if not domain:
+            self.warn("does not exist")
+            return
 
         if domain_has_state(domain, libvirt.VIR_DOMAIN_PAUSED):
             domain.resume()
@@ -65,7 +67,11 @@ class NodeComponent(Component, NeedLibvirt):
 
     def suspend(self):
         self.say("suspending...")
-        domain = self.get_domain(self.name)
+        domain = self.get_domain(self.name, raise_exception=False)
+
+        if not domain:
+            self.warn("does not exist")
+            return
 
         if domain_has_state(domain, libvirt.VIR_DOMAIN_PAUSED):
             self.warn("is already suspended")
@@ -80,7 +86,11 @@ class NodeComponent(Component, NeedLibvirt):
 
     def resume(self):
         self.say("resuming...")
-        domain = self.get_domain(self.name)
+        domain = self.get_domain(self.name, raise_exception=False)
+
+        if not domain:
+            self.warn("does not exist")
+            return
 
         if domain_has_state(domain, libvirt.VIR_DOMAIN_RUNNING):
             self.say("is already running")

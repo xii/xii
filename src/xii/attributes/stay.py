@@ -1,6 +1,5 @@
 from xii.attribute import Attribute
 from xii.validator import Bool
-from xii.output import show_setting
 
 
 class StayAttribute(Attribute):
@@ -13,7 +12,8 @@ class StayAttribute(Attribute):
 
     def info(self):
         if self.settings:
-            show_setting("stay when stopped", "yes")
+            pass
+            # show_setting("stay when stopped", "yes")
 
     def does_stay(self):
         return self.settings

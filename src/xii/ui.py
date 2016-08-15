@@ -25,6 +25,11 @@ def width():
     return int(columns)
 
 
+def warn(msg, tag="[xii]"):
+    output = "{} {}".format(tag, msg)
+    print(colors.WARN + colors.BOLD + output + colors.CLEAR)
+
+
 class Progressbar():
     def __init__(self, ui, target, msg, full):
         self._ui = ui
