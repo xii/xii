@@ -95,6 +95,19 @@ class Entity(HasOutput):
             }
         return self._shares[name]['value']
 
+    def global_share(self, key, value=None, default=None):
+        runtime = self.get_runtime()
+
+        # if set a new value
+        if value is not None:
+            runtime['share'][key] = value
+
+        # if key does not exist, create new one
+        if key not in runtime["share"]:
+            runtime["share"][key] = default
+
+        return runtime["share"][key]
+
     def finalize(self):
         for name, shared in self._shares.items():
             if shared["finalizer"] is not None:

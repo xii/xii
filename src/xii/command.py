@@ -14,6 +14,7 @@ class Command():
         self.args = args
         self.config = config
         self.userinterface = userinterface
+        self._global_share = {}
 
     def run(self):
         pass
@@ -37,7 +38,8 @@ class Command():
     def make_runtime(self, additional={}):
         runtime = {
             "config": self.config,
-            "userinterface": self.userinterface
+            "userinterface": self.userinterface,
+            "share": self._global_share
         }
         runtime.update(additional)
         return runtime

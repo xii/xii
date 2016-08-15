@@ -1,3 +1,5 @@
 setuptools
 PyYAML
+pycrypto
+paramiko
 # You also need libvirt-python and libguestfs-python
