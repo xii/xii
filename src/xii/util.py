@@ -1,3 +1,4 @@
+import os
 import pkgutil
 import inspect
 import yaml
@@ -33,9 +34,10 @@ def yaml_read(path):
         raise error.ValidatorError("Error parsing definition: {}".format(err))
 
 
-def load_modules(path):
+def load_modules(paths):
     modules = []
-    for loader, module_name, _ in pkgutil.walk_packages(path):
+
+    for loader, module_name, _ in pkgutil.walk_packages(paths):
         module = loader.find_module(module_name).load_module(module_name)
 
         for name, _ in inspect.getmembers(module):

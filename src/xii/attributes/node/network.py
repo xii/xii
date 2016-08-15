@@ -1,12 +1,11 @@
 from xii import paths, error
 from xii.need import NeedLibvirt
-from xii.attribute import Attribute
+from xii.attributes.base import NodeAttribute
 from xii.validator import String
 
 
-class NetworkAttribute(Attribute, NeedLibvirt):
+class NetworkAttribute(NodeAttribute, NeedLibvirt):
     entity = "network"
-    needs = ["node"]
     defaults = 'default'
 
     keys = String()

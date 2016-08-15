@@ -3,7 +3,7 @@ import os
 from Crypto.PublicKey import RSA
 
 from xii import util
-from xii.attributes.nodeattribute import NodeAttribute
+from xii.attributes.base import NodeAttribute
 from xii.need import NeedGuestFS
 from xii.validator import Dict, List, String, Required, Key, Bool
 

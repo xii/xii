@@ -16,17 +16,23 @@ def usage_text():
 def run_cli():
 
     parser = argparse.ArgumentParser(usage=usage_text())
-    parser.add_argument('--verbose', action='store_true', default=False, help="Verbose output")
-    parser.add_argument('--config', default=None, help="Path to configuration file")
-    parser.add_argument('command', metavar="COMMAND", help="Command to execute")
-    parser.add_argument('command_args', nargs=argparse.REMAINDER, metavar="ARGS", help="Command arguments")
+    parser.add_argument("--verbose", action="store_true", default=False,
+                        help="Make output more verbose")
+    parser.add_argument("--no-parallel", action="store_true", default=False,
+                        help="Disable parallel processing")
+    parser.add_argument("--config", default=None,
+                        help="Optional path to configuration file")
+    parser.add_argument("command", metavar="COMMAND",
+                        help="Command to run")
+    parser.add_argument("command_args", nargs=argparse.REMAINDER, metavar="ARGS",
+                        help="Command arguments")
 
     try:
 
         paths.prepare_local_paths()
 
         cli_args = parser.parse_args()
-        conf = config.Config(cli_args.config)
+        conf = config.Config(cli_args.config, cli_args)
         userinterface   = UI()
 
         instance = command.Register.get(cli_args.command, cli_args.command_args, conf, userinterface)

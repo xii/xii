@@ -1,8 +1,8 @@
-from xii.attribute import Attribute
+from xii.attributes.base import NetworkAttribute
 from xii.validator import Bool
 
 
-class StayAttribute(Attribute):
+class StayAttribute(NetworkAttribute):
     entity = "stay"
     needs = ["network"]
 

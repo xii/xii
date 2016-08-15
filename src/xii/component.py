@@ -8,14 +8,14 @@ class Component(Entity):
 
     @classmethod
     def register(cls):
-        EntityRegister.register("component", cls)
+        EntityRegister.register_component(cls)
 
     def __init__(self, name, runtime):
         Entity.__init__(self, name, runtime, parent=None)
 
     def load_defaults(self):
         for default in self.defaults:
-            attr = EntityRegister.get_entity("attribute", default)
+            attr = EntityRegister.get_entity(default, "attribute", self.entity)
             if attr.has_defaults():
                 self.add(attr(attr.defaults, self))
 

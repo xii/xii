@@ -22,7 +22,8 @@ def get(name, runtime):
 
 
 def _create_component(settings, name, runtime):
-    component_class = EntityRegister.get_entity("component", settings["type"])
+    component_type = settings["type"]
+    component_class = EntityRegister.get_entity(component_type, "component")
     component = component_class(name, runtime)
 
     component.load_defaults()
@@ -31,7 +32,7 @@ def _create_component(settings, name, runtime):
         if attr_name in ["type", "count"]:
             continue
 
-        attr = EntityRegister.get_entity("attribute", attr_name)
+        attr = EntityRegister.get_entity(attr_name, "attribute", component_type)
 
         if not attr:
             warn("Unkown attribute `{}`. Skipping.".format(attr_name))

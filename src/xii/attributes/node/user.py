@@ -3,7 +3,7 @@ import random
 import string
 import os
 
-from xii.attributes.nodeattribute import NodeAttribute
+from xii.attributes.base import NodeAttribute
 from xii.validator import Dict, String, VariableKeys, Key, Required
 from xii.need import NeedGuestFS
 

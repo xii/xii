@@ -8,12 +8,11 @@ from xii import paths, error
 from xii.need import NeedIO, NeedLibvirt
 from xii.attribute import Attribute
 from xii.validator import String
+from xii.entity import EntityRegister
 
 
 class ImageAttribute(Attribute, NeedIO, NeedLibvirt):
     entity = "image"
-
-    needs = ["node"]
 
     keys = String()
 
@@ -137,4 +136,4 @@ class ImageAttribute(Attribute, NeedIO, NeedLibvirt):
         return xml.safe_substitute({'image': self.get_domain_image_path()})
 
 
-ImageAttribute.register()
+EntityRegister.register_attribute("node", ImageAttribute)

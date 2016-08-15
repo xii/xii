@@ -1,21 +1,26 @@
 import yaml
-
 import paths
+
+from xii import error
 
 
 class Config():
-    def __init__(self, path=None):
-        self.path = path
+
+    def __init__(self, path, args):
+        self._path = path
+        self._args = args
         if not path:
-            self.path = paths.local('config.yml')
+            self._path = paths.local('config.yml')
 
         try:
-            with open(self.path, 'r') as stream:
+            with open(self._path, 'r') as stream:
                 self.config = yaml.load(stream)
         except IOError as err:
-            raise RuntimeError("Could not load configuration: {}".format(err))
+            raise error.ConnError("Could not load configuration: {}"
+                                  .format(err))
         except yaml.YamlError as err:
-            raise RuntimeError("Could not parse configuration: {}".format(err))
+            raise error.ValidatorError("Could not parse configuration: {}"
+                                       .format(err))
 
     def get(self, key, default=None):
         if key not in self.config:
@@ -30,7 +35,7 @@ class Config():
 
     def save(self):
         try:
-            with open(self.path, 'w') as stream:
+            with open(self._path, 'w') as stream:
                 yaml.dump(self.config, stream)
         except IOError:
             raise RuntimeError("Could not save configuration")
@@ -56,6 +61,8 @@ class Config():
         return self.known_hosts()[name]
 
     def is_parallel(self):
+        if self._args.no_parallel:
+            return False
         return self.get('parallel', True)
 
     def workers(self):

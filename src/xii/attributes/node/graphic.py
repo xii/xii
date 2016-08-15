@@ -1,6 +1,6 @@
 
 from xii import paths
-from xii.attributes.nodeattribute import NodeAttribute
+from xii.attributes.base import NodeAttribute
 from xii.validator import Bool
 
 

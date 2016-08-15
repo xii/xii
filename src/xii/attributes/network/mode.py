@@ -1,9 +1,10 @@
 from xii import error, paths
+from xii.attributes.base import NetworkAttribute
 from xii.attribute import Attribute
 from xii.validator import Dict, Key, String, Required, Or
 
 
-class ModeAttribute(Attribute):
+class ModeAttribute(NetworkAttribute):
     entity = "mode"
     needs = ["network"]
     defaults = {
@@ -18,14 +19,6 @@ class ModeAttribute(Attribute):
             ])
         ])
 
-    def prepare(self):
-        if self.settings:
-            state = self._get_mode()
-
-            if self._get_dev():
-                state += " (" + self._get_dev() + ")"
-            self.add_info('mode', state)
-
     def validate_settings(self):
         Attribute.validate_settings(self)
 
@@ -39,7 +32,7 @@ class ModeAttribute(Attribute):
             template = 'mode_route_dev.xml'
 
         xml = paths.template(template)
-        self.cmpnt.add_xml(xml.safe_substitute({
+        self.get_parent().add_xml(xml.safe_substitute({
             'type': self._get_mode(),
             'dev': self._get_dev()
         }))

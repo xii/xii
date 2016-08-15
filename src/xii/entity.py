@@ -10,7 +10,6 @@ class Entity(HasOutput):
 
     toplevel = False
     requires = []
-    needs = []
 
 
     def __init__(self, name, runtime=None, parent=None):
@@ -80,13 +79,6 @@ class Entity(HasOutput):
                                      "in {}".format(required, self.name))
             child.validate()
 
-        if self._parent:
-            for parent in self.needs:
-                if parent == self._parent.entity:
-                    return
-            raise error.NotFound("{} can only used as configuration "
-                                 "for {}".format(self.entity, ",".join(self.needs)))
-
     def share(self, name, creator, finalizer=None):
         if name not in self._shares:
             self._shares[name] = {
@@ -150,16 +142,39 @@ class EntityRegister():
     }
 
     @classmethod
-    def register(cls, group, klass):
+    def register_component(cls, klass):
         if Entity not in inspect.getmro(klass):
             raise error.Bug("{} is not a entity".format(klass.__name__))
 
-        if klass.entity in cls._registered[group]:
-            raise error.Bug("{}/{} is already defined".format(group, klass.entity))
-        cls._registered[group][klass.entity] = klass
+        if klass.entity in cls._registered["component"]:
+            raise error.Bug("{}/{} is already defined"
+                            .format("component", klass.entity))
+
+        cls._registered["component"][klass.entity] = klass
 
     @classmethod
-    def get_entity(cls, group, name):
-        if name not in cls._registered[group]:
-            raise error.NotFound("Could not find `{}/{}`. Maybe misspelled?".format(group, name))
-        return cls._registered[group][name]
+    def register_attribute(cls, component, klass):
+        if Entity not in inspect.getmro(klass):
+            raise error.Bug("{} is not a entity".format(klass.__name__))
+
+        if component not in cls._registered["attribute"]:
+            cls._registered["attribute"][component] = {}
+
+        if klass.entity in cls._registered["attribute"][component]:
+            raise error.Bug("{}/{}/{} is already defined"
+                            .format("attribute", component, klass.entity))
+
+        cls._registered["attribute"][component][klass.entity] = klass
+
+    @classmethod
+    def get_entity(cls, name, group, component=None):
+        if component is None:
+            if name not in cls._registered[group]:
+                raise error.NotFound("Could not find `{}/{}`. Maybe misspelled?".format(group, name))
+
+            return cls._registered[group][name]
+
+        if component not in cls._registered[group]:
+            raise error.NotFound("Could not find `{}/{}/{}`. "
+                                 "Maybe misspelled?".format(group, component, name))
+        return cls._registered[group][component][name]

@@ -16,10 +16,6 @@ class Attribute(Entity):
     def default(cls, cmpnt):
         return cls(cls.defaults, cmpnt)
 
-    @classmethod
-    def register(cls):
-        EntityRegister.register("attribute", cls)
-
     def __init__(self, settings, component):
         Entity.__init__(self, name=self.entity,
                               parent=component)

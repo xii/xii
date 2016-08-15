@@ -1,8 +1,8 @@
-from xii.attribute import Attribute
+from xii.attributes.base import NetworkAttribute
 from xii.validator import Dict, String, Required, Key
 
 
-class IPv6Attribute(Attribute):
+class IPv6Attribute(NetworkAttribute):
     entity = "ipv6"
 
     needs = ["network"]

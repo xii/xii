@@ -61,7 +61,7 @@ class NeedLibvirt():
             return self.virt().networkLookupByName(name)
         except libvirt.libvirtError:
             if raise_exception:
-                raise error.NotFound("Could not find pool "
+                raise error.NotFound("Could not find network "
                                      "({})".format(name))
             else:
                 return None
