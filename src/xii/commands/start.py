@@ -6,6 +6,8 @@ from multiprocessing import Pool
 from xii import definition, command, components, connection
 from xii.output import header, debug, hr, sep
 
+def start_command(cmpnt):
+    cmpnt.run("start")
 
 class StartCommand(command.Command):
     name = ['start', 's']
@@ -25,11 +27,12 @@ class StartCommand(command.Command):
 
         cmpnts = components.from_definition(runtime)
 
-        for cmpnt in cmpnts:
-            print("========= START: {} =========".format(cmpnt.name))
-            cmpnt.run("start")
-            print("========= END: {} =========".format(cmpnt.name))
-
+        if self.config.is_parallel():
+            pool = Pool(self.config.workers())
+            pool.map(start_command, cmpnts)
+        else:
+            for cmpnt in cmpnts:
+                cmpnt.run("start")
 
     def parse_command(self):
         parser = argparse.ArgumentParser()

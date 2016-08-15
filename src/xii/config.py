@@ -54,3 +54,9 @@ class Config():
             raise RuntimeError("Unknown default host `{}`. Check your "
                                "Configuration".format(name))
         return self.known_hosts()[name]
+
+    def is_parallel(self):
+        return self.get('parallel', True)
+
+    def workers(self):
+        return self.get('parallel_workers', 3)

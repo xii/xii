@@ -13,8 +13,6 @@ class Entity(HasOutput):
     requires = []
     needs = []
 
-    _childs = []
-    _shares = {}
 
     def __init__(self, name, runtime=None, parent=None):
         if parent and self.toplevel:
@@ -24,6 +22,8 @@ class Entity(HasOutput):
         self.name = name
         self._parent = parent
         self._runtime = runtime
+        self._childs = []
+        self._shares = {}
 
     def full_name(self):
         if self._parent:

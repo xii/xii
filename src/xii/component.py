@@ -23,6 +23,7 @@ class Component(Entity):
                 self.add(attr(attr.defaults, self))
 
     def run(self, action):
+        print("I'm component {} running action {}".format(self.name, action))
         if action in dir(self):
             getattr(self, action)()
 

@@ -27,7 +27,6 @@ class DestroyCommand(command.Command):
 
         for cmpnt in cmpnts:
             cmpnt.run("destroy")
-        
 
     def parse_command(self):
         parser = argparse.ArgumentParser()
