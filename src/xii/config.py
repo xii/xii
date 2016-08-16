@@ -24,7 +24,6 @@ class Config():
 
     def get(self, key, default=None):
         if key not in self.config:
-            self.config[key] = default
             return default
         return self.config[key]
 
@@ -68,8 +67,8 @@ class Config():
     def workers(self):
         return self.get('parallel_workers', 3)
 
-    def wait(self):
-        return self.get('retry_after', 3)
+    def wait(self, default=3):
+        return self.get('retry_after', default)
 
-    def retry(self, case):
-        return self.get(case + '_retry', 20)
+    def retry(self, case, default=20):
+        return self.get(case + '_retry', default)

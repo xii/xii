@@ -1,10 +1,10 @@
 # vim: set ts=2 sw=2 tw=0 ft=yaml:
 ---
-shell:
+sshmount:
   type: node
   network: default
-
-  image: http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2
+  count: 3
+  image: http://download.opensuse.org/repositories/home:/fschnizlein:/images:/libvirt/images/leap-42.1.x86_64.qcow2
 
   graphic: yes
   user:
@@ -17,6 +17,8 @@ shell:
       users:
         - felixsch
         - root
-  shell:
-    - start: test.sh
+  sshmount:
+    dev:
+      source: testdir
+      user: felixsch
 

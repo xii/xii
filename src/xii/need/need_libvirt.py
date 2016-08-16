@@ -95,15 +95,18 @@ class NeedLibvirt(HasOutput):
         if not domain.isActive():
             return False
 
-        for i in range(self.get_config().retry("ip")):
+        for i in range(self.get_config().retry("ip", default=20)):
+
+            self.counted(i, "fetching ip address from {}...".format(domain_name))
             nets = domain.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE)
 
             if len(nets):
                 break
+            sleep(self.get_config().wait(5))
 
-            self.counted(i, "Try fetching ip address from {}"
-                         .format(domain_name))
-            sleep(self.get_config().wait())
+        if not len(nets):
+            raise error.ConnError("Could not fetch ip address for {}. Giving up!"
+                                  .format(domain_name))
 
         net = nets.itervalues().next()
 
@@ -111,6 +114,23 @@ class NeedLibvirt(HasOutput):
             return False
 
         return net['addrs'][0]['addr']
+
+    def network_get_host_ip(self, network_name, version="ipv4"):
+        network = self.get_network(network_name, raise_exception=False)
+
+        if not network:
+            return None
+
+        xml = etree.fromstring(network.XMLDesc())
+        ips = xml.findall("ip")
+
+        for ip in ips:
+            if "family" in ip.attrib:
+                if ip.attrib["family"] == version:
+                    return ip.attrib["address"]
+            else:
+                if version == "ipv4":
+                    return ip.attrib["address"]
 
     def _parse_capabilities(self, text, prefer_kvm=True):
         caps = etree.fromstring(text)

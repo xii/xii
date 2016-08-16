@@ -1,5 +1,7 @@
 import inspect
 
+from multiprocessing import Lock
+
 from xii import error
 from xii.ui import HasOutput
 
@@ -69,8 +71,13 @@ class Entity(HasOutput):
         if action in dir(self):
             getattr(self, action)()
 
-    def childs_run(self, action):
-        for child in self._childs:
+    def childs_run(self, action, reverse=False):
+        if reverse:
+            run = reversed(self._childs)
+        else:
+            run = self._childs
+
+        for child in run:
             child.run(action)
 
     def validate(self):

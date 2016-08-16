@@ -2,7 +2,6 @@ import os
 import getpass
 import urllib2
 import errno
-import stat
 
 from xii import error
 from xii.connection import Connection
@@ -49,7 +48,7 @@ class Local(Connection):
                 with open(dest_path, 'wb') as dest:
                     self._copy_stream(size, source, dest)
         except OSError as err:
-            raise error.FileError(source_path, "Could not copy file: {}".format(err))
+            raise error.ExecError(source_path, "Could not copy file: {}".format(err))
 
     def chmod(self, path, new_mode, append=False):
         if append:

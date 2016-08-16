@@ -1,12 +1,12 @@
-import os
 import pkgutil
 import inspect
 import yaml
 import time
+import md5
 
+from Crypto.PublicKey import RSA
 
 from xii import error
-from xii.ui import warn
 
 
 def safe_get(name, structure):
@@ -22,6 +22,11 @@ def file_read(path):
     except IOError:
         raise error.NotFound("Could not open `{}`: No such file or "
                              "directory".format(path))
+
+
+def make_temp_name(seed):
+    hashed = md5.new(seed + str(time.time())).hexdigest()
+    return "/tmp/xii-" + hashed
 
 
 def yaml_read(path):
@@ -69,3 +74,9 @@ def domain_wait_state(domain, state, timeout=5):
             return True
         time.sleep(1)
     return False
+
+
+def generate_rsa_key_pair():
+    rsa = RSA.generate(4096)
+    pub = rsa.publickey()
+    return (rsa.exportKey("PEM"), pub.exportKey("OpenSSH"))

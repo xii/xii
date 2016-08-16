@@ -31,6 +31,10 @@ class Definition():
         self.dfn = util.yaml_read(self.dfn_file)
         self.conf = conf
 
+    def name(self):
+        base = os.path.basename(self.dfn_file)
+        return os.path.splitext(base)[0]
+
     def settings(self, key, default=None, group='xii'):
         if group not in self.dfn or key not in self.dfn[group]:
             return default
@@ -49,8 +53,11 @@ class Definition():
                 continue
 
             if 'count' in item:
-                for i in range(1, item['count']+1):
-                    yield ("{}-{}".format(name, i), item)
+                if item['count'] == 1:
+                    yield (name, item)
+                else:
+                    for i in range(1, item['count']+1):
+                        yield ("{}-{}".format(name, i), item)
             else:
                 yield (name, item)
 

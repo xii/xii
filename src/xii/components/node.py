@@ -36,15 +36,17 @@ class NodeComponent(Component, NeedLibvirt):
         self.childs_run("start")
         self.finalize()
         domain.create()
+
         self.success("started!")
         self.childs_run("after_start")
 
     def stop(self, force=False):
         domain = self.get_domain(self.name)
 
-        self.childs_run("stop")
+        self.childs_run("stop", reverse=True)
+        sleep(4)
         self._stop_domain(domain, force)
-        self.childs_run("after_stop")
+        self.childs_run("after_stop", reverse=True)
 
     def destroy(self):
         self.say("destroying...")
@@ -64,10 +66,10 @@ class NodeComponent(Component, NeedLibvirt):
             raise error.Bug("Could not remove running "
                             "domain {}".format(self.ident()))
 
-        self.childs_run("destroy")
+        self.childs_run("destroy", reverse=True)
         domain.undefine()
         self.success("removed!")
-        self.childs_run("after_destroy")
+        self.childs_run("after_destroy", reverse=True)
 
     def suspend(self):
         self.say("suspending...")

@@ -2,18 +2,24 @@
 [x] Add shell executor attribute to node (node/attributes/provisioner)
 [x] make a base need class which is able to use HasOutput functions
 [x] Make network + node components work together
-[ ] Add sshfs mount from host to node (node/attributes/sshmount)
-[ ] Add copy files from host to node (node/attributes/copy)
+[x] Add sshfs mount from host to node (node/attributes/sshmount)
+[x] Make connection/ssh usable for all connections (remove code duplication!)
+[x] Add copy files from host to node (node/attributes/copy)
+[x] Fix count (when count:1 is explicitly set name is name-1 not name)
+[ ] Fix ssh command to handle Connection refused errors
 [ ] Make static ip working (node/attributes/network)
+[ ] Make image downloading multithreading compatible
 [ ] Add ipv6 support do network component (network/attributes/ipv6)
 [ ] Remove distribute from node/attributes/network
+[ ] Cleanup execution order management
 [ ] Add distribution component
   [ ] Create skeleton
   [ ] Load all components defined in dfn
 [ ] Make network + node + distribution work together
 [ ] Add ssh key distribution (distribution/attributes/ssh)
 [ ] Add hostname distribution (distribution/attributes/hostname)
-[ ] Make cli output better (reformat everything. do we need fancy progressbar output?)
+[ ] Handle ctrl+c calls within thread
+[x] Make cli output better (reformat everything. do we need fancy progressbar output?)
 [x] Add better check for invalid definition formats (e.g list instead of hash)
 
 [ ] Create initial test platform
@@ -99,7 +105,11 @@
 [ ] Write howtos for the examples
 
 0.1.2:
-[ ] Add a import command from vagrant boxes -> xii images
+[ ] Make definition file more crazy
+  [ ] Add placeholders
+   [ ] Add ip selectors for various machines
+   [ ] Add hostname selectors for various machines
+   [ ] Make sure sshmount works between same boxes (maybe distribution/sshmount)?
 [ ] Add checks for requirements of boxes
   [ ] Check if linux based operating system
   [ ] Check if ssh is installed

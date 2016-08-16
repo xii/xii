@@ -30,7 +30,6 @@ class NeedGuestFS():
             return guest
 
         def _close_guest(guest):
-            print("syncing...")
             guest.sync()
             guest.umount("/")
             guest.close()
@@ -52,6 +51,13 @@ class NeedGuestFS():
                     'home': user[5],
                     'shell': user[6]}
         return users
+
+    def guest_user_home(self, name):
+        users = self.guest_get_users()
+        if name not in users:
+            return None
+
+        return users[name]["home"]
 
     def guest_get_groups(self):
         groups = {}

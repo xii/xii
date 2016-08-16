@@ -1,14 +1,11 @@
 import os
-import urllib2
-import errno
 import re
 import socket
-import time
-import functools
 import stat
+from time import sleep
 
 from xii import connection, error
-from xii.ui import warn
+from xii.ui import HasOutput
 
 import paramiko
 
@@ -16,102 +13,91 @@ import paramiko
 BUF_SIZE = 16 * 1024
 
 
-class Ssh(connection.Connection):
+class Ssh(connection.Connection, HasOutput):
 
-    def __init__(self, url):
-        Connection.__init__(self)
-        self.ssh_conn = None
-        self.username = None
-        self.host = None
-        self.url = url
+    def __init__(self, entity, user, host, retry, wait):
+        connection.Connection.__init__(self)
 
-        self.client = None
-        self.sftp_client = None
+        self._user = user
+        self._host = host
 
-        self._parse_url(url)
+        self._retry = retry
+        self._wait = wait
+        self._entity = entity
 
-    def ssh(self, timeout=5):
-        if self.client:
-            return self.client
+        self._ssh = None
+        self._sftp = None
 
-        conn_args = {'hostname': self.host}
+    def get_ui(self):
+        return self._entity.get_ui()
 
-        if self.user:
-            conn_args['user'] = self.username
+    def full_name(self):
+        return self._entity.full_name() + ["ssh"]
 
-        for i in range(timeout):
+    def ssh(self):
+        if self._ssh:
+            return self._ssh
+
+        for i in range(self._retry):
+            self.counted(i, "connecting to host {}...".format(self._host))
             try:
-                self.client = paramiko.SSHClient()
-                self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                self.client.connect(self.host, username=self.username)
-                return self.client
-            except paramiko.AuthenticationException:
-                raise error.ConnError("Could not connect to {} failed: "
-                                     "Authentication failed".format(self.host))
-            except paramiko.BadHostKeyException:
-                raise error.ConnError("Could not connect to {} failed: "
-                                     "Bad host key".format(self.host))
+                client = paramiko.SSHClient()
+                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                client.connect(self._host, username=self._user)
+                self._ssh = client
+                sleep(self._wait)
+                self.say("connected!")
+                return self._ssh
 
-            except socket.error as err:
-                warn("Connection to {}: socket error: {}".format(self.host, err))
-                pass
+            except (paramiko.BadHostKeyException,
+                    paramiko.AuthenticationException,
+                    paramiko.SSHException,
+                    socket.error) as e:
+                sleep(self._wait)
 
-            time.sleep(2)
-
-        raise error.SSHError("Coult not connect to {}. Timeout!")
+        raise error.ConnError("Could not connect to {}@{}. Giving up!"
+                                .format(self._user, self._host))
 
     def sftp(self):
+        if self._sftp:
+            return self._sftp
 
-        if self.sftp_client:
-            return self.sftp_client
+        self._sftp = self.ssh().open_sftp()
+        return self._sftp
 
-        self.sftp_client = self.ssh().open_sftp()
-
-        return self.sftp_client
-
-    def mkdir(self, directory, recursive=False):
-        paths = [directory]
-
-        if recursive:
-            dirs = directory.split("/")
-            curr = "/"
-            paths = []
-            for d in dirs:
-                curr = os.path.join(curr, d)
-                paths.append(curr)
-
-        for path in paths:
+    def mkdir(self, directory):
+        segments = filter(None, directory.split("/"))
+        path = ""
+        for seg in segments:
+            path += "/" + seg
             if not self.exists(path):
                 self.sftp().mkdir(path)
 
     def exists(self, path):
         try:
             self.sftp().stat(path)
-        except IOError, e:
+        except IOError as e:
             if e[0] == 2:
                 return False
             raise
         return True
 
     def user(self):
-        return self._shell("whoami")
+        return self.shell("whoami")
 
     def user_home(self):
-        return self._shell("echo $HOME")
+        return self.shell("echo $HOME")
 
     def copy(self, msg, source, dest):
-        info(msg)
         _, stdout, _ = self.ssh().exec_command("cp {} {}".format(source, dest))
         while not stdout.channel.eof_received:
-            time.sleep(1)
+            sleep(1)
 
     def put(self, msg, source, dest):
-        cb = functools.partial(progress, msg)
-        self.sftp().put(source, dest, callback=cb)
+        self.sftp().put(source, dest)
 
     def get(self, msg, source, dest):
-        cb = functools.partial(progress, msg)
-        self.sftp().get(source, dest, callback=cb)
+        self.sftp().get(source, dest)
 
     def remove(self, path):
         if self.exists(path):
@@ -122,14 +108,11 @@ class Ssh(connection.Connection):
                 self.sftp().unlink(path)
 
     def download(self, msg, source, dest):
-
-        progress(msg, 0, 100)
         command = "wget --progress=dot {} -O {} 2>&1 | grep --color=none -o \"[0-9]\+%\"".format(source, dest)
         _, stdout, _ = self.ssh().exec_command(command)
 
         for line in stdout:
             perc = int(line.replace("%", "").strip())
-            progress(msg, perc, 100)
 
     def chmod(self, path, new_mode, append=False):
         if append:
@@ -139,26 +122,58 @@ class Ssh(connection.Connection):
     def chown(self, path, uid, gid):
         self.sftp().chown(path, uid, gid)
 
-    def _parse_url(self, url):
-        matcher = re.compile(r"qemu\+ssh:\/\/((.+)@)?(((.+)\.(.+))|(.+))\/system")
-        matched = matcher.match(url)
-        if not matched:
-            raise error.ConnError("[io] Invalid connection URL specified.")
+    def run(self, command):
+        conn = self.ssh()
 
-        self.host = matched.group(3)
+        chan = conn.get_transport().open_session()
+        chan.set_combine_stderr(True)
+        chan.exec_command(command)
+        stdout = chan.makefile('r', -1)
 
-        if matched.group(2):
-            self.username = matched.group(2)
+        for line in stdout:
+            self.say(line.strip())
 
-    def _shell(self, command, timeout=None, multiline=False):
-        _, out, _ = self.ssh().exec_command(command, timeout=timeout)
-        if not out:
-            raise error.ExecError("Could not execute remote command "
-                                 "`{}`".format(command))
+        return chan.recv_exit_status()
 
+    def copy_to_tmp(self, source):
+        tmp_dir = "/tmp/xii"
+        name = os.path.basename(source)
+        dest = os.path.join(tmp_dir, name)
+
+        self.mkdir(tmp_dir)
+        self.put(source, dest)
+        return dest
+
+    def close(self):
+        if self._ssh:
+            self._ssh.close()
+
+    def shell(self, command, multiline=False):
+        _, out, _ = self.ssh().exec_command(command)
         if multiline:
             tmp = []
             for line in out:
                 tmp.append(line.strip())
             return tmp
         return out.read().strip()
+
+    @classmethod
+    def parse_url(cls, url):
+        matcher = re.compile(r"qemu\+ssh:\/\/((.+)@)?(((.+)\.(.+))|(.+))\/system")
+        matched = matcher.match(url)
+        user = None
+
+        if not matched:
+            raise error.ConnError("[io] Invalid connection URL specified.")
+
+        host = matched.group(3)
+
+        if matched.group(2):
+            user = matched.group(2)
+
+        return (user, host)
+
+    @classmethod
+    def new_from_url(cls, url):
+        (host, user) = cls.parse_url(url)
+        return cls(host, user, password=None)

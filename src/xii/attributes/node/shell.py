@@ -1,9 +1,9 @@
 import os
 
-from xii import paths, error
+from xii import error
 from xii.need import NeedSSH, NeedLibvirt
 from xii.attributes.base import NodeAttribute
-from xii.validator import String, List, Required, Key, Dict
+from xii.validator import String, List, Key, Dict
 
 
 class ShellAttribute(NodeAttribute, NeedSSH, NeedLibvirt):
@@ -20,7 +20,7 @@ class ShellAttribute(NodeAttribute, NeedSSH, NeedLibvirt):
     ]))
 
     def get_default_user(self):
-        return self.get_parent().get_child("user").get_default_user()
+        return self.other("user").get_default_user()
 
     def get_default_host(self):
         return self.domain_get_ip(self.component_name())
@@ -65,8 +65,9 @@ class ShellAttribute(NodeAttribute, NeedSSH, NeedLibvirt):
         if not os.path.isfile(script):
             raise error.NotFound("Could not find privisioner shell script ({})"
                                  .format(script))
-        script_location = self.copy_default_to_tmp(script)
-        return self.run_default_ssh(shell + " " + script_location)
+        ssh = self.default_ssh()
+        script_location = ssh.copy_to_tmp(script)
+        ssh.run(shell + " " + script_location)
 
 
 ShellAttribute.register()

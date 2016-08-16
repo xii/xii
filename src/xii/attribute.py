@@ -35,5 +35,8 @@ class Attribute(Entity):
     def component_name(self):
         return self.get_parent().name
 
+    def other(self, name):
+        return self.get_parent().get_child(name)
+
     def validate(self):
         self.keys.validate(self.get_parent().name + " > " + self.name, self.settings)
