@@ -170,11 +170,17 @@ class EntityRegister():
     def get_entity(cls, name, group, component=None):
         if component is None:
             if name not in cls._registered[group]:
-                raise error.NotFound("Could not find `{}/{}`. Maybe misspelled?".format(group, name))
+                raise error.NotFound("Could not find `{}/{}`. "
+                                     "Maybe misspelled?".format(group, name))
 
             return cls._registered[group][name]
 
         if component not in cls._registered[group]:
-            raise error.NotFound("Could not find `{}/{}/{}`. "
-                                 "Maybe misspelled?".format(group, component, name))
+            raise error.DefError("Could not find `{}/{}/{}`. Maybe misspelled?"
+                                 .format(component, group, name))
+
+        if name not in cls._registered[group][component]:
+            raise error.DefError("Could not find `{}/{}/{}`. Maybe misspelled?"
+                                 .format(component, group, name))
+
         return cls._registered[group][component][name]

@@ -36,12 +36,14 @@ class NodeComponent(Component, NeedLibvirt):
         domain.create()
         self.finalize()
         self.success("started!")
+        self.childs_run("after_start")
 
     def stop(self, force=False):
         domain = self.get_domain(self.name)
 
         self.childs_run("stop")
         self._stop_domain(domain, force)
+        self.childs_run("after_stop")
 
     def destroy(self):
         self.say("destroying...")
@@ -64,6 +66,7 @@ class NodeComponent(Component, NeedLibvirt):
         self.childs_run("destroy")
         domain.undefine()
         self.success("removed!")
+        self.childs_run("after_destroy")
 
     def suspend(self):
         self.say("suspending...")
@@ -77,6 +80,7 @@ class NodeComponent(Component, NeedLibvirt):
             self.warn("is already suspended")
             return
 
+        self.childs_run("suspend")
         domain.suspend()
 
         if not domain_wait_state(domain, libvirt.VIR_DOMAIN_PAUSED):
@@ -100,6 +104,7 @@ class NodeComponent(Component, NeedLibvirt):
             self.say("is not suspended")
             return
 
+        self.childs_run("resume")
         domain.resume()
 
         if not domain_wait_state(domain, libvirt.VIR_DOMAIN_RUNNING):
@@ -107,6 +112,7 @@ class NodeComponent(Component, NeedLibvirt):
             return
 
         self.success("resumed!")
+        self.childs_run("after_resume")
 
     def _spawn_domain(self):
         self.say("spawning...")

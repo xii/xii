@@ -8,7 +8,7 @@ from xii.connections.ssh import Ssh
 
 class NeedIO():
     __metaclass__ = ABCMeta
-    
+
     @abstractmethod
     def get_virt_url(self):
         pass
@@ -16,7 +16,7 @@ class NeedIO():
     def io(self):
         def _create_connection():
             url = self.get_virt_url()
-           
+
             if not url:
                 raise error.ConnError("[io] No connection url supplied")
 

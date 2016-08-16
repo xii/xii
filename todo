@@ -1,1 +1,106 @@
-[ ] Add better check for invalid definition formats (e.g list instead of hash)
+0.1.0:
+[x] Add shell executor attribute to node (node/attributes/provisioner)
+[x] make a base need class which is able to use HasOutput functions
+[ ] Add sshfs mount from host to node (node/attributes/sshmount)
+[ ] Add copy files from host to node (node/attributes/copy)
+[ ] Make static ip working (node/attributes/network)
+[ ] Add ipv6 support do network component (network/attributes/ipv6)
+[ ] Remove distribute from node/attributes/network
+[ ] Add distribution component
+  [ ] Create skeleton
+  [ ] Load all components defined in dfn
+[ ] Add ssh key distribution (distribution/attributes/ssh)
+[ ] Add hostname distribution (distribution/attributes/hostname)
+[ ] Make cli output better (reformat everything. do we need fancy progressbar output?)
+[x] Add better check for invalid definition formats (e.g list instead of hash)
+
+[ ] Create initial test platform
+[ ] Write unit test helper for components
+[ ] Write unit test helper for attributes
+[ ] Write mock helper for need_libvirt
+[ ] Write unit test for need_libvirt
+[ ] Write mock helper for need_io
+[ ] Write unit test for need_io
+  [ ] Write unit test for connections/local
+  [ ] Write unit test for connections/ssh
+[ ] Write mock helper for need_guestfs
+[ ] Write unit test for need_guestfs
+
+[ ] Document neccessary api (developer)
+  [ ] component/entity structure
+  [ ] attribute structure
+  [ ] need classes
+
+[ ] Write documentation (enduser)
+  [ ] general xii execution
+  [ ] requirements on host
+  [ ] how to define a node
+  [ ] Investigate how to automatically create a documentation definition out
+      of the keys definition
+  [ ] Document each attribute
+
+[ ] Create a github.io webpage
+  [ ] create a logo
+
+[ ] package xii in build.opensuse.org
+[ ] package xii in copr.fedora.org
+[ ] package xii in aur
+[ ] package xii for addition in nixos
+[ ] package xii in ppa
+
+[ ] Write test definitions and create them all
+  [ ] One simple instance
+  [ ] One simple instance
+    + own network
+  [ ] Three instances 
+    + own network
+  [ ] Three instances 
+    + own network 
+    + ssh copy key 
+    + user creation
+  [ ] Three instances
+    + own network
+    + ssh copy key
+    + user creation
+    + distribute keys
+    + shell provisioner
+    + sshfs mount
+    + copy files
+  [ ] Three instances
+    + own network #1
+    + own network #2
+    + ssh copy key
+    + sshfs mount
+    + copy files
+[ ] fix bugs found or document them in github issues
+
+[ ] If all green -> let the human have fun!
+  [ ] fix found bugs
+
+[ ] release!
+
+0.1.1:
+[ ] Add nfs mount from host to node (node/attributes/nfsmount)
+[ ] Implement remote libvirt host capability
+  [ ] Check connection is working
+  [ ] Add open_tunnel capability to need_io
+  [ ] Make need_ssh remote safe
+  [ ] Make nodes/attribute/image working
+  [ ] Implement libguestfs support on remote hosts
+  [ ] Make tests working on a remote maschine
+[ ] Make test infrastructure functional with travis.io (only unit tests)
+[ ] Write meaningfull examples for the xii environment
+[ ] Implement plugin feature
+  [ ] Load components from external directory
+  [ ] Load attributes from external directory
+  [ ] Load commands from external directory
+[ ] Write howtos for the examples
+
+0.1.2:
+[ ] Add a import command from vagrant boxes -> xii images
+[ ] Add checks for requirements of boxes
+  [ ] Check if linux based operating system
+  [ ] Check if ssh is installed
+  [ ] Check if curl/wget is installed
+  [ ] Check if sshfs is installed
+  [ ] Check if nfs-client is installed if neccessary

@@ -26,7 +26,7 @@ class SSHCommand(command.Command):
         domain = cmpnt.get_domain(domain_name)
 
         if not user:
-            user = cmpnt.attribute("user").get_default_user()
+            user = cmpnt.get_child("user").get_default_user()
 
         if not domain or not cmpnt:
             raise error.NotFound("Could not find {}".format(domain_name))

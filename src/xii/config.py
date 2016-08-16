@@ -67,3 +67,9 @@ class Config():
 
     def workers(self):
         return self.get('parallel_workers', 3)
+
+    def wait(self):
+        return self.get('retry_after', 3)
+
+    def retry(self, case):
+        return self.get(case + '_retry', 20)

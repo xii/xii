@@ -1,12 +1,14 @@
 import libvirt
 import xml.etree.ElementTree as etree
 
+from time import sleep
 from abc import ABCMeta, abstractmethod
 
 from xii import error
+from xii.ui import HasOutput
 
 
-class NeedLibvirt():
+class NeedLibvirt(HasOutput):
 
     @abstractmethod
     def get_virt_url(self):
@@ -15,7 +17,7 @@ class NeedLibvirt():
     def virt(self):
         def _error_handler(_, err):
             if err[3] != libvirt.VIR_ERR_ERROR:
-                warn("Non-error from libvirt: '{}'".format(err[2]))
+                self.warn("Non-error from libvirt: '{}'".format(err[2]))
             else:
                 raise error.ConnError("[libvirt] {}".format(err[2]))
 
@@ -79,6 +81,31 @@ class NeedLibvirt():
                                      "Could not find requiered archtitecture "
                                      "`{}`".format(arch))
         return emulators[arch]
+
+
+    def domain_get_ip(self, domain_name):
+        domain = self.get_domain(domain_name)
+        nets = []
+
+        if not domain.isActive():
+            return False
+
+        for i in range(self.get_config().retry("ip")):
+            nets = domain.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE)
+
+            if len(nets):
+                break
+
+            self.counted(i, "Try fetching ip address from {}"
+                         .format(domain_name))
+            sleep(self.get_config().wait())
+
+        net = nets.itervalues().next()
+
+        if not len(net['addrs']):
+            return False
+
+        return net['addrs'][0]['addr']
 
     def _parse_capabilities(self, text, prefer_kvm=True):
         caps = etree.fromstring(text)
