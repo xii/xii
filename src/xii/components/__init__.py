@@ -11,7 +11,15 @@ def from_definition(runtime):
     cmpnts = []
     for name, settings in runtime['definition'].items():
         cmpnts.append(_create_component(settings, name, runtime))
-    return cmpnts
+
+    def _select_weight(cmpnt):
+        if cmpnt.entity == "network":
+            return 1
+        if cmpnt.entity == "node":
+            return 10
+        return 100
+
+    return sorted(cmpnts, key=_select_weight)
 
 
 def get(name, runtime):

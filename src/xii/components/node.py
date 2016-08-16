@@ -1,4 +1,5 @@
 import libvirt
+from time import sleep
 
 from xii import paths, error
 from xii.component import Component
@@ -33,8 +34,8 @@ class NodeComponent(Component, NeedLibvirt):
 
         self.say("starting ...")
         self.childs_run("start")
-        domain.create()
         self.finalize()
+        domain.create()
         self.success("started!")
         self.childs_run("after_start")
 
@@ -129,6 +130,7 @@ class NodeComponent(Component, NeedLibvirt):
         try:
             self.virt().defineXML(xml.safe_substitute(self.xml_dfn))
             domain = self.get_domain(self.name)
+            self.finalize()
             return domain
         except libvirt.libvirtError as err:
             raise error.ExecError(err, "Could not start "
@@ -145,11 +147,6 @@ class NodeComponent(Component, NeedLibvirt):
         domain.shutdown()
 
         if not wait_until_inactive(domain):
-            if not force:
-                self.warn("could not be stopped")
-                self.warn("If you want to force shutdown. Try --force")
-                return
-
             # Try to force off
             domain.destroy()
             if not wait_until_inactive(domain):

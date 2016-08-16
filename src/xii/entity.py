@@ -58,6 +58,9 @@ class Entity(HasOutput):
     def get_config(self):
         return self.get_runtime()["config"]
 
+    def get_definition(self):
+        return self.get_runtime()["definition"]
+
     def get_virt_url(self):
         dfn = self.get_runtime()["definition"]
         return dfn.settings("connection", self.get_config().default_host())

@@ -23,32 +23,20 @@ class SSHCommand(command.Command):
         }
 
         cmpnt = components.get(domain_name, runtime)
+
+        if not cmpnt:
+            raise error.NotFound("Could not find `{}`. Maybe wrong directory?"
+                                 .format(domain_name))
+
         domain = cmpnt.get_domain(domain_name)
 
+        if not domain or not domain.isActive():
+            raise error.NotFound("{} has not been started. Forgot to run "
+                                 "`xii start` first?".format(domain_name))
         if not user:
             user = cmpnt.get_child("user").get_default_user()
 
-        if not domain or not cmpnt:
-            raise error.NotFound("Could not find {}".format(domain_name))
-
-        if not domain.isActive():
-            self.userinterface.warn("{} is not running. Try starting the domain first".format(domain_name))
-            return
-
-        # Currently there is no way to determine net name (like vnet0) from a networkname
-        # eg. default -> vibr0 -> ??? -> vnet0
-
-        nets = domain.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE)
-
-        if not len(nets):
-            raise error.ExecError("Could not fetch ip address for ssh connection")
-
-        net = nets.itervalues().next()
-
-        if not len(net['addrs']):
-            raise error.ExecError("No ip address was accociated with {}".format(domain_name))
-
-        ip = net['addrs'][0]['addr']
+        ip = cmpnt.domain_get_ip(domain_name)
 
         null = open(os.devnull, 'w')
 

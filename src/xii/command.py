@@ -20,8 +20,6 @@ class Command():
         pass
 
     def action_each(self, action, objs):
-
-
         if self.config.is_parallel():
 
             pool = Pool(self.config.workers())

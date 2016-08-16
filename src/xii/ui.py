@@ -2,7 +2,6 @@ import os
 import sys
 
 from abc import ABCMeta, abstractmethod
-from threading import Lock
 
 
 class colors:
@@ -27,10 +26,6 @@ def warn(msg, tag="[xii]"):
 
 class UI():
 
-    def __init__(self):
-        self._bars = []
-        #self.lock = Lock()
-
     def clear(self):
         sys.stdout.write("\033[2K")
         sys.stdout.flush()
@@ -50,9 +45,9 @@ class UI():
             line = wrap + line + colors.CLEAR
         print(line)
 
+
 class HasOutput:
     __meta__ = ABCMeta
-
 
     @abstractmethod
     def get_ui(self):
@@ -63,10 +58,11 @@ class HasOutput:
                              msg,
                              colors.NORMAL)
 
-
     def counted(self, i, msg):
         tag = "{}[#{}]".format(self._generate_tag(), i)
-        self.get_ui().tprint(tag, msg, colors.NORMAL)
+        self.get_ui().tprint(tag,
+                             msg,
+                             colors.NORMAL)
 
     def warn(self, msg):
         self.get_ui().tprint(self._generate_tag(),
@@ -80,11 +76,6 @@ class HasOutput:
 
     def _generate_tag(self):
         tag = ""
-
-        try:
-            for ident in self.full_name():
-                tag += "[" + ident + "]"
-        except TypeError:
-            import pdb; pdb.set_trace()
+        for ident in self.full_name():
+            tag += "[" + ident + "]"
         return tag
-

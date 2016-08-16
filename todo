@@ -1,6 +1,7 @@
 0.1.0:
 [x] Add shell executor attribute to node (node/attributes/provisioner)
 [x] make a base need class which is able to use HasOutput functions
+[x] Make network + node components work together
 [ ] Add sshfs mount from host to node (node/attributes/sshmount)
 [ ] Add copy files from host to node (node/attributes/copy)
 [ ] Make static ip working (node/attributes/network)
@@ -9,6 +10,7 @@
 [ ] Add distribution component
   [ ] Create skeleton
   [ ] Load all components defined in dfn
+[ ] Make network + node + distribution work together
 [ ] Add ssh key distribution (distribution/attributes/ssh)
 [ ] Add hostname distribution (distribution/attributes/hostname)
 [ ] Make cli output better (reformat everything. do we need fancy progressbar output?)

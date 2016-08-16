@@ -30,6 +30,7 @@ class NeedGuestFS():
             return guest
 
         def _close_guest(guest):
+            print("syncing...")
             guest.sync()
             guest.umount("/")
             guest.close()

@@ -54,11 +54,16 @@ class Definition():
             else:
                 yield (name, item)
 
-    def item(self, name):
+    def item(self, name, item_type=None):
         for (item_name, item) in self.items():
             if item_name == name:
+                if item_type:
+                    if item_type == item["type"]:
+                        return item
+                    return None
                 return item
-        return False
+        return None
+
 
     def validate(self):
         for name, settings in self.items():

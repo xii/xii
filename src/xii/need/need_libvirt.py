@@ -35,7 +35,12 @@ class NeedLibvirt(HasOutput):
                 raise error.ConnError("[libvirt] Could not connect "
                                       "to {}".format(url))
             return virt
-        return self.share("libvirt", _create_connection)
+
+        def _close_connection(virt):
+            virt.close()
+
+
+        return self.share("libvirt", _create_connection, _close_connection)
 
 
     def get_domain(self, name, raise_exception=True):
