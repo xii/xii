@@ -1,7 +1,5 @@
 import inspect
 
-from multiprocessing import Lock
-
 from xii import error
 from xii.ui import HasOutput
 
