@@ -9,8 +9,6 @@ from xii.ui import HasOutput
 from xii.entity import Entity
 
 
-
-
 class SSHCommand(command.Command, HasOutput):
     name = ['ssh']
     help = "connect to a domain"
@@ -24,7 +22,6 @@ class SSHCommand(command.Command, HasOutput):
         runtime = {
                 'definition': dfn,
                 'config': self.config,
-                'userinterface': self.userinterface
         }
 
         cmpnt = components.get(domain_name, runtime)

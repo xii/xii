@@ -28,11 +28,8 @@ class Ssh(connection.Connection, HasOutput):
         self._ssh = None
         self._sftp = None
 
-    def get_ui(self):
-        return self._entity.get_ui()
-
-    def full_name(self):
-        return self._entity.full_name() + ["ssh"]
+    def get_full_name(self):
+        return self._entity.get_full_name() + ["ssh"]
 
     def ssh(self):
         if self._ssh:

@@ -24,19 +24,35 @@ def warn(msg, tag="[xii]"):
     print(colors.WARN + colors.BOLD + output + colors.CLEAR)
 
 
-class UI():
+class HasOutput:
+    __meta__ = ABCMeta
 
-    def clear(self):
-        sys.stdout.write("\033[2K")
-        sys.stdout.flush()
+    @abstractmethod
+    def get_full_name(self):
+        pass
 
-    def up(self, n):
-        if n < 1:
-            return
-        sys.stdout.write("\033[{}F".format(n))
-        sys.stdout.flush()
+    def say(self, msg):
+        self._tprint(self._generate_tag(),
+                             msg,
+                             colors.NORMAL)
 
-    def tprint(self, tag, msg, wrap=None):
+    def counted(self, i, msg):
+        tag = "{}[#{}]".format(self._generate_tag(), i)
+        self._tprint(tag,
+                             msg,
+                             colors.NORMAL)
+
+    def warn(self, msg):
+        self._tprint(self._generate_tag(),
+                             msg,
+                             colors.WARN + colors.BOLD)
+
+    def success(self, msg):
+        self._tprint(self._generate_tag(),
+                             msg,
+                             colors.SUCCESS + colors.BOLD)
+
+    def _tprint(self, tag, msg, wrap=None):
         stop = 35
         fill = stop - len(tag)
         line = "{} {}: {}".format(tag, "." * fill, msg)
@@ -45,37 +61,8 @@ class UI():
             line = wrap + line + colors.CLEAR
         print(line)
 
-
-class HasOutput:
-    __meta__ = ABCMeta
-
-    @abstractmethod
-    def get_ui(self):
-        pass
-
-    def say(self, msg):
-        self.get_ui().tprint(self._generate_tag(),
-                             msg,
-                             colors.NORMAL)
-
-    def counted(self, i, msg):
-        tag = "{}[#{}]".format(self._generate_tag(), i)
-        self.get_ui().tprint(tag,
-                             msg,
-                             colors.NORMAL)
-
-    def warn(self, msg):
-        self.get_ui().tprint(self._generate_tag(),
-                             msg,
-                             colors.WARN + colors.BOLD)
-
-    def success(self, msg):
-        self.get_ui().tprint(self._generate_tag(),
-                             msg,
-                             colors.SUCCESS + colors.BOLD)
-
     def _generate_tag(self):
         tag = ""
-        for ident in self.full_name():
+        for ident in self.get_full_name():
             tag += "[" + ident + "]"
         return tag

@@ -12,16 +12,11 @@ class Command(HasOutput):
     name = ["invalidcommand"]
     help = "No help given"
 
-    def __init__(self, args, config, userinterface):
+    def __init__(self, args, config):
         self.args = args
         self.config = config
-        self.userinterface = userinterface
-        self._global_share = {}
 
-    def get_ui(self):
-        return self.userinterface
-
-    def full_name(self):
+    def get_full_name(self):
         return ["cmd", self.name[0]]
 
     def run(self):
@@ -44,8 +39,6 @@ class Command(HasOutput):
     def make_runtime(self, additional={}):
         runtime = {
             "config": self.config,
-            "userinterface": self.userinterface,
-            "share": self._global_share
         }
         runtime.update(additional)
         return runtime
@@ -62,10 +55,10 @@ class Register(object):
     registered = []
 
     @classmethod
-    def get(cls, name, args, config, userinterface):
+    def get(cls, name, args, config):
         for command in cls.registered:
             if name in command.name:
-                return command(args, config, userinterface)
+                return command(args, config)
         return None
 
     @classmethod

@@ -23,9 +23,9 @@ class Entity(HasOutput):
         self._childs = []
         self._shares = {}
 
-    def full_name(self):
+    def get_full_name(self):
         if self._parent:
-            return self._parent.full_name() + [self.name]
+            return self._parent.get_full_name() + [self.name]
         return [self.name]
 
     def add(self, new):
@@ -51,9 +51,6 @@ class Entity(HasOutput):
         if self._parent is not None:
             return self._parent.get_runtime()
         return self._runtime
-
-    def get_ui(self):
-        return self.get_runtime()["userinterface"]
 
     def get_config(self):
         return self.get_runtime()["config"]
