@@ -57,6 +57,8 @@ class HasOutput:
         self.get_ui().tprint(self._generate_tag(),
                              msg,
                              colors.NORMAL)
+    def add_say(self, msg, indent=2):
+        self.say("{}::{}".format(" " * indent, msg))
 
     def counted(self, i, msg):
         tag = "{}[#{}]".format(self._generate_tag(), i)

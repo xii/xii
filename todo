@@ -7,6 +7,7 @@
 [x] Add copy files from host to node (node/attributes/copy)
 [x] Fix count (when count:1 is explicitly set name is name-1 not name)
 [ ] Fix ssh command to handle Connection refused errors
+[ ] Refine HasOutput -> move full_name to HasOutput
 [ ] Make static ip working (node/attributes/network)
 [ ] Make image downloading multithreading compatible
 [ ] Add ipv6 support do network component (network/attributes/ipv6)

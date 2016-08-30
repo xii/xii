@@ -2,11 +2,16 @@ import os
 import argparse
 import libvirt
 import subprocess
+import time
 
 from xii import definition, command, components, error
+from xii.ui import HasOutput
+from xii.entity import Entity
 
 
-class SSHCommand(command.Command):
+
+
+class SSHCommand(command.Command, HasOutput):
     name = ['ssh']
     help = "connect to a domain"
 
@@ -49,9 +54,24 @@ class SSHCommand(command.Command):
 
         # options = "-o HostKeyAlgorithms=ssh-rsa"
         options = ""
-        cmd = "ssh {} {}@{}".format(options, user, ip)
-        subprocess.call(cmd, shell=True)
+        self._run_ssh_cmd(domain_name, user, ip, options, self.config.retry("ssh", 10))
 
+    def _run_ssh_cmd(self, domain_name, user, ip, options="", retry=10, step=0):
+        if step == retry:
+            raise error.ConnError("Could not connect to {}".format(domain_name))
+
+        self.counted(step, "connecting to {}...".format(domain_name))
+        cmd = "ssh {} {}@{}".format(options, user, ip)
+
+        #FIXME: Is there a better way to find out if a ssh connection was successfully
+        #       established?
+        status = subprocess.call(cmd, shell=True)
+        if status == 255:
+            self.counted(step, "connection refused! Retrying...")
+            time.sleep(self.config.wait())
+            self._run_ssh_cmd(domain_name, user, ip, options, retry, step+1)
+            
+    
     def _parse_command(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("domain",
@@ -66,6 +86,7 @@ class SSHCommand(command.Command):
         args = parser.parse_args(self.args)
 
         return args.definition, args.domain, args.user
+
 
 
 command.Register.register(SSHCommand)

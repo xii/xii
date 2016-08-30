@@ -2,11 +2,13 @@ import argparse
 
 from multiprocessing import Pool, Queue
 
+from xii.ui import HasOutput
+
 
 def run_action_on_obj((obj, action)):
     obj.run(action)
 
-class Command():
+class Command(HasOutput):
     name = ["invalidcommand"]
     help = "No help given"
 
@@ -15,6 +17,12 @@ class Command():
         self.config = config
         self.userinterface = userinterface
         self._global_share = {}
+
+    def get_ui(self):
+        return self.userinterface
+
+    def full_name(self):
+        return ["cmd", self.name[0]]
 
     def run(self):
         pass
