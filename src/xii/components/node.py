@@ -135,8 +135,7 @@ class NodeComponent(Component, NeedLibvirt):
             self.finalize()
             return domain
         except libvirt.libvirtError as err:
-            raise error.ExecError(err, "Could not start "
-                                          "domain {}".format(self.name))
+            raise error.ExecError("Could not start {}: {}".format(self.name, str(err)))
 
     def _stop_domain(self, domain, force=False):
         if not domain.isActive():

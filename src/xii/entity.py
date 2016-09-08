@@ -82,6 +82,7 @@ class Entity(HasOutput):
             if not child:
                 raise error.NotFound("Could not find required `{}` "
                                      "in {}".format(required, self.name))
+        for child in self._childs:
             child.validate()
 
     def share(self, name, creator, finalizer=None):

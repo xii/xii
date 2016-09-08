@@ -1,3 +1,5 @@
+from socket import inet_pton, AF_INET, AF_INET6
+
 from xii import error, util
 
 
@@ -26,6 +28,25 @@ class String(TypeCheck):
     want = "string"
     want_type = basestring
 
+
+class Ip(TypeCheck):
+    want = "ip"
+    want_type = basestring
+
+    def validate(self, pre, structure):
+        TypeCheck.validate(self, pre, structure)
+
+        try:
+            inet_pton(AF_INET, structure)
+            return True
+        except socket.error:
+            try:
+                inet_pton(AF_INET6, structure)
+                return True
+            except socket.error:
+                pass
+        return False
+            
 
 class Required():
     def __init__(self, schema):
@@ -59,7 +80,7 @@ class Or():
         errors = []
         def _validate_each(schema):
             try:
-                return Required(schema).validate(pre, structure)
+                return schema.validate(pre, structure)
             except error.ValidatorError as err:
                 errors.append(err)
                 return False
@@ -97,11 +118,22 @@ class Key():
     def validate(self, pre, structure):
         value_of_key = util.safe_get(self.name, structure)
         if not value_of_key:
-            if isinstance(value_of_key, Required):
-                raise error.ValidatorError("{} must have {} "
-                                           "defined".format(pre, self.name))
-            return False
+            return True
         return self.schema.validate(pre + " > " + self.name, value_of_key)
+
+
+class RequiredKey():
+    def __init__(self, name, schema):
+        self.name = name
+        self.schema = schema
+
+    def validate(self, pre, structure):
+        value_of_key = util.safe_get(self.name, structure)
+        if not value_of_key:
+            raise error.ValidatorError("{} must have {} "
+                                       "defined".format(pre, self.name))
+        return self.schema.validate(pre + " > " + self.name, value_of_key)
+
 
 
 class Dict(TypeCheck):
@@ -114,6 +146,6 @@ class Dict(TypeCheck):
     def validate(self, pre, structure):
         TypeCheck.validate(self, pre, structure)
 
-        def _validate(schema):
+        def _validate(schema): 
             return schema.validate(pre, structure)
-        return sum(map(_validate, self.schemas)) >= 1
+        return sum(map(_validate, self.schemas)) == len(self.schemas)
