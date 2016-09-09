@@ -10,13 +10,21 @@ from xii.util import domain_has_state, domain_wait_state, wait_until_inactive
 class NodeComponent(Component, NeedLibvirt):
     entity = "node"
 
-    requires = ["image"]
-    defaults = ["network", "hostname"]
+    requires = ["pool", "image"]
+    defaults = ["pool", "network", "hostname"]
 
     xml_dfn = {'devices': ""}
+    xml_metadata = {}
 
     def add_xml(self, section, xml):
         self.xml_dfn[section] += "\n" + xml
+
+    def metadata(self, key, value=None):
+        if value is not None:
+            self.xml_metadata[key] = value
+        if key in self.xml_metadata:
+            return self.xml_metadata[key]
+        return None
 
     # every node has an image (only currently)
     def get_domain_image_path(self):
@@ -120,7 +128,6 @@ class NodeComponent(Component, NeedLibvirt):
     def _spawn_domain(self):
         self.say("spawning...")
         self.xml_dfn = {'devices': ''}
-
         self.childs_run("spawn")
 
         caps = self.get_capabilities()
@@ -129,10 +136,11 @@ class NodeComponent(Component, NeedLibvirt):
         self.xml_dfn['name'] = self.name
         self.xml_dfn.update(caps)
 
+        self.finalize()
+        self.childs_run("after_spawn")
         try:
             self.virt().defineXML(xml.safe_substitute(self.xml_dfn))
             domain = self.get_domain(self.name)
-            self.finalize()
             return domain
         except libvirt.libvirtError as err:
             raise error.ExecError("Could not start {}: {}".format(self.name, str(err)))

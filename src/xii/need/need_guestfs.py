@@ -2,21 +2,21 @@ from abc import ABCMeta, abstractmethod
 
 import guestfs
 
+from xii import util
+
 
 class NeedGuestFS():
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def share(self, name, creator, finalizer):
-        pass
-
-    @abstractmethod
-    def get_domain_image_path(self):
+    def get_tmp_volume_path(self):
         pass
 
     def guest(self):
         def _start_guestfs():
-            path = self.get_domain_image_path()
+            path = self.get_tmp_volume_path()
+            print("mounting " + path)
+            
 
             guest = guestfs.GuestFS()
 
@@ -37,20 +37,8 @@ class NeedGuestFS():
         return self.share("guestfs", _start_guestfs, _close_guest)
 
     def guest_get_users(self):
-        users = {}
         content = self.guest().cat('/etc/passwd').split("\n")
-
-        for line in content:
-            user = line.split(":")
-            if len(user) < 6:
-                continue
-            users[user[0]] = {
-                    'uid': int(user[2]),
-                    'gid': int(user[3]),
-                    'description': user[4],
-                    'home': user[5],
-                    'shell': user[6]}
-        return users
+        return util.parse_passwd(content)
 
     def guest_user_home(self, name):
         users = self.guest_get_users()
@@ -60,16 +48,5 @@ class NeedGuestFS():
         return users[name]["home"]
 
     def guest_get_groups(self):
-        groups = {}
         content = self.guest().cat('/etc/group').split("\n")
-
-        for line in content:
-            group = line.split(":")
-            if len(group) < 2:
-                continue
-
-            groups[group[0]] = {'gid': int(group[2]), 'users': []}
-
-            if len(group) > 2:
-                groups[group[0]]['users'] = group[3].split(',')
-        return groups
+        return util.parse_groups(content)

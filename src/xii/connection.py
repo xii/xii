@@ -1,3 +1,8 @@
+import os
+import random
+import string
+from stat import S_IRWXU
+
 from abc import ABCMeta, abstractmethod
 
 
@@ -8,7 +13,15 @@ class Connection():
         pass
 
     @abstractmethod
+    def open(self, path, mode):
+        pass
+
+    @abstractmethod
     def mkdir(self, directory, recursive=False):
+        pass
+
+    @abstractmethod
+    def stat(self, path):
         pass
 
     @abstractmethod
@@ -28,10 +41,6 @@ class Connection():
         pass
 
     @abstractmethod
-    def remove(self, path):
-        pass
-
-    @abstractmethod
     def download(self, msg, source, dest):
         pass
 
@@ -42,3 +51,28 @@ class Connection():
     @abstractmethod
     def chown(self, path, uid=None, guid=None):
         pass
+
+    @abstractmethod
+    def get_users(self):
+        pass
+
+    @abstractmethod
+    def rm(self, path):
+        pass
+
+    @abstractmethod
+    def get_groups(self):
+        pass
+
+    def mktempdir(self, prefix):
+        user = self.user()
+        users = self.get_users()
+        group = self.get_groups()
+
+        suffix = ''.join(random.choice(string.lowercase) for i in range(8))
+        path = os.path.join("/var/tmp", prefix + "-" + suffix)
+
+        self.mkdir(path)
+        self.chmod(path, S_IRWXU)
+
+        return path

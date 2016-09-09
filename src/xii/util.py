@@ -80,3 +80,37 @@ def generate_rsa_key_pair():
     rsa = RSA.generate(4096)
     pub = rsa.publickey()
     return (rsa.exportKey("PEM"), pub.exportKey("OpenSSH"))
+
+
+def parse_passwd(passwd):
+    users = {}
+
+    for line in passwd:
+        user = line.split(":")
+        if len(user) < 6:
+            continue
+        users[user[0]] = {
+                'uid': int(user[2]),
+                'gid': int(user[3]),
+                'description': user[4],
+                'home': user[5],
+                'shell': user[6]
+                }
+    return users
+
+
+def parse_groups(group):
+    groups = {}
+
+    for line in group:
+        group = line.split(":")
+        if len(group) < 2:
+            continue
+
+        groups[group[0]] = {'gid': int(group[2]), 'users': []}
+
+        if len(group) > 2:
+            groups[group[0]]['users'] = group[3].split(',')
+    return groups
+
+

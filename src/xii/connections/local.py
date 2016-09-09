@@ -2,8 +2,9 @@ import os
 import getpass
 import urllib2
 import errno
+import shutil
 
-from xii import error
+from xii import error, util
 from xii.connection import Connection
 
 
@@ -11,6 +12,10 @@ BUF_SIZE = 16 * 1024
 
 
 class Local(Connection):
+
+    def open(self, path, mode):
+        return open(path, mode)
+
     def mkdir(self, directory, recursive=False):
         try:
             if recursive:
@@ -23,6 +28,9 @@ class Local(Connection):
             else:
                 raise
 
+    def stat(self, path):
+        return os.stat(path)
+
     def exists(self, path):
         try:
             os.stat(path)
@@ -32,8 +40,8 @@ class Local(Connection):
             raise
         return True
 
-    def remove(self, path):
-        return os.remove(path)
+    def rm(self, path):
+        shutil.rmtree(path)
 
     def user(self):
         return getpass.getuser()
@@ -61,9 +69,22 @@ class Local(Connection):
     def download(self, url, dest_path):
         source = urllib2.urlopen(url)
         size = int(source.info().getheaders("Content-Length")[0])
-
         with open(dest_path, 'wb') as dest:
             self._copy_stream(size, source, dest)
+
+    def get_users(self):
+        try:
+            with self.open('/etc/passwd', 'r') as source:
+                return util.parse_passwd([line.rstrip('\n') for line in source])
+        except OSError as err:
+            raise error.ExecError("Reading /etc/passwd failed.")
+
+    def get_groups(self):
+        try:
+            with self.open('/etc/group', 'r') as source:
+                return util.parse_groups([line.rstrip('\n') for line in source])
+        except OSError as err:
+            raise error.ExecError("Reading /etc/group failed.")
 
     def _copy_stream(self, size, source, dest):
         copied = 0

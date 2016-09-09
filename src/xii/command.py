@@ -1,12 +1,19 @@
 import argparse
 
 from multiprocessing import Pool, Queue
-
+import logging, multiprocessing
+mpl = multiprocessing.log_to_stderr()
+mpl.setLevel(multiprocessing.SUBDEBUG)
 from xii.ui import HasOutput
 
 
 def run_action_on_obj((obj, action)):
-    obj.run(action)
+    try:
+        # This is where you do your actual work
+        return obj.run(action)
+    except:
+        # Put all exception text into an exception and raise that
+        raise Exception("".join(traceback.format_exception(*sys.exc_info())))
 
 class Command(HasOutput):
     name = ["invalidcommand"]

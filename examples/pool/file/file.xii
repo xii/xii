@@ -1,0 +1,26 @@
+# vim: set ts=2 sw=2 tw=0 ft=yaml:
+---
+
+# test-file-pool:
+#   type: pool
+#   directory:
+#     path: /tmp/xii-test-file-pool
+
+pool-file:
+  type: node
+  network: default
+
+  #pool: test-file-pool
+  image: http://download.opensuse.org/repositories/home:/fschnizlein:/images:/libvirt/images/leap-42.1.x86_64.qcow2
+
+  graphic: yes
+  user:
+    felixsch:
+      password: felix
+    root:
+      password: linux
+  ssh:
+    copy-key:
+      users:
+        - felixsch
+        - root

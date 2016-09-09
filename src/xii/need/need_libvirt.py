@@ -73,6 +73,17 @@ class NeedLibvirt(HasOutput):
             else:
                 return None
 
+    def get_volume(self, pool_name, name, raise_exception=True):
+        try:
+            pool = self.get_pool(pool_name)
+            return pool.storageVolLookupByName(name)
+        except libvirt.libvirtError:
+            if raise_exception:
+                raise error.NotFound("Could not find volume "
+                                     "({})".format(name))
+            else:
+                return None
+
     def get_capabilities(self, arch='x86_64', prefer_kvm=True):
         try:
             capabilities = self.virt().getCapabilities()

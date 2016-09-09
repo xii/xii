@@ -8,6 +8,22 @@
 [x] Fix count (when count:1 is explicitly set name is name-1 not name)
 [x] Fix ssh command to handle Connection refused errors
 [x] Refine HasOutput -> move full_name to HasOutput
+[ ] Adapt libvirt pool/volume system
+ [x] Create skeletons for components/pool, attributes/pool/directory, attributes/node/pool
+ [x] Add get_users, get_groups to local and ssh connection (refine with guestfs)
+ [x] Implement pool node attribute
+   [x] Add support for xii default volume pool (~/.xii/pool)
+   [x] Add type detection
+ [ ] Rewrite attributes/node/image
+   [ ] Add metadata volume source
+   [ ] Add copy to tmp directory routine (before spawn)
+   [ ] Import volume to pool (after spawn)
+ [ ] Implement basic pool creating in components/pool
+ [ ] Implement attributes/pool/directory
+ [ ] Cleanup image/storage path abstrace requirements
+ [ ] Move attributes/node/image -> attributes/node/volume
+[ ] Move xii configuration (~/.config/xii -> ~/.xii/config)
+[ ] prefix all need classes
 [ ] Make static ip working (node/attributes/network)
 [ ] Make image downloading multithreading compatible
 [ ] Add ipv6 support do network component (network/attributes/ipv6)
@@ -89,7 +105,12 @@
 [ ] release!
 
 0.1.1:
+[ ] Make attribute/node/image use local paths aswell
 [ ] Add nfs mount from host to node (node/attributes/nfsmount)
+[ ] Extend the image view command
+ [ ] Add image used by domain to output
+ [ ] Create delete subcommand
+ [ ] Create add subcommand
 [ ] Implement remote libvirt host capability
   [ ] Check connection is working
   [ ] Add open_tunnel capability to need_io

@@ -2,6 +2,8 @@ import os
 import re
 import socket
 import stat
+import string
+import random
 from time import sleep
 
 from xii import connection, error
@@ -62,6 +64,9 @@ class Ssh(connection.Connection, HasOutput):
         self._sftp = self.ssh().open_sftp()
         return self._sftp
 
+    def open(self, path, mode):
+        return self.sftp().open(path)
+
     def mkdir(self, directory):
         segments = filter(None, directory.split("/"))
         path = ""
@@ -70,14 +75,27 @@ class Ssh(connection.Connection, HasOutput):
             if not self.exists(path):
                 self.sftp().mkdir(path)
 
+    def stat(self, path):
+        return self.sftp.stat(path)
+
     def exists(self, path):
         try:
-            self.sftp().stat(path)
+            self.stat(path)
         except IOError as e:
             if e[0] == 2:
                 return False
             raise
         return True
+
+    def rm(self, path):
+        files = self.sftp().listdir(path)
+        for file_ in files:
+            to_remove = os.path.join(path, file_)
+            try:
+                self.sftp().remove(to_remove)
+            except IOError:
+                self.rm(to_remove)
+        self.sftp().remove(path)
 
     def user(self):
         return self.shell("whoami")
@@ -95,14 +113,6 @@ class Ssh(connection.Connection, HasOutput):
 
     def get(self, msg, source, dest):
         self.sftp().get(source, dest)
-
-    def remove(self, path):
-        if self.exists(path):
-            stats = self.sftp().stat(path)
-            if stat.S_ISDIR(stats.st_mode):
-                self.sftp().rmdir(path)
-            else:
-                self.sftp().unlink(path)
 
     def download(self, msg, source, dest):
         command = "wget --progress=dot {} -O {} 2>&1 | grep --color=none -o \"[0-9]\+%\"".format(source, dest)
@@ -153,6 +163,14 @@ class Ssh(connection.Connection, HasOutput):
                 tmp.append(line.strip())
             return tmp
         return out.read().strip()
+
+    def get_users(self):
+        with self.open("/etc/passwd") as source:
+            return util.parse_passwd([line.rstrip('\n') for line in source])
+
+    def get_groups(self):
+        with self.open("/etc/group") as source:
+            return util.parse_groups([line.rstrip('\n') for line in source])
 
     @classmethod
     def parse_url(cls, url):

@@ -8,5 +8,5 @@ class NodeAttribute(Attribute):
     def register(cls):
         EntityRegister.register_attribute("node", cls)
 
-    def get_domain_image_path(self):
-        return self.get_parent().get_domain_image_path()
+    def get_tmp_volume_path(self):
+        return self.other("image").get_tmp_volume_path()
