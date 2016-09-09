@@ -28,7 +28,8 @@ class NeedIO():
             raise error.ConnError("Unsupported connection type. Currently "
                                   "qemu and qemu+ssh is supported")
 
+        # FIXME: THis can not be pickled...
         def _finalize_connection(connection):
             connection.finalize()
 
-        return self.share("io", creator=_create_connection, finalizer=_finalize_connection)
+        return self.share("io", creator=_create_connection) #finalizer=_finalize_connection)

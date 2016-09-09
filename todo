@@ -14,18 +14,17 @@
  [x] Implement pool node attribute
    [x] Add support for xii default volume pool (~/.xii/pool)
    [x] Add type detection
- [ ] Rewrite attributes/node/image
+ [x] Rewrite attributes/node/image
    [ ] Add metadata volume source
-   [ ] Add copy to tmp directory routine (before spawn)
-   [ ] Import volume to pool (after spawn)
+   [x] Add copy to tmp directory routine (before spawn)
+   [x] Import volume to pool (after spawn)
  [ ] Implement basic pool creating in components/pool
  [ ] Implement attributes/pool/directory
- [ ] Cleanup image/storage path abstrace requirements
- [ ] Move attributes/node/image -> attributes/node/volume
-[ ] Move xii configuration (~/.config/xii -> ~/.xii/config)
+ [x] Cleanup image/storage path abstrace requirements
+[x] Move xii configuration (~/.config/xii -> ~/.xii/config)
 [ ] prefix all need classes
 [ ] Make static ip working (node/attributes/network)
-[ ] Make image downloading multithreading compatible
+[x] Make image downloading multithreading compatible
 [ ] Add ipv6 support do network component (network/attributes/ipv6)
 [ ] Remove distribute from node/attributes/network
 [ ] Cleanup execution order management

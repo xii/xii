@@ -1,22 +1,22 @@
 import os
 import time
 
+from multiprocessing import Condition
+
 from xii import paths, error
 from xii.need import NeedIO, NeedLibvirt
 from xii.attribute import Attribute
 from xii.validator import String
 from xii.entity import EntityRegister
 
-
-def read_handler(stream, data, file_):
-    return file_.read(data)
-
+_pending_downloads = Condition()
 
 class ImageAttribute(Attribute, NeedIO, NeedLibvirt):
     entity = "image"
     requires = ['pool']
 
     keys = String()
+
 
     def __init__(self, settings, component):
         Attribute.__init__(self, settings, component)
@@ -55,6 +55,9 @@ class ImageAttribute(Attribute, NeedIO, NeedLibvirt):
 
         # FIXME: Add error handling
         volume = pool.createXML(xml)
+
+        def read_handler(stream, data, file_):
+            return file_.read(data)
 
         self.say("importing...")
         with open(self.get_tmp_volume_path(), 'r') as image:
@@ -96,16 +99,14 @@ class ImageAttribute(Attribute, NeedIO, NeedLibvirt):
                      "set auto_delete_volumes to True in your xii configuration"])
 
     def _download_image(self):
-        pass
-        # if self.settings in self._pending_downloads:
-        #     for _ in range(self.get_config().cycle("image_download")):
-        #         time.sleep(self.get_config().wait())
-        #     return
-        # else:
-        #     self._pending_downloads[self.settings] = True
-        #     self.say("downloading image...")
-        #     self.io().download(self.settings, self._image_path())
-        #     del self._pending_downloads[self.settings]
+        _pending_downloads.acquire()
+        if self.io().exists(self._image_path()):
+            _pending_downloads.release()
+            return
+        self.say("downloading image...")
+        self.io().download(self.settings, self._image_path())
+
+        _pending_downloads.release()
 
 
 EntityRegister.register_attribute("node", ImageAttribute)

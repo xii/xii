@@ -15,9 +15,6 @@ class NeedGuestFS():
     def guest(self):
         def _start_guestfs():
             path = self.get_tmp_volume_path()
-            print("mounting " + path)
-            
-
             guest = guestfs.GuestFS()
 
             guest.add_drive(path)
