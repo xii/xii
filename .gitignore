@@ -2,6 +2,7 @@
 *.venv
 *.pyc
 *.egg-info
+.tox
 */__pycache__
 build
 dist

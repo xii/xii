@@ -1,4 +1,4 @@
-from socket import inet_pton, AF_INET, AF_INET6
+import socket
 
 from xii import error, util
 
@@ -37,17 +37,17 @@ class Ip(TypeCheck):
         TypeCheck.validate(self, pre, structure)
 
         try:
-            inet_pton(AF_INET, structure)
+            socket.inet_pton(socket.AF_INET, structure)
             return True
         except socket.error:
             try:
-                inet_pton(AF_INET6, structure)
+                socket.inet_pton(socket.AF_INET6, structure)
                 return True
             except socket.error:
                 pass
-        return False
-            
+        raise error.ValidatorError("{} is not a valid IP address".format(pre))
 
+#TODO: Remove me
 class Required():
     def __init__(self, schema):
         self.schema = schema
@@ -78,6 +78,7 @@ class Or():
 
     def validate(self, pre, structure):
         errors = []
+
         def _validate_each(schema):
             try:
                 return schema.validate(pre, structure)
@@ -94,8 +95,8 @@ class Or():
                 for err in it:
                     yield "or"
                     yield " ".join(err.error())
-            raise error.ValidatorError(["{} is ambigous:".format(pre)]
-                                       + list(_error_lines()))
+            raise error.ValidatorError(["{} is ambigous:".format(pre)] +
+                                       list(_error_lines()))
         return True
 
 
@@ -104,6 +105,10 @@ class VariableKeys():
         self.schema = schema
 
     def validate(self, pre, structure):
+
+        if not isinstance(structure, dict):
+            raise error.ValidatorError("{} needs to be a dict".format(pre))
+
         def _validate_each(pair):
             (name, next_structure) = pair
             return self.schema.validate(pre + " > " + name, next_structure)
@@ -116,9 +121,11 @@ class Key():
         self.schema = schema
 
     def validate(self, pre, structure):
+        if not isinstance(structure, dict):
+            raise error.ValidatorError("{} needs to be a dict".format(pre))
         value_of_key = util.safe_get(self.name, structure)
         if not value_of_key:
-            return True
+            return False
         return self.schema.validate(pre + " > " + self.name, value_of_key)
 
 
@@ -135,7 +142,6 @@ class RequiredKey():
         return self.schema.validate(pre + " > " + self.name, value_of_key)
 
 
-
 class Dict(TypeCheck):
     want = "dictonary"
     want_type = dict
@@ -146,6 +152,6 @@ class Dict(TypeCheck):
     def validate(self, pre, structure):
         TypeCheck.validate(self, pre, structure)
 
-        def _validate(schema): 
+        def _validate(schema):
             return schema.validate(pre, structure)
-        return sum(map(_validate, self.schemas)) == len(self.schemas)
+        return sum(map(_validate, self.schemas)) >= 1

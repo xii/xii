@@ -1,8 +1,0 @@
-PyYAML
-pytest
-pytest-cov
-mock
-tox
-# python-libvirt
-# python-libguestfs
-
