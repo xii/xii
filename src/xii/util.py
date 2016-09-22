@@ -112,5 +112,3 @@ def parse_groups(group):
         if len(group) > 2:
             groups[group[0]]['users'] = group[3].split(',')
     return groups
-
-

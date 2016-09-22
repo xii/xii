@@ -10,13 +10,13 @@ if ! which tox &>/dev/null; then
   fatal "Install tox package (mostly python-tox) or pip install tox"
 fi
 
-SOURCE_ROOT=$(pwd)/..
-
-pushd ${SOURCE_ROOT} > /dev/null
-
-tox -e unit
-STATUS=$?
-
-popd > /dev/null
-exit ${STATUS}
+if [ "x$1" == "xtox" ]; then
+  tox -e unit
+  exit $?
+else
+  if ! which ptw &>/dev/null; then
+    pip install pytest-watch
+  fi
+  ptw
+fi
 
