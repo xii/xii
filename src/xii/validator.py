@@ -88,7 +88,7 @@ class Or():
 
         state = sum(map(_validate_each, self.schemas))
 
-        if self.exclusive and state > 1 or state == 0:
+        if self.exclusive and (state > 1 or state == 0):
             def _error_lines():
                 it = iter(errors)
                 yield " ".join(next(it).error())

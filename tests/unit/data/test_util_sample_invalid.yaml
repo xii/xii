@@ -1,0 +1,19 @@
+# vim: set ts=2 sw=2 tw=0 ft=yaml:
+---
+<<<>>>>
+multiple:
+  type: node
+  network: default
+  count:
+    - content:
+  graphic: yes
+  ssh:
+    copy-key:
+      users:
+        - felixsch
+        - root
+  user:
+    felixsch:
+      password: "1"
+    root:
+      password: linux

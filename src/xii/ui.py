@@ -1,5 +1,4 @@
 import os
-import sys
 
 from abc import ABCMeta, abstractmethod
 
@@ -15,6 +14,7 @@ class colors:
 
 
 def width():
+    # FIXME: port me to subprocess
     _, columns = os.popen('stty size', 'r').read().split()
     return int(columns)
 
@@ -33,24 +33,24 @@ class HasOutput:
 
     def say(self, msg):
         self._tprint(self._generate_tag(),
-                             msg,
-                             colors.NORMAL)
+                     msg,
+                     colors.NORMAL)
 
     def counted(self, i, msg):
         tag = "{}[#{}]".format(self._generate_tag(), i)
         self._tprint(tag,
-                             msg,
-                             colors.NORMAL)
+                     msg,
+                     colors.NORMAL)
 
     def warn(self, msg):
         self._tprint(self._generate_tag(),
-                             msg,
-                             colors.WARN + colors.BOLD)
+                     msg,
+                     colors.WARN + colors.BOLD)
 
     def success(self, msg):
         self._tprint(self._generate_tag(),
-                             msg,
-                             colors.SUCCESS + colors.BOLD)
+                     msg,
+                     colors.SUCCESS + colors.BOLD)
 
     def _tprint(self, tag, msg, wrap=None):
         stop = 35
