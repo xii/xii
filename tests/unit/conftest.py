@@ -26,3 +26,31 @@ class __TestData():
 @pytest.fixture
 def data(request):
     return  __TestData(request)
+
+
+class MockedSleep():
+
+    def __init__(self):
+        self._call_count = 0
+        self._sleep_time  = 1
+
+    def set_sleep_time(self, n):
+        self._sleep_time = n
+
+    def call_count(self):
+        return self._call_count
+
+    def __call__(self, sleep):
+        if sleep != self._sleep_time:
+            pytest.fail("[sleep] Tought sleeping {} seconds "
+                        "but {} where requrested"
+                        .format(sleep, time))
+        self._call_count += 1
+
+
+@pytest.fixture
+def sleep(monkeypatch, request):
+    fake_sleep = MockedSleep()
+    monkeypatch.setattr("time.sleep", lambda n: fake_sleep(n))
+
+    return fake_sleep
