@@ -55,4 +55,29 @@ def test_yaml_read_ioerror(monkeypatch):
     
     with raises(error.DefError):
         util.yaml_read("/tmp/yaml")
+
+
+class FakeObject():
+    def __init__(self, count):
+        self._count = count
+
+    def isActive(self):
+        if self._count == 0:
+            return True
+        
+        self._count -= 1
+        return False
+
+def test_wait_until_active(sleep):
+    sleep.set_sleep_time(1)
     
+    util.wait_until_active(FakeObject(3))
+
+    assert(sleep.call_count() == 3)
+
+
+
+
+
+   
+
