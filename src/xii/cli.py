@@ -2,6 +2,7 @@
 import argparse
 
 from xii import commands, components, attributes, paths, config, command, error
+from xii import store
 from xii.error import XiiError
 from xii.ui import warn
 
@@ -13,23 +14,44 @@ def usage_text():
     return "\n".join(usage)
 
 
-def run_cli():
-
+def cli_arg_parser():
     parser = argparse.ArgumentParser(usage=usage_text())
     parser.add_argument("--verbose", action="store_true", default=False,
                         help="Make output more verbose")
-    parser.add_argument("--no-parallel", action="store_true", default=False,
+    parser.add_argument("--no-parallel", dest="parallel", action="store_false", default=True,
                         help="Disable parallel processing")
     parser.add_argument("--config", default=None,
                         help="Optional path to configuration file")
+
+    parser.add_argument("-D", "--define", dest="defines", action="append",
+                        help="Define local variables")
+    parser.add_argument("-V", "--varfile", dest="varfile", default=None,
+                       help="load local variables from file")
     parser.add_argument("command", metavar="COMMAND",
                         help="Command to run")
     parser.add_argument("command_args", nargs=argparse.REMAINDER, metavar="ARGS",
                         help="Command arguments")
 
+    return parser
+
+
+def run_cli():
+    parser = cli_arg_parser()
     try:
 
+        # prepare local environment xii runs in
         paths.prepare_local_paths()
+        # parse arguments
+        cli_args = parser.parse_args()
+        # load variable store
+        store = Store()
+        # load defaults / home configuration into variable store
+        # parse definifition file
+        # merge with arguments from commandline
+        # run command
+        # return exit code
+
+
 
         cli_args = parser.parse_args()
         conf = config.Config(cli_args.config, cli_args)
