@@ -34,7 +34,7 @@ def yaml_read(path):
         with open(path, 'r') as stream:
             return yaml.load(stream)
     except IOError:
-        raise error.DefError("Could not open definition: No such file or directory")
+        raise error.ConnError("Could not open definition: No such file or directory")
     except yaml.YAMLError as err:
         raise error.ValidatorError("Error parsing definition: {}".format(err))
 
@@ -74,7 +74,6 @@ def domain_wait_state(domain, state, timeout=5):
             return True
         time.sleep(1)
     return False
-
 
 def generate_rsa_key_pair():
     rsa = RSA.generate(4096)

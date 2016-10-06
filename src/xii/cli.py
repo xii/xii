@@ -46,16 +46,14 @@ def run_cli():
         # load variable store
         store = Store()
         # load defaults / home configuration into variable store
+        config = config.load_from_file(cli_args.config)
         # parse definifition file
         # merge with arguments from commandline
         # run command
         # return exit code
 
-
-
         cli_args = parser.parse_args()
         conf = config.Config(cli_args.config, cli_args)
-
         instance = command.Register.get(cli_args.command, cli_args.command_args, conf)
 
         if not instance:

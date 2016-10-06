@@ -1,4 +1,5 @@
 import io
+import libvirt
 from pytest import raises, xfail
 
 from fake.open import fake_open, fake_invalid_open
@@ -53,7 +54,7 @@ def test_yaml_read_ioerror(monkeypatch):
 
     monkeypatch.setattr("__builtin__.open", fake_invalid_open())
     
-    with raises(error.DefError):
+    with raises(error.ConnError):
         util.yaml_read("/tmp/yaml")
 
 
@@ -71,13 +72,49 @@ class FakeObject():
 def test_wait_until_active(sleep):
     sleep.set_sleep_time(1)
     
-    util.wait_until_active(FakeObject(3))
+    result = util.wait_until_active(FakeObject(3))
 
+    assert(result is True)
     assert(sleep.call_count() == 3)
 
 
+def test_wait_until_inactive(sleep):
+    sleep.set_sleep_time(1)
+
+    result = util.wait_until_inactive(FakeObject(3))
+
+    assert(result is True)
+    assert(sleep.call_count() == 0)
 
 
+class FakeDomain():
+    def __init__(self, state):
+        self._state = (state, 0)
+    
+    def state(self):
+        return self._state
 
-   
 
+def test_domain_has_state():
+    domain = FakeDomain(libvirt.VIR_DOMAIN_PAUSED)
+ 
+    assert(util.domain_has_state(domain, libvirt.VIR_DOMAIN_PAUSED))
+
+def test_domain_wait_state(sleep):
+    sleep.set_sleep_time(1)
+    domain = FakeDomain(libvirt.VIR_DOMAIN_RUNNING)
+
+    assert(not util.domain_wait_state(domain, libvirt.VIR_DOMAIN_PAUSED))
+    assert(sleep.call_count() == 5)
+
+    assert(util.domain_wait_state(domain, libvirt.VIR_DOMAIN_RUNNING))
+    assert(sleep.call_count() == 5)
+
+def test_generate_rsa_key_pair():
+    pass
+
+def test_parse_passwd():
+    pass
+
+def test_parse_groups():
+    pass

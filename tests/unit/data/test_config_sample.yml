@@ -1,0 +1,8 @@
+auto_delete_volumes: true
+default_host: "qemu://system"
+parallel: True
+foo: "bar"
+parallel_workers: 3
+retry_after: 17
+ssh_retry: 13
+ip_retry: 20
