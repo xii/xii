@@ -7,6 +7,31 @@ from fake.open import fake_open, fake_invalid_open
 from xii import util, error
 
 
+def test_convert_type():
+    tests = [
+        ("True", True),
+        ("true", True),
+        ("False", False),
+        ("false", False),
+        ("123", 123),
+        ("foo", "foo")
+    ]
+
+    for test, result in tests):
+        assert(util.convert_type(test) == result)
+
+
+def convert_type(convertable):
+    if convertable in ["true", "True", "TRUE"]:
+        return True
+    if convertable in ["false", "False", "FALSE"]:
+        return False
+    try:
+        return ast.literal_eval(convertable)
+    except ValueError:
+        return None
+
+
 def test_safe_get():
     assert(util.safe_get("foo", {"foo": 1}) == 1)
     assert(util.safe_get("bar", {"foo": 1}) is None)

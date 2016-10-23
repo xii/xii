@@ -19,6 +19,16 @@ def template(file):
     return string.Template(content)
 
 
+def find_definition_file(path):
+    if not path:
+        cwd = os.getcwd()
+        path = os.path.join(cwd, os.path.basename(cwd) + ".xii")
+
+    if not os.path.exists(path):
+        raise error.FileError("Could not open definition: No such file or directory")
+    return path
+
+
 def local(extend=""):
     return os.path.join(os.path.expanduser('~'), '.xii', extend)
 
@@ -28,7 +38,6 @@ def xii_home(home, extend=""):
 
 
 def prepare_local_paths():
-
     # make config dir
     try:
         os.makedirs(local())

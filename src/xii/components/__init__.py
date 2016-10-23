@@ -7,19 +7,17 @@ from xii.entity import EntityRegister
 __all__ = util.load_modules(__path__)
 
 
-def from_definition(runtime):
+def from_definition(store):
     cmpnts = []
-    for name, settings in runtime['definition'].items():
-        cmpnts.append(_create_component(settings, name, runtime))
+    # this also describes hirachy between component types
+    types = ["network", "node"]
 
-    def _select_weight(cmpnt):
-        if cmpnt.entity == "network":
-            return 1
-        if cmpnt.entity == "node":
-            return 10
-        return 100
-
-    return sorted(cmpnts, key=_select_weight)
+    for component_type in types:
+        if not store.get("components/" + component_type):
+            continue
+        for name, settings in store.get("components/" + component_type).items():
+            cmpnts.append(_create_component(settings, name, store))
+    return cmpnts
 
 
 def get(name, runtime):

@@ -10,10 +10,10 @@ multiple:
   ssh:
     copy-key:
       users:
-        - felixsch
         - root
+        - felixsch
   user:
     felixsch:
-      password: "1"
+      password: {{ password }}
     root:
       password: linux

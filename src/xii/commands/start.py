@@ -1,6 +1,6 @@
 import argparse
 
-from xii import definition, command, components
+from xii import command, components
 
 
 def start_command(cmpnt):
@@ -16,13 +16,7 @@ class StartCommand(command.Command):
         parser = self.default_arg_parser()
         args = parser.parse_args(self.args)
 
-        dfn  = definition.from_file(args.dfn_file, self.config)
-
-        runtime = self.make_runtime({
-            "definition": dfn
-        })
-
-        cmpnts = components.from_definition(runtime)
+        cmpnts = components.from_definition(self.store)
 
         self.action_each("start", cmpnts)
 

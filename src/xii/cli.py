@@ -1,8 +1,9 @@
 
 import argparse
 
-from xii import commands, components, attributes, paths, config, command, error
-from xii import store
+from xii import commands, components, attributes, paths, config, command, util
+from xii import definition
+from xii.store import Store
 from xii.error import XiiError
 from xii.ui import warn
 
@@ -16,17 +17,17 @@ def usage_text():
 
 def cli_arg_parser():
     parser = argparse.ArgumentParser(usage=usage_text())
-    parser.add_argument("--verbose", action="store_true", default=False,
-                        help="Make output more verbose")
+    parser.add_argument("--debug", action="store_true", default=False,
+                        help="Make output more verbose and dump environment")
     parser.add_argument("--no-parallel", dest="parallel", action="store_false", default=True,
                         help="Disable parallel processing")
     parser.add_argument("--config", default=None,
                         help="Optional path to configuration file")
 
-    parser.add_argument("-D", "--define", dest="defines", action="append",
+    parser.add_argument("-D", "--define", dest="defines", action="append", default=[],
                         help="Define local variables")
-    parser.add_argument("-V", "--varfile", dest="varfile", default=None,
-                       help="load local variables from file")
+    #parser.add_argument("-V", "--varfile", dest="varfile", default=None,
+    #                   help="load local variables from file")
     parser.add_argument("command", metavar="COMMAND",
                         help="Command to run")
     parser.add_argument("command_args", nargs=argparse.REMAINDER, metavar="ARGS",
@@ -41,28 +42,42 @@ def run_cli():
 
         # prepare local environment xii runs in
         paths.prepare_local_paths()
+
         # parse arguments
         cli_args = parser.parse_args()
+
         # load variable store
         store = Store()
+        store.set("runtime/config", paths.local("config.yml"))
+
+        store.set("runtime/definition", paths.find_definition_file(cli_args.config))
+
         # load defaults / home configuration into variable store
-        config = config.load_from_file(cli_args.config)
-        # parse definifition file
+        config = util.yaml_read(store.get("runtime/config"))
+
+        store.set("global", config)
+
         # merge with arguments from commandline
+        for define in [d.split("=") for d in cli_args.defines]:
+            if len(define) != 2:
+                warn("Invalid variable definition detected")
+                warn("Use -Dscope/variable=value")
+                return 1
+            store.set(define[0], util.convert_type(define[1]))
+
+        # parse definifition file
+        defn = util.jinja_read(store.get("runtime/definition"), store)
+
+        # construct component configurations
+        definition.prepare_store(defn, store)
+        
         # run command
+        instance = command.Register.get(cli_args.command, cli_args.command_args, store)
         # return exit code
 
-        cli_args = parser.parse_args()
-        conf = config.Config(cli_args.config, cli_args)
-        instance = command.Register.get(cli_args.command, cli_args.command_args, conf)
-
         if not instance:
-            warn("Invalid command `{}`. Command not found.".format(cli_args.command))
-            parser.print_help()
+            warn("Invalid command `{}`. Command not unknown.".format(cli_args.command))
             return 1
-
-        # if cli_args.verbose:
-        #     set_verbose()
 
         return instance.run()
     except XiiError as e:
@@ -71,4 +86,7 @@ def run_cli():
 
         for line in it:
             warn(line)
+
+        if cli_args.debug:
+            store.dump()
         return 1

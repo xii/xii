@@ -15,6 +15,13 @@ sample = {
     "array": [1, 2, 3, 4]
 }
 
+merge = {
+    "one": 2,
+    "two": 3,
+    "three": 4,
+    "four": 5
+}
+
 
 
 def test_create_store():
@@ -36,6 +43,22 @@ def test_set_store():
     test.set("foo/bar", 2)
 
     assert(test.get("foo/bar") == 2)
+
+
+def test_merge_store_overwrite():
+    test = store.Store(parent=sample)
+    test.merge(merge, overwrite=True, root="struct")
+
+    assert(test.get("struct/one") == 2)
+    assert(test.get("struct/four") == 5)
+
+
+def test_merge_store_overwrite():
+    test = store.Store(parent=sample)
+    test.merge(merge, overwrite=False, root="struct")
+
+    assert(test.get("struct/one") == 1)
+    assert(test.get("struct/four") == 5)
 
 
 def test_derive_store():

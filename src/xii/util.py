@@ -1,8 +1,11 @@
+import os
 import pkgutil
 import inspect
 import yaml
+import jinja2
 import time
 import md5
+import ast
 
 from Crypto.PublicKey import RSA
 
@@ -13,6 +16,17 @@ def safe_get(name, structure):
     if name not in structure:
         return None
     return structure[name]
+
+
+def convert_type(convertable):
+    if convertable in ["true", "True", "TRUE"]:
+        return True
+    if convertable in ["false", "False", "FALSE"]:
+        return False
+    try:
+        return ast.literal_eval(convertable)
+    except ValueError:
+        return convertable
 
 
 def file_read(path):
@@ -28,6 +42,23 @@ def make_temp_name(seed):
     hashed = md5.new(seed + str(time.time())).hexdigest()
     return "/tmp/xii-" + hashed
 
+def jinja_read(tpl, store):
+    try:
+        path, filename = os.path.split(tpl)
+        from_file = jinja2.FileSystemLoader(path)
+        env = jinja2.Environment(loader = from_file,
+                                 undefined = jinja2.StrictUndefined)
+
+        yml = env.get_template(filename).render(store.values())
+
+        return yaml.load(yml)
+    except IOError:
+        raise error.ConnError("Could not open definition: No such file or directory")
+    except yaml.YAMLError as err:
+        raise error.ValidatorError("error parsing definition, {}".format(err))
+    except jinja2.exceptions.UndefinedError as err:
+        raise error.ValidatorError("error parsing definition, {}".format(err))
+    
 
 def yaml_read(path):
     try:

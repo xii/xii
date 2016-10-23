@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from multiprocessing import Pool
 from xii.ui import HasOutput
@@ -11,21 +12,23 @@ class Command(HasOutput):
     name = ["invalidcommand"]
     help = "No help given"
 
-    def __init__(self, args, config):
+    def __init__(self, args, store):
         self.args = args
-        self.config = config
+        self.store = store
 
     def get_full_name(self):
         return ["cmd", self.name[0]]
 
     def run(self):
         pass
+        
 
     def action_each(self, action, objs):
-        if self.config.is_parallel():
-
-            pool = Pool(self.config.workers())
+        if self.store.get("global/parallel", True):
+            pool = Pool(self.store.get("global/workers", 3))
             table = []
+
+            import pdb; pdb.set_trace()
 
             for obj in objs:
                 table.append((obj, action))
@@ -34,13 +37,6 @@ class Command(HasOutput):
         else:
             for obj in objs:
                 obj.run(action)
-
-    def make_runtime(self, additional={}):
-        runtime = {
-            "config": self.config,
-        }
-        runtime.update(additional)
-        return runtime
 
     def default_arg_parser(self):
         parser = argparse.ArgumentParser()
@@ -54,10 +50,10 @@ class Register(object):
     registered = []
 
     @classmethod
-    def get(cls, name, args, config):
+    def get(cls, name, args, store):
         for command in cls.registered:
             if name in command.name:
-                return command(args, config)
+                return command(args, store)
         return None
 
     @classmethod
