@@ -1,7 +1,7 @@
 import md5
 
 from xii import error
-from xii.ui import HasOutput
+from xii.output import HasOutput
 from xii.connections.ssh import Ssh
 
 

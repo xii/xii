@@ -5,7 +5,7 @@ from time import sleep
 from abc import ABCMeta, abstractmethod
 
 from xii import error
-from xii.ui import HasOutput
+from xii.output import HasOutput
 
 
 class NeedLibvirt(HasOutput):

@@ -2,13 +2,13 @@ import os
 import tarfile
 import md5
 
-from xii import error, util
-from xii.attributes.base import NodeAttribute
-from xii.need import NeedGuestFS
+from xii import error, util, need
 from xii.validator import Dict, String, Required, Key, VariableKeys
 
+from base import NodeAttribute
 
-class CopyAttribute(NodeAttribute, NeedGuestFS):
+
+class CopyAttribute(NodeAttribute, need.NeedGuestFS):
     entity = "copy"
     requires = ["image"]
 

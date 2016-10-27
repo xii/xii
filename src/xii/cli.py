@@ -1,11 +1,10 @@
 
 import argparse
 
-from xii import commands, components, attributes, paths, config, command, util
-from xii import definition
+from xii import paths, config, command, util, definition, extension
 from xii.store import Store
 from xii.error import XiiError
-from xii.ui import warn
+from xii.output import warn
 
 
 def usage_text():
@@ -37,6 +36,7 @@ def cli_arg_parser():
 
 
 def run_cli():
+    extension.load_builtin()
     parser = cli_arg_parser()
     try:
 

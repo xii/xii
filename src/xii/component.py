@@ -1,24 +1,94 @@
 from xii.entity import Entity, EntityRegister
+from xii.store import HasStore
 
 
-class Component(Entity):
-    entity = "component"
-    toplevel = True
-    defaults = []
+class Component(Entity, HasStore):
+    ctype = ""
+    default_attrs = []
 
     @classmethod
     def register(cls):
         EntityRegister.register_component(cls)
 
-    def __init__(self, name, runtime):
-        Entity.__init__(self, name, runtime, parent=None)
+    def __init__(self, name, command):
+        Entity.__init__(self, name, parent=command)
+
+    # limit access to component/type/concret_instance
+    def store(self):
+        path = "components/{}/{}".format(self.ctype, self.entity())
+        return self.parent().store().derive(path)
+
+    def add_attribute(self, attribute):
+        return self.add_child(self, attribute)
+
+    def each_attribute(self, action, reverse=False):
+        return self.each_child(action, reverse)
+
+    def get_attribute(self, name):
+        return self.get_child(name)
 
     def load_defaults(self):
-        for default in self.defaults:
-            attr = EntityRegister.get_entity(default, "attribute", self.entity)
+        for default in self.default_attributes:
+            attr = EntityRegister.get_attribute(self.ctype, default)
+            import pdb; pdb.set_trace()
             if attr.has_defaults():
-                self.add(attr(attr.defaults, self))
+                self.add_attribute(attr(attr.defaults, self))
 
     def run(self, action):
         if action in dir(self):
             getattr(self, action)()
+
+    def validate(self):
+        Entity.validate(self, self.required_attributes)
+
+
+def from_definition(store, command):
+    components = []
+
+    definition = store.get("components")
+    for component_type in definition:
+        for name in definition[component_type].keys():
+            components.append(_create_component(name, component_type, command))
+    return components
+
+
+# def get(name, runtime):
+#     settings = runtime['definition'].item(name)
+#     if not settings:
+#         return None
+#     return _create_component(settings, name, runtime)
+
+
+def _create_component(name, component_type, command):
+
+    component_class = EntityRegister.get_component(component_type)
+    component = component_class(name, command)
+
+    component.load_defaults()
+
+    import pdb; pdb.set_trace()
+
+    for attr_name in component.store().values().keys():        
+        if attr_name in ["type", "count"]:
+            continue
+
+        attr = EntityRegister.get_attribute(component_type, attr_name)
+
+        import pdb; pdb.set_trace()
+
+        
+
+    for attr_name, attr_settings in settings.items():
+        if attr_name in ["type", "count"]:
+            continue
+
+        attr = EntityRegister.get_entity(attr_name, "attribute", component_type)
+
+        if not attr:
+            warn("Unkown attribute `{}`. Skipping.".format(attr_name))
+            continue
+        component.add(attr(attr_settings, component))
+
+    # check if component is correctly initialized
+    component.validate()
+    return component

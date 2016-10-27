@@ -18,6 +18,9 @@
    [ ] Add metadata volume source
    [x] Add copy to tmp directory routine (before spawn)
    [x] Import volume to pool (after spawn)
+ [ ] Add store construction
+   [ ] Add system
+   [ ] Load jinja file
  [ ] Implement basic pool creating in components/pool
  [ ] Implement attributes/pool/directory
  [x] Cleanup image/storage path abstrace requirements

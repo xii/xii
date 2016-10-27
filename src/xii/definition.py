@@ -11,7 +11,10 @@ def prepare_store(defn, store):
 
     for ctype, cname, component in get_components(defn):
         print("adding {}/{}". format(ctype, cname))
-        store.set("components/{}/{}".format(ctype, cname), component)
+        tmp = store.get("global").copy()
+        tmp.update(component)
+        import pdb; pdb.set_trace()
+        store.set("components/{}/{}".format(ctype, cname), tmp)
 
 
 def get_components(defn):

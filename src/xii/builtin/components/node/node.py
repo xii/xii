@@ -8,10 +8,9 @@ from xii.util import domain_has_state, domain_wait_state, wait_until_inactive
 
 
 class NodeComponent(Component, NeedLibvirt):
-    entity = "node"
-
-    requires = ["pool", "image"]
-    defaults = ["pool", "network", "hostname"]
+    ctype = "node"
+    required_attributes = ["pool", "image"]
+    default_attributes = ["pool", "network", "hostname"]
 
     xml_dfn = {'devices': ""}
     xml_metadata = {}

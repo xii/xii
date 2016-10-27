@@ -7,7 +7,7 @@ import random
 from time import sleep
 
 from xii import connection, error
-from xii.ui import HasOutput
+from xii.output import HasOutput
 
 import paramiko
 

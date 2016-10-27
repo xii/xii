@@ -1,6 +1,6 @@
 import argparse
 
-from xii import command, components
+from xii import command
 
 
 def start_command(cmpnt):
@@ -16,9 +16,6 @@ class StartCommand(command.Command):
         parser = self.default_arg_parser()
         args = parser.parse_args(self.args)
 
-        cmpnts = components.from_definition(self.store)
-
-        self.action_each("start", cmpnts)
-
+        self.each_component("start")
 
 command.Register.register(StartCommand)

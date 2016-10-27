@@ -9,4 +9,4 @@ class NodeAttribute(Attribute):
         EntityRegister.register_attribute("node", cls)
 
     def get_tmp_volume_path(self):
-        return self.other("image").get_tmp_volume_path()
+        return self.other_attribute("image").get_tmp_volume_path()

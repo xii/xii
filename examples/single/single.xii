@@ -2,7 +2,8 @@
 ---
 single:
   type: node
-  network: default
+  #connection: qemu+ssh://felixsch@192.168.178.90/system
+  #network: default
 
   # opensuse Leap 42.1 (x86_64)
   #image: http://download.opensuse.org/repositories/home:/fschnizlein:/images:/libvirt/images/openSUSE-Leap-42.1.x86_64.qcow2
@@ -17,14 +18,14 @@ single:
   image: http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2
   #image: /home/felixsch/CentOS-7-x86_64-GenericCloud-no-selinux.qcow2
 
-  graphic: yes
-  user:
-    felixsch:
-      password: felix
-    root:
-      password: linux
-  ssh:
-    copy-key:
-      users:
-        - felixsch
-        - root
+  # graphic: yes
+  # user:
+  #   felixsch:
+  #     password: felix
+  #   root:
+  #     password: linux
+  # ssh:
+  #   copy-key:
+  #     users:
+  #       - felixsch
+  #       - root

@@ -2,7 +2,7 @@ import argparse
 
 from multiprocessing import Pool
 
-from xii import definition, command, components, connection
+from xii import command
 
 
 def destroy_component(cmpnt):
@@ -13,17 +13,8 @@ class DestroyCommand(command.Command):
     help = "Destroy xii vm's"
 
     def run(self):
+        self.each_component("destroy")
 
-        dfn_path = self.parse_command()
-        dfn  = definition.from_file(dfn_path, self.config)
-
-        runtime = self.make_runtime({
-            "definition": dfn
-        })
-
-        cmpnts = components.from_definition(runtime)
-
-        self.action_each("destroy", cmpnts)
 
     def parse_command(self):
         parser = argparse.ArgumentParser()

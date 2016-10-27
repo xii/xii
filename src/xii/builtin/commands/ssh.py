@@ -4,12 +4,12 @@ import libvirt
 import subprocess
 import time
 
-from xii import definition, command, components, error
-from xii.ui import HasOutput
+from xii import definition, command, error
+from xii.output import HasOutput
 from xii.entity import Entity
 
 
-class SSHCommand(command.Command, HasOutput):
+class SSHCommand(command.Command):
     name = ['ssh']
     help = "connect to a domain"
 

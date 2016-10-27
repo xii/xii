@@ -1,8 +1,8 @@
 from xii.entity import EntityRegister, Entity
+from xii.store import HasStore
 
-class Attribute(Entity):
-    entity = "attribute"
-
+class Attribute(Entity, HasStore):
+    attribute=""
     defaults = None
     keys = None
 
@@ -17,26 +17,17 @@ class Attribute(Entity):
         return cls(cls.defaults, cmpnt)
 
     def __init__(self, settings, component):
-        Entity.__init__(self, name=self.entity,
+        Entity.__init__(self, name=self.attribute,
                               parent=component)
-        self.settings = settings
 
-    def share(self, name, creator, finalizer=None):
-        return self.get_parent().share(name, creator, finalizer)
+    def store(self):
+        return self.parent().store().get(self.attribute)
 
-    def setting(self, path, default_value=None):
-        value = self.settings
-        for key in path.split("/"):
-            if key not in value:
-                return default_value
-            value = value[key]
-        return value
+    def component_entity(self):
+        return self.parent().entity()
 
-    def component_name(self):
-        return self.get_parent().name
-
-    def other(self, name):
-        return self.get_parent().get_child(name)
+    def other_attribute(self, name):
+        return self.parent().get_attribute(name)
 
     def validate(self):
-        self.keys.validate(self.get_parent().name + " > " + self.name, self.settings)
+        self.keys.validate(self.component_entity() + " > " + self.entity(), self.store().values())

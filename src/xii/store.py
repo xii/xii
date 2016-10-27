@@ -1,8 +1,9 @@
+from abc import ABCMeta, abstractmethod
+
 class Store():
 
     def __init__(self, parent={}):
         self._values = parent
-
 
     def set(self, key, new):
         path = key.split("/")
@@ -44,3 +45,17 @@ class Store():
     def dump(self):
         import pprint
         pprint.pprint(self._values)
+
+
+class HasStore():
+    __meta__ = ABCMeta
+
+    @abstractmethod
+    def store(self):
+        pass
+
+    def get(self, key, default=None):
+        return self.store().get(key, default)
+
+    def set(self, key, value):
+        return self.store().set(key, value)

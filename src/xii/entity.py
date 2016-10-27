@@ -1,36 +1,74 @@
 import inspect
 
-from xii import error
-from xii.ui import HasOutput
-
+from xii import error, util
+from xii.output import HasOutput
 
 class Entity(HasOutput):
-    entity = "entity"
-    name = "name"
-
-    toplevel = False
     requires = []
 
-
-    def __init__(self, name, runtime=None, parent=None):
-        if parent and self.toplevel:
-            raise error.Bug("{} is a toplevel entity but added "
-                            "as child?".format(self.entity))
-
-        self.name = name
+    def __init__(self, name, store=None, parent=None):
+        self._entity = name
         self._parent = parent
-        self._runtime = runtime
+        self._store = store
         self._childs = []
         self._shares = {}
 
-    def get_full_name(self):
-        if self._parent:
-            return self._parent.get_full_name() + [self.name]
-        return [self.name]
+    def has_parent(self):
+        return self._parent is not None
 
-    def add(self, new):
+    def parent(self):
+        if not self.has_parent():
+            raise error.Bug("{} is trying to get parent entity, but there "
+                            "is none".format(self.entity()))
+        return self._parent
+
+    def entity_path(self):
+        if self.has_parent():
+            return self._parent.entity_path() + [self._entity]
+        return [self._entity]
+
+    def entity(self):
+        return self._entity
+
+    def store(self):
+        import pdb; pdb.set_trace()
+        return self._store
+
+    def validate(self, required_children=None):
+        self._reorder_childs()
+        if required_children:
+            for required in required_children:
+                child = self.get_child(required)
+                if not child:
+                    raise error.NotFound("Could not find required `{}` "
+                                        "in {}".format(required, self.name))
+        for child in self._childs:
+            child.validate()
+
+    def share(self, name, creator, finalizer=None):
+        if self.has_parent():
+            return self.get_parent().share(name, creator, finalizer)
+
+        if name not in self._shares:
+            self._shares[name] = {
+                "value": creator(),
+                "finalizer": finalizer
+            }
+        return self._shares[name]['value']
+
+    def finalize(self):
+        for name, shared in self._shares.items():
+            if shared["finalizer"] is not None:
+                shared["finalizer"](shared['value'])
+            del self._shares[name]
+
+    def run(self, action):
+        if action in dir(self):
+            getattr(self, action)()
+
+    def add_child(self, new):
         for idx, child in enumerate(self._childs):
-            if child.entity == new.entity:
+            if child.entity() == new.entity():
                 self._childs[idx] = new
                 return
         self._childs.append(new)
@@ -41,32 +79,10 @@ class Entity(HasOutput):
                 return child
         return None
 
-    def get_parent(self):
-        if self._parent is None:
-            raise error.Bug("{} is trying to get parent entity, but there "
-                            "is none".format(self.entity))
-        return self._parent
+    def children(self):
+        return self._childs
 
-    def get_runtime(self):
-        if self._parent is not None:
-            return self._parent.get_runtime()
-        return self._runtime
-
-    def get_config(self):
-        return self.get_runtime()["config"]
-
-    def get_definition(self):
-        return self.get_runtime()["definition"]
-
-    def get_virt_url(self):
-        dfn = self.get_runtime()["definition"]
-        return dfn.settings("connection", self.get_config().default_host())
-
-    def run(self, action):
-        if action in dir(self):
-            getattr(self, action)()
-
-    def childs_run(self, action, reverse=False):
+    def each_child(self, action, reverse=False):
         if reverse:
             run = reversed(self._childs)
         else:
@@ -74,43 +90,6 @@ class Entity(HasOutput):
 
         for child in run:
             child.run(action)
-
-    def validate(self):
-        self._reorder_childs()
-        for required in self.requires:
-            child = self.get_child(required)
-            if not child:
-                raise error.NotFound("Could not find required `{}` "
-                                     "in {}".format(required, self.name))
-        for child in self._childs:
-            child.validate()
-
-    def share(self, name, creator, finalizer=None):
-        if name not in self._shares:
-            self._shares[name] = {
-                "value": creator(),
-                "finalizer": finalizer
-            }
-        return self._shares[name]['value']
-
-    def global_share(self, key, value=None, default=None):
-        runtime = self.get_runtime()
-
-        # if set a new value
-        if value is not None:
-            runtime['share'][key] = value
-
-        # if key does not exist, create new one
-        if key not in runtime["share"]:
-            runtime["share"][key] = default
-
-        return runtime["share"][key]
-
-    def finalize(self):
-        for name, shared in self._shares.items():
-            if shared["finalizer"] is not None:
-                shared["finalizer"](shared['value'])
-            del self._shares[name]
 
     def _child_index(self, name):
         for idx, child in enumerate(self._childs):
@@ -141,14 +120,20 @@ class Entity(HasOutput):
             rounds += 1
 
 
+    # def get_virt_url(self):
+    #     dfn = self.get_runtime()["definition"]
+    #     return dfn.settings("connection", self.get_config().default_host())
+
+
 class EntityRegister():
     _registered = {
         'component': {},
         'attribute': {}
-    }
+    } 
 
     @classmethod
     def register_component(cls, klass):
+        print("registering component {}".format(klass.__name__))
         if Entity not in inspect.getmro(klass):
             raise error.Bug("{} is not a entity".format(klass.__name__))
 
@@ -156,10 +141,11 @@ class EntityRegister():
             raise error.Bug("{}/{} is already defined"
                             .format("component", klass.entity))
 
-        cls._registered["component"][klass.entity] = klass
+        cls._registered["component"][klass.ctype] = klass
 
     @classmethod
     def register_attribute(cls, component, klass):
+        print("registering attribute {}/{}".format(component, klass.__name__))
         if Entity not in inspect.getmro(klass):
             raise error.Bug("{} is not a entity".format(klass.__name__))
 
@@ -170,23 +156,18 @@ class EntityRegister():
             raise error.Bug("{}/{}/{} is already defined"
                             .format("attribute", component, klass.entity))
 
-        cls._registered["attribute"][component][klass.entity] = klass
+        cls._registered["attribute"][component][klass.attr_type] = klass
 
     @classmethod
-    def get_entity(cls, name, group, component=None):
-        if component is None:
-            if name not in cls._registered[group]:
-                raise error.NotFound("Could not find `{}/{}`. "
-                                     "Maybe misspelled?".format(group, name))
+    def get_component(cls, ctype):
+        if ctype not in cls._registered["component"]:
+            raise error.NotFound("Unknown component `{}`. Maybe misspelled?".format(ctype))
+        return cls._registered["component"][ctype]
 
-            return cls._registered[group][name]
-
-        if component not in cls._registered[group]:
-            raise error.DefError("Could not find `{}/{}/{}`. Maybe misspelled?"
-                                 .format(component, group, name))
-
-        if name not in cls._registered[group][component]:
-            raise error.DefError("Could not find `{}/{}/{}`. Maybe misspelled?"
-                                 .format(component, group, name))
-
-        return cls._registered[group][component][name]
+    @classmethod
+    def get_attribute(cls, ctype, aname):
+        if (ctype not in cls._registered["attribute"] or 
+            aname not in cls._registered["attribute"][ctype][aname]):
+            raise error.NotFound("Unkown attribute `{}`. "
+                            "Maybe misspelled?".format(aname, ctype))
+        return cls_registered["attribute"][ctype][aname]
