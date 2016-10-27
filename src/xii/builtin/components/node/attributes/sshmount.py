@@ -3,14 +3,15 @@ import getpass
 
 from multiprocessing import Lock
 
-from xii import error, util
-from xii.attributes.base import NodeAttribute
-from xii.need import NeedGuestFS, NeedSSH, NeedLibvirt
+
+from xii import error, util, need
 from xii.validator import Dict, String, Required, Key, VariableKeys
 
+from base import NodeAttribute
 
-class SSHMountAttribute(NodeAttribute, NeedLibvirt, NeedGuestFS, NeedSSH):
-    entity = "sshmount"
+
+class SSHMountAttribute(NodeAttribute, need.NeedLibvirt, need.NeedGuestFS, need.NeedSSH):
+    atype = "sshmount"
     requires = ["image", "ssh", "user", "network"]
 
     key_path = ".ssh/xii-sshfs.key"

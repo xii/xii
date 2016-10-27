@@ -9,7 +9,7 @@ from base import NodeAttribute
 
 
 class CopyAttribute(NodeAttribute, need.NeedGuestFS):
-    entity = "copy"
+    atype = "copy"
     requires = ["image"]
 
     keys = Dict([

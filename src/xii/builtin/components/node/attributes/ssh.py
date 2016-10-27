@@ -2,14 +2,14 @@ import os
 
 from Crypto.PublicKey import RSA
 
-from xii import util
-from xii.attributes.base import NodeAttribute
-from xii.need import NeedGuestFS
+from xii import util, need
 from xii.validator import Dict, List, String, Required, Key, Bool
 
+from base import NodeAttribute
 
-class SSHAttribute(NodeAttribute, NeedGuestFS):
-    entity = "ssh"
+
+class SSHAttribute(NodeAttribute, need.NeedGuestFS):
+    atype = "ssh"
 
     requires = ["image", "user"]
     defaults = None

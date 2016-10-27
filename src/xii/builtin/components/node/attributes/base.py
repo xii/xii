@@ -10,3 +10,6 @@ class NodeAttribute(Attribute):
 
     def get_tmp_volume_path(self):
         return self.other_attribute("image").get_tmp_volume_path()
+
+    def add_xml(self, section, xml):
+        self.parent().add_xml(section, xml)

@@ -3,13 +3,14 @@ import random
 import string
 import os
 
-from xii.attributes.base import NodeAttribute
+from xii import need
 from xii.validator import Dict, String, VariableKeys, Key, Required
-from xii.need import NeedGuestFS
+
+from base import NodeAttribute
 
 
-class UserAttribute(NodeAttribute, NeedGuestFS):
-    entity = "user"
+class UserAttribute(NodeAttribute, need.NeedGuestFS):
+    atype = "user"
 
     default_user = {"username": "xii",
                     "description": "xii generated user",

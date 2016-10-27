@@ -1,6 +1,7 @@
 from xii.entity import Entity, EntityRegister
 from xii.store import HasStore
 
+non_attributes = ["count", "type", "settings"]
 
 class Component(Entity, HasStore):
     ctype = ""
@@ -19,7 +20,7 @@ class Component(Entity, HasStore):
         return self.parent().store().derive(path)
 
     def add_attribute(self, attribute):
-        return self.add_child(self, attribute)
+        return self.add_child(attribute)
 
     def each_attribute(self, action, reverse=False):
         return self.each_child(action, reverse)
@@ -30,9 +31,8 @@ class Component(Entity, HasStore):
     def load_defaults(self):
         for default in self.default_attributes:
             attr = EntityRegister.get_attribute(self.ctype, default)
-            import pdb; pdb.set_trace()
             if attr.has_defaults():
-                self.add_attribute(attr(attr.defaults, self))
+                self.add_attribute(attr(self))
 
     def run(self, action):
         if action in dir(self):
@@ -66,28 +66,15 @@ def _create_component(name, component_type, command):
 
     component.load_defaults()
 
-    import pdb; pdb.set_trace()
-
     for attr_name in component.store().values().keys():        
-        if attr_name in ["type", "count"]:
+        if attr_name in non_attributes:
             continue
-
         attr = EntityRegister.get_attribute(component_type, attr_name)
-
-        import pdb; pdb.set_trace()
-
-        
-
-    for attr_name, attr_settings in settings.items():
-        if attr_name in ["type", "count"]:
-            continue
-
-        attr = EntityRegister.get_entity(attr_name, "attribute", component_type)
-
         if not attr:
-            warn("Unkown attribute `{}`. Skipping.".format(attr_name))
-            continue
-        component.add(attr(attr_settings, component))
+            raise NotFound("Invalid attribute `{}` for component "
+                           "{}. Maybe Missspelled?"
+                           .format(attr_name, component.entity()))
+        component.add_attribute(attr(component))
 
     # check if component is correctly initialized
     component.validate()

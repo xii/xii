@@ -16,7 +16,7 @@ class Attribute(Entity, HasStore):
     def default(cls, cmpnt):
         return cls(cls.defaults, cmpnt)
 
-    def __init__(self, settings, component):
+    def __init__(self, component):
         Entity.__init__(self, name=self.attribute,
                               parent=component)
 
@@ -31,3 +31,6 @@ class Attribute(Entity, HasStore):
 
     def validate(self):
         self.keys.validate(self.component_entity() + " > " + self.entity(), self.store().values())
+
+    def get_virt_url(self):
+        return self.connection("connection", "FAILING")

@@ -1,13 +1,12 @@
 from time import sleep
 
-from xii import paths, error
-from xii.need import NeedLibvirt
-from xii.attributes.base import NodeAttribute
+from xii import paths, error, need
 from xii.validator import String
 
+from base import NodeAttribute
 
-class NetworkAttribute(NodeAttribute, NeedLibvirt):
-    entity = "network"
+class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
+    atype = "network"
     defaults = 'default'
 
     keys = String()

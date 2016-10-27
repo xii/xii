@@ -2,7 +2,8 @@
 ---
 single:
   type: node
-  #connection: qemu+ssh://felixsch@192.168.178.90/system
+  settings:
+    connection: qemu+ssh://sometest
   #network: default
 
   # opensuse Leap 42.1 (x86_64)

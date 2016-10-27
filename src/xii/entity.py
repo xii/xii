@@ -31,7 +31,6 @@ class Entity(HasOutput):
         return self._entity
 
     def store(self):
-        import pdb; pdb.set_trace()
         return self._store
 
     def validate(self, required_children=None):
@@ -156,7 +155,7 @@ class EntityRegister():
             raise error.Bug("{}/{}/{} is already defined"
                             .format("attribute", component, klass.entity))
 
-        cls._registered["attribute"][component][klass.attr_type] = klass
+        cls._registered["attribute"][component][klass.atype] = klass
 
     @classmethod
     def get_component(cls, ctype):
@@ -166,8 +165,9 @@ class EntityRegister():
 
     @classmethod
     def get_attribute(cls, ctype, aname):
+        print("getting attribute {} => {}".format(str(ctype), str(aname)))
         if (ctype not in cls._registered["attribute"] or 
-            aname not in cls._registered["attribute"][ctype][aname]):
+            aname not in cls._registered["attribute"][ctype]):
             raise error.NotFound("Unkown attribute `{}`. "
                             "Maybe misspelled?".format(aname, ctype))
-        return cls_registered["attribute"][ctype][aname]
+        return cls._registered["attribute"][ctype][aname]

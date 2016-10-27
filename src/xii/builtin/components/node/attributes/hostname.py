@@ -1,12 +1,11 @@
-from xii import error
-from xii.attributes.base import NodeAttribute
+from xii import error, need
 from xii.validator import Bool
-from xii.need import NeedGuestFS
+
+from base import NodeAttribute
 
 
-class HostnameAttribute(NodeAttribute, NeedGuestFS):
-    entity = "hostname"
-
+class HostnameAttribute(NodeAttribute, need.NeedGuestFS):
+    atype = "hostname"
     requires = ["image"]
     defaults = True
 

@@ -4,14 +4,13 @@ import stat
 
 import xml.etree.ElementTree as etree
 
-from xii import paths, error
-from xii.need import NeedIO, NeedLibvirt
+from xii import paths, error, need
 from xii.attribute import Attribute
 from xii.validator import String
 from xii.entity import EntityRegister
 
-class PoolAttribute(Attribute, NeedIO, NeedLibvirt):
-    entity = "pool"
+class PoolAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
+    atype = "pool"
 
     keys = String()
 

@@ -1,13 +1,13 @@
 import os
 
-from xii import error
-from xii.need import NeedSSH, NeedLibvirt
-from xii.attributes.base import NodeAttribute
+from xii import error, need
 from xii.validator import String, List, Key, Dict
 
+from base import NodeAttribute
 
-class ShellAttribute(NodeAttribute, NeedSSH, NeedLibvirt):
-    entity = "shell"
+
+class ShellAttribute(NodeAttribute, need.NeedSSH, need.NeedLibvirt):
+    atype = "shell"
     requires = ["ssh", "user"]
 
     keys = List(Dict([

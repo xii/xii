@@ -3,24 +3,24 @@ import time
 
 from multiprocessing import Condition
 
-from xii import paths, error
-from xii.need import NeedIO, NeedLibvirt
+from xii import paths, error, entity, need
+
 from xii.attribute import Attribute
 from xii.validator import String
 from xii.entity import EntityRegister
 
 _pending_downloads = Condition()
 
-class ImageAttribute(Attribute, NeedIO, NeedLibvirt):
-    entity = "image"
-    requires = ['pool']
+class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
+    atype = "image"
 
+    requires = ['pool']
     keys = String()
 
 
-    def __init__(self, settings, component):
-        Attribute.__init__(self, settings, component)
-        self._tempdir = self.io().mktempdir("xii-" + self.component_name())
+    def __init__(self, component):
+        Attribute.__init__(self, parent=component)
+        self._tempdir = self.io().mktempdir("xii-" + self.component_entity())
 
     def get_tmp_volume_path(self):
         return os.path.join(self._tempdir, "image")
