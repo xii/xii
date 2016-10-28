@@ -27,7 +27,7 @@ class SSHAttribute(NodeAttribute, need.NeedGuestFS):
     ])
 
     def spawn(self):
-        if not self.settings:
+        if not self.settings():
             return
 
         guest = self.guest()
@@ -64,7 +64,7 @@ class SSHAttribute(NodeAttribute, need.NeedGuestFS):
                 guest.sh("chcon -R unconfined_u:object_r:user_home_t:s0 {}".format(user_ssh_dir))
 
     def _get_public_keys(self):
-        ssh_keys = self.setting('copy-key/ssh-keys')
+        ssh_keys = self.settings('copy-key/ssh-keys')
         if ssh_keys:
             return ssh_keys
 
@@ -98,10 +98,10 @@ class SSHAttribute(NodeAttribute, need.NeedGuestFS):
         guest_users = self.guest_get_users()
 
         # check if user wants current host to distribute his ssh keys
-        if hosts and self.component_name() not in hosts:
+        if hosts and self.component_entity() not in hosts:
             return
 
-        keys = self.global_share("ssh_distribute_keys", default={})
+        #keys = self.global_share("ssh_distribute_keys", default={})
 
         for user in users:
             if user not in guest_users:

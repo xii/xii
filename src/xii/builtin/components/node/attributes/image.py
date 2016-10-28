@@ -30,10 +30,12 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         if not self.io().exists(self._image_store_path()):
             self.io().mkdir(self._image_store_path(), recursive=True)
 
-        pool_name = self.other("pool").get_used_pool_name()
-        pool_type = self.other("pool").get_used_pool_type()
+        pool_name = self.other_attribute("pool").get_used_pool_name()
+        pool_type = self.other_attribute("pool").get_used_pool_type()
 
-        volume = self.get_volume(pool_name, self.component_name(), raise_exception=False)
+        import pdb; pdb.set_trace()
+
+        volume = self.get_volume(pool_name, self.component_entity(), raise_exception=False)
 
         if volume:
             self._remove_volume(volume)
@@ -45,7 +47,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         self.io().copy(self._image_path(), self.get_tmp_volume_path())
 
     def after_spawn(self):
-        pool = self.other("pool").get_used_pool()
+        pool = self.other_attribute("pool").get_used_pool()
         size = self.io().stat(self.get_tmp_volume_path()).st_size
         volume_tpl = paths.template("volume.xml")
         xml = volume_tpl.safe_substitute({
@@ -76,8 +78,8 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         self.io().rm(self._tempdir)
 
     def destroy(self):
-        pool = self.other("pool").get_used_pool()
-        volume = self.get_volume(pool.name(), self.component_name(), raise_exception=False)
+        pool = self.other_attribute("pool").get_used_pool()
+        volume = self.get_volume(pool.name(), self.component_entity(), raise_exception=False)
 
         if volume:
             self._remove_volume(volume, force=True)
@@ -87,7 +89,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         return paths.xii_home(home, 'images')
 
     def _image_path(self):
-        return os.path.join(self._image_store_path(), os.path.basename(self.settings))
+        return os.path.join(self._image_store_path(), os.path.basename(self.settings()))
 
     def _remove_volume(self, volume, force=False):
         if self.get_config().get('auto_delete_volumes', False) or force:
@@ -104,7 +106,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
             _pending_downloads.release()
             return
         self.say("downloading image...")
-        self.io().download(self.settings, self._image_path())
+        self.io().download(self.settings(), self._image_path())
 
         _pending_downloads.release()
 

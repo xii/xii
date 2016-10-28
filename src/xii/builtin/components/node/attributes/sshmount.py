@@ -26,10 +26,10 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
         ])
 
     def get_default_user(self):
-        return self.other("user").get_default_user()
+        return self.other_attribute("user").get_default_user()
 
     def get_default_host(self):
-        return self.domain_get_ip(self.component_name())
+        return self.domain_get_ip(self.component_entity())
 
     def sshfs_key_path(self, name):
         home = self.guest_user_home(name)
@@ -53,7 +53,7 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
             (key, pubkey) = util.generate_rsa_key_pair()
 
             # save private key to domain_image
-            self.say("{} => {}".format(user, self.component_name()))
+            self.say("{} => {}".format(user, self.component_entity()))
             self.guest().write(path, key)
 
             for idx, host in enumerate(authed_hosts):
@@ -80,7 +80,7 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
 
         # removing key from authorized_keys
         self.lock.acquire()
-        for mount in self.settings.values():
+        for mount in self.settings().values():
             user = self.get_default_user()
 
             if "user" in mount:
@@ -116,12 +116,12 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
         pass
 
     def _mount_dirs(self):
-        host = self.network_get_host_ip(self.other("network").settings)
+        host = self.network_get_host_ip(self.other_attribute("network").settings)
         user = getpass.getuser()
         ssh  = self.default_ssh()
         key  = os.path.join("~", self.key_path)
 
-        for dest, settings in self.settings.items():
+        for dest, settings in self.settings().items():
             user = self.get_default_user()
             source = settings["source"]
 
@@ -150,7 +150,7 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
 
     def _umount_dirs(self):
         ssh  = self.default_ssh()
-        for dest, settings in self.settings.items():
+        for dest, settings in self.settings().items():
             if not os.path.isabs(dest):
                 dest = os.path.join(ssh.user_home(), dest)
             self.say("unmounting {}...".format(dest))
@@ -173,7 +173,7 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
             return filter(None, content)
 
     def _host_name(self):
-        return self.component_name() + "." + self.get_definition().name()
+        return self.component_entity()
 
     def _check_sshfs_compability(self):
         sshfs_locations = ["/usr/bin/sshfs"]
@@ -184,14 +184,14 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
                 return
 
         raise error.NotFound("Image for {} seems to not support sshfs."
-                             .format(self.component_name()))
+                             .format(self.component_entity()))
 
     def _get_required_users(self):
         required = {}
         users = self.guest_get_users()
-        default = self.other("user").get_default_user()
+        default = self.other_attribute("user").get_default_user()
 
-        for mount in self.settings.values():
+        for mount in self.settings().values():
             user = default
 
             if "user" in mount:

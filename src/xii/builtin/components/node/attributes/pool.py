@@ -21,20 +21,20 @@ class PoolAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
 
         if not pool:
             # support the default volume pool
-            if self.settings == "xii":
+            if self.settings() == "xii":
                 return self._initialize_default_pool()
 
 
             # check if pool is defined and wait for its creation
-            has_definition = self.get_definition().item(self.settings,
+            has_definition = self.get_definition().item(self.settings(),
                                                         item_type="pool")
             if not has_definition:
                 raise error.NotFound("Could not find pool {}"
-                                     .format(self.settings))
+                                     .format(self.settings()))
 
             for i in range(self.get_config().retry("pool")):
                 self.counted(i, "Waiting for pool {} to become ready"
-                                .format(self.settings))
+                                .format(self.settings()))
 
                 pool = self.get_pool(self.settings(), raise_exception=False)
 
@@ -42,7 +42,7 @@ class PoolAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
                     return pool
                 sleep(self.get_config().wait())
             raise error.ExecError("Pool {} has not become ready "
-                                  "in time".format(self.settings))
+                                  "in time".format(self.settings()))
         return pool
 
     def get_used_pool_type(self):
@@ -53,7 +53,7 @@ class PoolAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         return xml.attrib["type"]
 
     def get_used_pool_name(self):
-        return self.settings
+        return self.settings()
 
     def _default_pool_path(self):
         home = self.io().user_home()

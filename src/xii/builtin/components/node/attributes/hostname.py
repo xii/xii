@@ -11,13 +11,8 @@ class HostnameAttribute(NodeAttribute, need.NeedGuestFS):
 
     keys = Bool()
 
-    def prepare(self):
-        if not self.settings:
-            return
-        self.add_info("set hostname", "yes")
-
     def spawn(self):
-        if not self.settings:
+        if not self.settings():
             return
 
         name = self.component_name()

@@ -9,13 +9,8 @@ class GraphicAttribute(NodeAttribute):
 
     keys = Bool()
 
-    def prepare(self):
-        if not self.settings:
-            return
-        self.add_info("graphic", "yes")
-
     def spawn(self):
-        if not self.settings:
+        if not self.settings():
             return
         xml = paths.template('graphic.xml')
         self.add_xml('devices', xml.safe_substitute())

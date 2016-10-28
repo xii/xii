@@ -20,10 +20,10 @@ class ShellAttribute(NodeAttribute, need.NeedSSH, need.NeedLibvirt):
     ]))
 
     def get_default_user(self):
-        return self.other("user").get_default_user()
+        return self.other_attribute("user").get_default_user()
 
     def get_default_host(self):
-        return self.domain_get_ip(self.component_name())
+        return self.domain_get_ip(self.component_entity())
 
     def after_start(self):
         for (script, shell) in self._get_shell_scripts("start"):
@@ -51,7 +51,7 @@ class ShellAttribute(NodeAttribute, need.NeedSSH, need.NeedLibvirt):
 
     def _get_shell_scripts(self, action):
         scripts = []
-        for script in self.settings:
+        for script in self.settings():
             if action in script:
                 shell = "/usr/bin/bash"
 

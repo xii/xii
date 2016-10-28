@@ -27,17 +27,13 @@ class UserAttribute(NodeAttribute, need.NeedGuestFS):
             ])
         )])
 
-    def prepare(self):
-        if self.settings:
-            self.add_info("user", ", ".join(self.settings.keys()))
-
     def get_default_user(self):
-        if not self.settings:
+        if not self.settings():
             return "xii"
-        return self.settings.iterkeys().next()
+        return self.settings().iterkeys().next()
 
     def spawn(self):
-        if not self.settings:
+        if not self.settings():
             return
 
         self.say("adding user/s...")
@@ -48,7 +44,7 @@ class UserAttribute(NodeAttribute, need.NeedGuestFS):
         groups = guest.cat("/etc/group").split("\n")
 
         user_index = 0
-        for name, settings in self.settings.items():
+        for name, settings in self.settings().items():
             self.say("adding {}".format(name))
             user = self.default_user.copy()
             user['username'] = name
