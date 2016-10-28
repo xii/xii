@@ -19,7 +19,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
 
 
     def __init__(self, component):
-        Attribute.__init__(self, parent=component)
+        Attribute.__init__(self, component)
         self._tempdir = self.io().mktempdir("xii-" + self.component_entity())
 
     def get_tmp_volume_path(self):
@@ -72,7 +72,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
             "volume": self.component_name()
         })
 
-        self.get_parent().add_xml('devices', xml)
+        self.parent().add_xml('devices', xml)
         self.io().rm(self._tempdir)
 
     def destroy(self):

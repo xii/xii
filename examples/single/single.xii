@@ -2,8 +2,7 @@
 ---
 single:
   type: node
-  settings:
-    connection: qemu+ssh://sometest
+
   #network: default
 
   # opensuse Leap 42.1 (x86_64)

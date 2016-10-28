@@ -33,6 +33,13 @@ class Entity(HasOutput):
     def store(self):
         return self._store
 
+    def gstore(self):
+        if self.has_parent():
+            return self.parent().gstore()
+        else:
+            return self.store()
+
+
     def validate(self, required_children=None):
         self._reorder_childs()
         if required_children:
@@ -46,7 +53,7 @@ class Entity(HasOutput):
 
     def share(self, name, creator, finalizer=None):
         if self.has_parent():
-            return self.get_parent().share(name, creator, finalizer)
+            return self.parent().share(name, creator, finalizer)
 
         if name not in self._shares:
             self._shares[name] = {
@@ -72,9 +79,9 @@ class Entity(HasOutput):
                 return
         self._childs.append(new)
 
-    def get_child(self, name):
+    def get_child(self, entity):
         for child in self._childs:
-            if child.name == name:
+            if child.entity() == entity:
                 return child
         return None
 
@@ -90,9 +97,9 @@ class Entity(HasOutput):
         for child in run:
             child.run(action)
 
-    def _child_index(self, name):
+    def _child_index(self, entity):
         for idx, child in enumerate(self._childs):
-            if child.name == name:
+            if child.entity() == entity:
                 return idx
         return None
 

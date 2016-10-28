@@ -10,7 +10,7 @@ from xii.validator import Dict, String, Required, Key, VariableKeys
 from base import NodeAttribute
 
 
-class SSHMountAttribute(NodeAttribute, need.NeedLibvirt, need.NeedGuestFS, need.NeedSSH):
+class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
     atype = "sshmount"
     requires = ["image", "ssh", "user", "network"]
 

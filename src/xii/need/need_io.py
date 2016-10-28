@@ -1,7 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
 from xii import error
-
 from xii.connections.local import Local
 from xii.connections.ssh import Ssh
 
@@ -21,7 +20,7 @@ class NeedIO():
                 raise error.ConnError("[io] No connection url supplied")
 
             if url.startswith('qemu+ssh'):
-                return Ssh(url)
+                return Ssh.new_from_url(url)
             if url.startswith('qemu'):
                 return Local()
 

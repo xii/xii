@@ -18,11 +18,13 @@ class PoolAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
 
     def get_used_pool(self):
         pool = self.get_pool(self.settings, raise_exception=False)
+        import pdb; pdb.set_trace()
 
         if not pool:
             # support the default volume pool
             if self.settings == "xii":
                 return self._initialize_default_pool()
+
 
             # check if pool is defined and wait for its creation
             has_definition = self.get_definition().item(self.settings,

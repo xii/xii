@@ -17,9 +17,10 @@ BUF_SIZE = 16 * 1024
 
 class Ssh(connection.Connection, HasOutput):
 
-    def __init__(self, entity, user, host, retry, wait):
+    def __init__(self, entity, user, host, retry, wait, password=None, keyfile=None):
         connection.Connection.__init__(self)
 
+        #TODO: Add password and key support
         self._user = user
         self._host = host
 
@@ -30,8 +31,8 @@ class Ssh(connection.Connection, HasOutput):
         self._ssh = None
         self._sftp = None
 
-    def get_full_name(self):
-        return self._entity.get_full_name() + ["ssh"]
+    def entity_path(self):
+        return self._entity.entity_path() + ["ssh"]
 
     def ssh(self):
         if self._ssh:
@@ -179,7 +180,8 @@ class Ssh(connection.Connection, HasOutput):
         user = None
 
         if not matched:
-            raise error.ConnError("[io] Invalid connection URL specified.")
+            raise error.ConnError("Invalid connection URL specified. `{}` is "
+                                  "invalid!".format(url))
 
         host = matched.group(3)
 
