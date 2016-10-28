@@ -27,10 +27,13 @@ class NodeComponent(Component, NeedLibvirt):
 
     # every node has an image (only currently)
     def get_domain_image_path(self):
-        return self.get_child('image').get_domain_image_path()
+        return self.get_attribute('image').get_domain_image_path()
+
+    def get_virt_url(self):
+        return self.get("settings/connection", "FAILING")
 
     def start(self):
-        domain = self.get_domain(self.name, raise_exception=False)
+        domain = self.get_domain(self.entity(), raise_exception=False)
 
         if not domain:
             domain = self._spawn_domain()
@@ -40,20 +43,20 @@ class NodeComponent(Component, NeedLibvirt):
             return
 
         self.say("starting ...")
-        self.childs_run("start")
+        self.each_child("start")
         self.finalize()
         domain.create()
 
         self.success("started!")
-        self.childs_run("after_start")
+        self.each_child("after_start")
 
     def stop(self, force=False):
         domain = self.get_domain(self.name)
 
-        self.childs_run("stop", reverse=True)
+        self.each_child("stop", reverse=True)
         sleep(4)
         self._stop_domain(domain, force)
-        self.childs_run("after_stop", reverse=True)
+        self.each_child("after_stop", reverse=True)
 
     def destroy(self):
         self.say("destroying...")
@@ -73,10 +76,10 @@ class NodeComponent(Component, NeedLibvirt):
             raise error.Bug("Could not remove running "
                             "domain {}".format(self.ident()))
 
-        self.childs_run("destroy", reverse=True)
+        self.each_child("destroy", reverse=True)
         domain.undefine()
         self.success("removed!")
-        self.childs_run("after_destroy", reverse=True)
+        self.each_child("after_destroy", reverse=True)
 
     def suspend(self):
         self.say("suspending...")
@@ -90,7 +93,7 @@ class NodeComponent(Component, NeedLibvirt):
             self.warn("is already suspended")
             return
 
-        self.childs_run("suspend")
+        self.each_child("suspend")
         domain.suspend()
 
         if not domain_wait_state(domain, libvirt.VIR_DOMAIN_PAUSED):
@@ -114,7 +117,7 @@ class NodeComponent(Component, NeedLibvirt):
             self.say("is not suspended")
             return
 
-        self.childs_run("resume")
+        self.each_child("resume")
         domain.resume()
 
         if not domain_wait_state(domain, libvirt.VIR_DOMAIN_RUNNING):
@@ -122,12 +125,12 @@ class NodeComponent(Component, NeedLibvirt):
             return
 
         self.success("resumed!")
-        self.childs_run("after_resume")
+        self.each_child("after_resume")
 
     def _spawn_domain(self):
         self.say("spawning...")
         self.xml_dfn = {'devices': ''}
-        self.childs_run("spawn")
+        self.each_child("spawn")
 
         caps = self.get_capabilities()
 
@@ -136,7 +139,7 @@ class NodeComponent(Component, NeedLibvirt):
         self.xml_dfn.update(caps)
 
         self.finalize()
-        self.childs_run("after_spawn")
+        self.each_child("after_spawn")
         try:
             self.virt().defineXML(xml.safe_substitute(self.xml_dfn))
             domain = self.get_domain(self.name)

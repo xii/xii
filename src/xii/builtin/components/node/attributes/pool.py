@@ -17,8 +17,7 @@ class PoolAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
     defaults = 'xii'
 
     def get_used_pool(self):
-        pool = self.get_pool(self.settings, raise_exception=False)
-        import pdb; pdb.set_trace()
+        pool = self.get_pool(self.settings(), raise_exception=False)
 
         if not pool:
             # support the default volume pool
@@ -37,7 +36,7 @@ class PoolAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
                 self.counted(i, "Waiting for pool {} to become ready"
                                 .format(self.settings))
 
-                pool = self.get_pool(self.settings, raise_exception=False)
+                pool = self.get_pool(self.settings(), raise_exception=False)
 
                 if pool:
                     return pool

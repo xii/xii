@@ -39,7 +39,20 @@ class Entity(HasOutput):
         else:
             return self.store()
 
+    def g_get(self, key, default=None):
+        return self.gstore().get(key, default)
 
+    def has_component(self, ctype, cmpnt):
+        components = self.get("components")
+
+        if not components:
+            return False
+
+        if (ctype not in components or
+            cmpnt not in components[ctype][cmpnt]):
+            return False
+        return True
+        
     def validate(self, required_children=None):
         self._reorder_childs()
         if required_children:
@@ -124,11 +137,6 @@ class Entity(HasOutput):
             if not has_moved:
                 idx += 1
             rounds += 1
-
-
-    # def get_virt_url(self):
-    #     dfn = self.get_runtime()["definition"]
-    #     return dfn.settings("connection", self.get_config().default_host())
 
 
 class EntityRegister():

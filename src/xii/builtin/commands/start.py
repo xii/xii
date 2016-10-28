@@ -14,7 +14,7 @@ class StartCommand(command.Command):
     def run(self):
 
         parser = self.default_arg_parser()
-        args = parser.parse_args(self.args)
+        args = parser.parse_args(self.args())
 
         self.each_component("start")
 

@@ -12,7 +12,7 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
     keys = String()
 
     def start(self):
-        network = self._get_delayed_network(self.settings)
+        network = self._get_delayed_network(self.settings())
 
         if network.isActive():
             return
@@ -22,36 +22,34 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
         self.success("network started!")
 
     def spawn(self):
-        network = self._get_delayed_network(self.settings)
+        network = self._get_delayed_network(self.settings())
         if not network:
             raise error.NotFound("Network {} for domain "
-                                 "{}".format(self.settings, self.component_name()))
+                                 "{}".format(self.settings(), self.component_name()))
 
         if not network.isActive():
             self.start()
 
-        self.get_parent().add_xml('devices', self._gen_xml())
+        self.add_xml('devices', self._gen_xml())
 
     def _gen_xml(self):
         xml = paths.template('network.xml')
-        return xml.safe_substitute({'network': self.settings})
+        return xml.safe_substitute({'network': self.settings()})
 
     def _get_delayed_network(self, name):
         network = self.get_network(name, raise_exception=False)
 
         if not network:
-            is_created = self.get_definition().item(name,
-                                                    item_type="network")
-            if not is_created:
+            if not self.has_component("network", name):
                 raise error.NotFound("Could not find network ({})"
                                      .format(name))
             # wait for network to become ready
-            for _ in range(self.get_config().retry("network")):
+            for _ in range(self.global_get("retry_network", 20)):
                 network = self.get_network(name, raise_exception=False)
 
                 if network:
                     return network
-                sleep(self.get_config().wait())
+                sleep(self.global_get("wait", 3))
 
             raise error.ExecError("Network {} has not become ready in "
                                   "time. Giving up".format(name))

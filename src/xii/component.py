@@ -32,7 +32,6 @@ class Component(Entity, HasStore):
         for default in self.default_attributes:
             attr = EntityRegister.get_attribute(self.ctype, default)
             if attr.has_defaults():
-                import pdb; pdb.set_trace()
                 self.add_attribute(attr(self))
 
     def run(self, action):

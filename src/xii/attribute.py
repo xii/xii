@@ -18,7 +18,7 @@ class Attribute(Entity, HasStore):
 
     def settings(self, key=None, default=None):
         if self.get(self.atype):
-            s = self.store.derive(self.atype)
+            s = self.store().derive(self.atype)
         if self.has_defaults():
             s = Store(parent=self.defaults)
 
@@ -36,8 +36,7 @@ class Attribute(Entity, HasStore):
         return self.parent().get_attribute(name)
 
     def validate(self):
-        import pdb; pdb.set_trace()
-        self.keys.validate(self.component_entity() + " > " + self.entity(), self.store().values())
+        self.keys.validate(self.component_entity() + " > " + self.entity(), self.settings())
         print("{} validated".format(self.entity()))
 
     def get_virt_url(self):

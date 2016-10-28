@@ -46,8 +46,7 @@ class Command(Entity, HasStore):
 
             result = pool.map_async(run_action_on_obj, table).get()
         else:
-            for obj in objs:
-                self.each_child(action, reverse=False)
+            self.each_child(action, reverse=False)
 
     def _create_components(self):
         for cmpnt in component.from_definition(self.store(), self):
@@ -59,6 +58,9 @@ class Command(Entity, HasStore):
         parser.add_argument("dfn_file", nargs="?", default=None)
 
         return parser
+
+    def args(self):
+        return self._args
 
 
 class Register(object):

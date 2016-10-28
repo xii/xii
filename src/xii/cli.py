@@ -57,6 +57,9 @@ def run_cli():
 
         store.set("global", config)
 
+        if cli_args.parallel is False:
+            store.set("global/parallel", cli_args.parallel)
+
         # merge with arguments from commandline
         for define in [d.split("=") for d in cli_args.defines]:
             if len(define) != 2:
@@ -78,7 +81,7 @@ def run_cli():
         if not instance:
             warn("Invalid command `{}`. Command not unknown.".format(cli_args.command))
             return 1
-
+        
         return instance.run()
     except XiiError as e:
         it = iter(e.error())
