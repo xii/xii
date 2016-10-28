@@ -34,6 +34,9 @@ class Command(Entity, HasStore):
     def add_component(self, component):
         self.add_child(component)
 
+    def get_component(self, name):
+        return self.get_child(name)
+
     def each_component(self, action):
         components = self.get("components")
 
@@ -42,7 +45,7 @@ class Command(Entity, HasStore):
             table = []
 
             for cmpnt in self.children():
-                table.append((cpmnt, action))
+                table.append((cmpnt, action))
 
             result = pool.map_async(run_action_on_obj, table).get()
         else:

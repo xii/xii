@@ -15,7 +15,7 @@ class HostnameAttribute(NodeAttribute, need.NeedGuestFS):
         if not self.settings():
             return
 
-        name = self.component_name()
+        name = self.component_entity()
 
         for replace in ["#", "."]:
             name = name.replace(replace, "-")

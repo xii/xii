@@ -99,21 +99,21 @@ class NeedLibvirt(HasOutput):
         return emulators[arch]
 
 
-    def domain_get_ip(self, domain_name):
+    def domain_get_ip(self, domain_name, retry=20, wait=3):
         domain = self.get_domain(domain_name)
         nets = []
 
         if not domain.isActive():
             return False
 
-        for i in range(self.get_config().retry("ip", default=20)):
+        for i in range(retry):
 
             self.counted(i, "fetching ip address from {}...".format(domain_name))
             nets = domain.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE)
 
             if len(nets):
                 break
-            sleep(self.get_config().wait(5))
+            sleep(wait)
 
         if not len(nets):
             raise error.ConnError("Could not fetch ip address for {}. Giving up!"

@@ -51,14 +51,6 @@ def from_definition(store, command):
             components.append(_create_component(name, component_type, command))
     return components
 
-
-# def get(name, runtime):
-#     settings = runtime['definition'].item(name)
-#     if not settings:
-#         return None
-#     return _create_component(settings, name, runtime)
-
-
 def _create_component(name, component_type, command):
 
     component_class = EntityRegister.get_component(component_type)

@@ -25,7 +25,7 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
         network = self._get_delayed_network(self.settings())
         if not network:
             raise error.NotFound("Network {} for domain "
-                                 "{}".format(self.settings(), self.component_name()))
+                                 "{}".format(self.settings(), self.component_entity()))
 
         if not network.isActive():
             self.start()
@@ -44,12 +44,12 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
                 raise error.NotFound("Could not find network ({})"
                                      .format(name))
             # wait for network to become ready
-            for _ in range(self.global_get("retry_network", 20)):
+            for _ in range(self.global_get("global/retry_network", 20)):
                 network = self.get_network(name, raise_exception=False)
 
                 if network:
                     return network
-                sleep(self.global_get("wait", 3))
+                sleep(self.global_get("global/wait", 3))
 
             raise error.ExecError("Network {} has not become ready in "
                                   "time. Giving up".format(name))

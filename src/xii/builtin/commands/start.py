@@ -17,5 +17,6 @@ class StartCommand(command.Command):
         args = parser.parse_args(self.args())
 
         self.each_component("start")
+        self.finalize()
 
 command.Register.register(StartCommand)

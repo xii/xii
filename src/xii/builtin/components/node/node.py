@@ -44,14 +44,13 @@ class NodeComponent(Component, NeedLibvirt):
 
         self.say("starting ...")
         self.each_child("start")
-        self.finalize()
         domain.create()
 
         self.success("started!")
         self.each_child("after_start")
 
     def stop(self, force=False):
-        domain = self.get_domain(self.name)
+        domain = self.get_domain(self.entity())
 
         self.each_child("stop", reverse=True)
         sleep(4)
@@ -60,7 +59,7 @@ class NodeComponent(Component, NeedLibvirt):
 
     def destroy(self):
         self.say("destroying...")
-        domain = self.get_domain(self.name, raise_exception=False)
+        domain = self.get_domain(self.entity(), raise_exception=False)
 
         if not domain:
             self.warn("does not exist")
@@ -83,7 +82,7 @@ class NodeComponent(Component, NeedLibvirt):
 
     def suspend(self):
         self.say("suspending...")
-        domain = self.get_domain(self.name, raise_exception=False)
+        domain = self.get_domain(self.entity(), raise_exception=False)
 
         if not domain:
             self.warn("does not exist")
@@ -103,7 +102,7 @@ class NodeComponent(Component, NeedLibvirt):
 
     def resume(self):
         self.say("resuming...")
-        domain = self.get_domain(self.name, raise_exception=False)
+        domain = self.get_domain(self.entity(), raise_exception=False)
 
         if not domain:
             self.warn("does not exist")
@@ -135,17 +134,17 @@ class NodeComponent(Component, NeedLibvirt):
         caps = self.get_capabilities()
 
         xml = paths.template('node.xml')
-        self.xml_dfn['name'] = self.name
+        self.xml_dfn['name'] = self.entity()
         self.xml_dfn.update(caps)
 
         self.finalize()
         self.each_child("after_spawn")
         try:
             self.virt().defineXML(xml.safe_substitute(self.xml_dfn))
-            domain = self.get_domain(self.name)
+            domain = self.get_domain(self.entity())
             return domain
         except libvirt.libvirtError as err:
-            raise error.ExecError("Could not start {}: {}".format(self.name, str(err)))
+            raise error.ExecError("Could not start {}: {}".format(self.entity(), str(err)))
 
     def _stop_domain(self, domain, force=False):
         if not domain.isActive():

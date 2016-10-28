@@ -26,6 +26,9 @@ class Attribute(Entity, HasStore):
             return s.values()
         return s.get(key, default)
 
+    def share(self, name, creator, finalizer=None):
+        return self.parent().share(name, creator, finalizer)
+
     def store(self):
         return self.parent().store()
 

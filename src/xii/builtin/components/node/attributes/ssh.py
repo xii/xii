@@ -32,7 +32,7 @@ class SSHAttribute(NodeAttribute, need.NeedGuestFS):
 
         guest = self.guest()
 
-        copy_key = self.setting('copy-key')
+        copy_key = self.settings('copy-key')
         if copy_key:
             self._add_keys_to_domain(guest, copy_key)
 
@@ -62,6 +62,7 @@ class SSHAttribute(NodeAttribute, need.NeedGuestFS):
             # FIXME: Find better way to deal with selinux labels
             if guest.get_selinux():
                 guest.sh("chcon -R unconfined_u:object_r:user_home_t:s0 {}".format(user_ssh_dir))
+
 
     def _get_public_keys(self):
         ssh_keys = self.settings('copy-key/ssh-keys')

@@ -33,8 +33,6 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         pool_name = self.other_attribute("pool").get_used_pool_name()
         pool_type = self.other_attribute("pool").get_used_pool_type()
 
-        import pdb; pdb.set_trace()
-
         volume = self.get_volume(pool_name, self.component_entity(), raise_exception=False)
 
         if volume:
@@ -51,7 +49,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         size = self.io().stat(self.get_tmp_volume_path()).st_size
         volume_tpl = paths.template("volume.xml")
         xml = volume_tpl.safe_substitute({
-            "name": self.component_name(),
+            "name": self.component_entity(),
             "capacity": size
             })
 
@@ -71,7 +69,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         disk_tpl = paths.template("disk.xml")
         xml = disk_tpl.safe_substitute({
             "pool": pool.name(),
-            "volume": self.component_name()
+            "volume": self.component_entity()
         })
 
         self.parent().add_xml('devices', xml)
@@ -92,11 +90,11 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         return os.path.join(self._image_store_path(), os.path.basename(self.settings()))
 
     def _remove_volume(self, volume, force=False):
-        if self.get_config().get('auto_delete_volumes', False) or force:
+        if self.g_get('global/auto_delete_volumes', False) or force:
             volume.delete()
         else:
             raise error.ExecError(
-                    ["Volume `{}` already exists".format(self.component_name()),
+                    ["Volume `{}` already exists".format(self.component_entity()),
                      "If you want xii to automatically delete volumes",
                      "set auto_delete_volumes to True in your xii configuration"])
 

@@ -32,7 +32,7 @@ class PoolAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
                 raise error.NotFound("Could not find pool {}"
                                      .format(self.settings()))
 
-            for i in range(self.get_config().retry("pool")):
+            for i in range(self.g_get("global/retry_pool", 20)):
                 self.counted(i, "Waiting for pool {} to become ready"
                                 .format(self.settings()))
 
@@ -40,7 +40,7 @@ class PoolAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
 
                 if pool:
                     return pool
-                sleep(self.get_config().wait())
+                sleep(self.g_get("global/wait", 3))
             raise error.ExecError("Pool {} has not become ready "
                                   "in time".format(self.settings()))
         return pool

@@ -65,9 +65,6 @@ class Entity(HasOutput):
             child.validate()
 
     def share(self, name, creator, finalizer=None):
-        if self.has_parent():
-            return self.parent().share(name, creator, finalizer)
-
         if name not in self._shares:
             self._shares[name] = {
                 "value": creator(),
@@ -76,8 +73,11 @@ class Entity(HasOutput):
         return self._shares[name]['value']
 
     def finalize(self):
+        for child in self._childs:
+            child.finalize()
         for name, shared in self._shares.items():
             if shared["finalizer"] is not None:
+                print("running finalizer for {}".format(name))
                 shared["finalizer"](shared['value'])
             del self._shares[name]
 
