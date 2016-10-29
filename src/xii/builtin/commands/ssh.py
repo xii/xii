@@ -52,8 +52,8 @@ class SSHCommand(command.Command):
                         stdout=null,
                         stderr=null)
 
-        options = "-o HostKeyAlgorithms=ssh-rsa"
-        #options = ""
+        #options = "-o HostKeyAlgorithms=ssh-rsa"
+        options = ""
         self._run_ssh_cmd(domain_name, user, ip, options, self.get("global/retry_ssh", 10))
 
     def _run_ssh_cmd(self, domain_name, user, ip, options="", retry=10, step=0):

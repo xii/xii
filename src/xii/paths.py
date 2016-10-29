@@ -23,9 +23,8 @@ def find_definition_file(path):
     if not path:
         cwd = os.getcwd()
         path = os.path.join(cwd, os.path.basename(cwd) + ".xii")
-
     if not os.path.exists(path):
-        raise error.FileError("Could not open definition: No such file or directory")
+        raise error.NotFound("Could not open definition: No such file or directory")
     return path
 
 

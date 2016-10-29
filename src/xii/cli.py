@@ -1,4 +1,4 @@
-
+import os
 import argparse
 
 from xii import paths, config, command, util, definition, extension
@@ -18,11 +18,10 @@ def cli_arg_parser():
     parser = argparse.ArgumentParser(usage=usage_text())
     parser.add_argument("--debug", action="store_true", default=False,
                         help="Make output more verbose and dump environment")
+    parser.add_argument("--deffile", default=None,
+                        help="Specify definition file")
     parser.add_argument("--no-parallel", dest="parallel", action="store_false", default=True,
                         help="Disable parallel processing")
-    parser.add_argument("--config", default=None,
-                        help="Optional path to configuration file")
-
     parser.add_argument("-D", "--define", dest="defines", action="append", default=[],
                         help="Define local variables")
     #parser.add_argument("-V", "--varfile", dest="varfile", default=None,
@@ -50,7 +49,7 @@ def run_cli():
         store = Store()
         store.set("runtime/config", paths.local("config.yml"))
 
-        store.set("runtime/definition", paths.find_definition_file(cli_args.config))
+        store.set("runtime/definition", paths.find_definition_file(cli_args.deffile))
 
         # load defaults / home configuration into variable store
         config = util.yaml_read(store.get("runtime/config"))
@@ -68,6 +67,9 @@ def run_cli():
                 return 1
             store.set(define[0], util.convert_type(define[1]))
 
+        for envvar in filter(lambda x: x.startswith("XII_"), os.environ):
+            store.set("global/" + envvar[4:], os.environ[envvar])
+            
         # parse definifition file
         defn = util.jinja_read(store.get("runtime/definition"), store)
 
