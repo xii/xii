@@ -10,7 +10,7 @@ def load_variables_from_env(prefix="XII_INTEGRATION_"):
     return vars
 
 
-def run_xii(deffile, cmd, variables={}, gargs="", cargs=""):
+def run_xii(deffile, cmd, variables={}, gargs=None, cargs=None):
 
     xii_env = os.environ.copy()
     
