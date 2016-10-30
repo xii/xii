@@ -15,7 +15,7 @@ def run_xii(deffile, cmd, variables={}, gargs="", cargs=""):
     xii_env = os.environ.copy()
     
     for key, value in variables.items():
-        env["XII_" + key] = value
+        xii_env["XII_" + key] = value
 
     call = ["xii", "--no-parallel", "--deffile", deffile, gargs, cmd, cargs]
     print("calling `{}`".format(" ".join(call)))
