@@ -18,8 +18,8 @@ def run_xii(deffile, cmd, variables={}, gargs=None, cargs=None):
         print("=> XII_" + key + " defined")
         xii_env["XII_" + key] = value
 
-    call = ["xii", "--no-parallel", "--deffile", deffile, gargs, cmd, cargs]
-    print("calling `{}`".format(" ".join(filter(None, call))))
+    call = ["xii", "--no-parallel", "--deffile", deffile, cmd]
+    print("calling `{}`".format(" ".join(call)))
  
     process = subprocess.Popen(call, stdout=subprocess.PIPE, env=xii_env)
 
