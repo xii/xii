@@ -15,6 +15,7 @@ def run_xii(deffile, cmd, variables={}, gargs="", cargs=""):
     xii_env = os.environ.copy()
     
     for key, value in variables.items():
+        print("=> XII_" + key + " defined")
         xii_env["XII_" + key] = value
 
     call = ["xii", "--no-parallel", "--deffile", deffile, gargs, cmd, cargs]
@@ -23,7 +24,7 @@ def run_xii(deffile, cmd, variables={}, gargs="", cargs=""):
     process = subprocess.Popen(call, stdout=subprocess.PIPE, env=xii_env)
 
     for line in process.stdout:
-        print(">" + line)
+        print("> " + line.rstrip(os.linesep))
 
     if process.returncode != 0:
         raise RuntimeError("running xii failed")
