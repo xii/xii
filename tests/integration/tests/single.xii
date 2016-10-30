@@ -19,5 +19,5 @@ single:
   ssh:
     copy-key:
       users:
-        {{ user }}
+        - {{ user }}
         - root

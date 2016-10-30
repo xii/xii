@@ -68,7 +68,8 @@ def run_cli():
             store.set(define[0], util.convert_type(define[1]))
 
         for envvar in filter(lambda x: x.startswith("XII_"), os.environ):
-            store.set("global/" + envvar[4:], os.environ[envvar])
+            print("define {} = {}".format(envvar[4:], os.environ[envvar]))
+            store.set(envvar[4:], os.environ[envvar])
             
         # parse definifition file
         defn = util.jinja_read(store.get("runtime/definition"), store)
