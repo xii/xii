@@ -32,7 +32,6 @@ setupdict = dict(
         include_package_data=True,
         packages=find_packages('src'),
         package_dir={'': 'src'},
-        data_files=[('config', ['defaults/config.yml'])],
         entry_points={'console_scripts': ['xii=xii:main']}
         )
 
