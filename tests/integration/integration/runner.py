@@ -15,9 +15,7 @@ def load_variables_from_env(prefix="XII_"):
 def run_xii(deffile, cmd, variables={}, gargs=None, cargs=None, returncode=0):
 
     xii_env = os.environ.copy()
-
-    print(xii_env)
-    
+ 
     for key, value in variables.items():
         print("=> XII_" + key + " defined")
         xii_env["XII_" + key] = value
