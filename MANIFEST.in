@@ -1,2 +1,2 @@
-recursive-include defaults *
+recursive-include src/xii/defaults *
 recursive-include src/xii/templates *

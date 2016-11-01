@@ -1,6 +1,20 @@
 #!/usr/bin/env bash
 NO_TOX=0
 
+if [ -f $(pwd)/.xii-env ]; then
+  echo "Loading xii-env..."
+  source $(pwd)/.xii-env
+fi
+
+if [ -x ${XII_image} ] ||
+   [ -x ${XII_user} ] ||
+   [ -x ${XII_password} ]; then
+  echo "!! no working setup found. Create .xii-env in !!"
+  echo "!! top level source directory.                !!"
+  exit 1
+fi
+
+
 if [ "x$1" == "x--no-tox" ]; then
   NO_TOX=1
 fi

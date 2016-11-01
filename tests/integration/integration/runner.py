@@ -1,7 +1,9 @@
 import os
 import subprocess
 
-def load_variables_from_env(prefix="XII_INTEGRATION_"):
+import pytest
+
+def load_variables_from_env(prefix="XII_"):
     length = len(prefix)
     vars   = {}
 
@@ -10,9 +12,11 @@ def load_variables_from_env(prefix="XII_INTEGRATION_"):
     return vars
 
 
-def run_xii(deffile, cmd, variables={}, gargs=None, cargs=None):
+def run_xii(deffile, cmd, variables={}, gargs=None, cargs=None, returncode=0):
 
     xii_env = os.environ.copy()
+
+    print(xii_env)
     
     for key, value in variables.items():
         print("=> XII_" + key + " defined")
@@ -26,9 +30,26 @@ def run_xii(deffile, cmd, variables={}, gargs=None, cargs=None):
     for line in process.stdout:
         print("> " + line.rstrip(os.linesep))
 
-    if process.returncode != 0:
-        raise RuntimeError("running xii failed")
+    process.communicate()
 
+
+    if process.returncode != returncode:
+        pytest.fail("Excepted xii to return {} but it returned {}"
+                     .format(returncode, process.returncode))
+
+    return True
+
+
+def cleanup_instance(instance, pool="xii", connection="qemu:///system"):
+    def _run(args):
+        print(" ".join(args))
+        subprocess.call(args)
+
+    print("[cleanup] ---------------------------------------------------------")
+    _run(["virsh", "-c", connection, "destroy", instance])
+    _run(["virsh", "-c", connection, "undefine", instance])
+    _run(["virsh", "-c", connection, "vol-delete", instance, pool])
+    print("-------------------------------------------------------------------")
 
     
 

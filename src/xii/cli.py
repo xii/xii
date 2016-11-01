@@ -1,7 +1,7 @@
 import os
 import argparse
 
-from xii import paths, config, command, util, definition, extension
+from xii import paths, command, util, definition, extension
 from xii.store import Store
 from xii.error import XiiError
 from xii.output import warn

@@ -1,5 +1,0 @@
----
-default_host: localhost
-
-known_hosts:
-  localhost: qemu:///system

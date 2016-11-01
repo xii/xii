@@ -8,5 +8,6 @@ build
 dist
 .ropeproject
 .cache
+.xii-env
 htmlcov
 .coverage
