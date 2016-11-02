@@ -1,7 +1,7 @@
 import io
 from pytest import raises, fail
 
-from xii import ui
+from xii import output
 
 
 def test_width(monkeypatch):
@@ -14,19 +14,19 @@ def test_width(monkeypatch):
 
     monkeypatch.setattr("os.popen", _fake_popen)
 
-    assert(ui.width() == 144)
+    assert(output.width() == 144)
 
 
 def test_warn(capsys):
-    ui.warn("test")
+    output.warn("test")
 
     out, _ = capsys.readouterr()
 
     assert('[xii] test' in out)
 
 
-class TestHasOutput(ui.HasOutput):
-    def get_full_name(self):
+class TestHasOutput(output.HasOutput):
+    def entity_path(self):
         return ["test", "hasOutput"]
 
 def test_generate_tag():
@@ -58,28 +58,28 @@ def test_tprint(capsys):
 def test_output(capsys):
     test = TestHasOutput()
 
-    def output():
+    def stdout():
         out, _  = capsys.readouterr()
         return out
 
     # say
     test.say("Normal text")
-    assert("Normal text" in output())
+    assert("Normal text" in stdout())
 
     # counted
     test.counted(12, "Counted text")
-    out = output()
+    out = stdout()
     assert("[#12]" in out)
     assert("Counted text" in out)
 
     # warn
     test.warn("Warn text")
-    out = output()
-    assert(ui.colors.WARN + ui.colors.BOLD in out)
+    out = stdout()
+    assert(output.colors.WARN + output.colors.BOLD in out)
     assert("Warn text" in out)
 
     #success
     test.success("Success text")
-    out = output()
-    assert(ui.colors.SUCCESS + ui.colors.BOLD in out)
+    out = stdout()
+    assert(output.colors.SUCCESS + output.colors.BOLD in out)
     assert("Success text" in out)

@@ -17,7 +17,7 @@ def test_convert_type():
         ("foo", "foo")
     ]
 
-    for test, result in tests):
+    for test, result in tests:
         assert(util.convert_type(test) == result)
 
 

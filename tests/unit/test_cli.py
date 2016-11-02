@@ -25,20 +25,16 @@ def test_cli_arg_parser():
     parser = cli.cli_arg_parser()
 
     result = parser.parse_args([
-        "--verbose",
         "--no-parallel",
-        "--config", "/tmp/xii/config",
+        "--deffile", "/tmp/xii/config",
         "-Dtest=true", "-D", "foo=bar",
-        "-V", "/tmp/xii/varfile",
         "start",
         "foo"
     ])
 
-    assert(result.verbose is True)
     assert(result.parallel is False)
-    assert(result.config == "/tmp/xii/config")
+    assert(result.deffile == "/tmp/xii/config")
     assert(result.defines == ["test=true", "foo=bar"])
-    assert(result.varfile == "/tmp/xii/varfile")
     assert(result.command == "start")
     assert(result.command_args == ["foo"])
 

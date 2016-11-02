@@ -11,7 +11,13 @@ if ! which tox &>/dev/null; then
 fi
 
 if [ "x$1" == "xtox" ]; then
-  tox -e unit
+  if [ "x$2" == "xcov" ]; then
+    echo "tox with coveralls"
+    tox -e unitwithcov
+  else
+    echo "tox without coveralls"
+    tox -e unit
+  fi
   exit $?
 else
   if ! which ptw &>/dev/null; then
