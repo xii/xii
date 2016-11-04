@@ -52,7 +52,7 @@ class Entity(HasOutput):
             cmpnt not in components[ctype][cmpnt]):
             return False
         return True
-        
+
     def validate(self, required_children=None):
         self._reorder_childs()
         if required_children:
@@ -60,7 +60,7 @@ class Entity(HasOutput):
                 child = self.get_child(required)
                 if not child:
                     raise error.NotFound("Could not find required `{}` "
-                                        "in {}".format(required, self.name))
+                                        "in {}".format(required, self.entity()))
         for child in self._childs:
             child.validate()
 
@@ -143,7 +143,7 @@ class EntityRegister():
     _registered = {
         'component': {},
         'attribute': {}
-    } 
+    }
 
     @classmethod
     def register_component(cls, klass):
@@ -181,7 +181,7 @@ class EntityRegister():
     @classmethod
     def get_attribute(cls, ctype, aname):
         print("getting attribute {} => {}".format(str(ctype), str(aname)))
-        if (ctype not in cls._registered["attribute"] or 
+        if (ctype not in cls._registered["attribute"] or
             aname not in cls._registered["attribute"][ctype]):
             raise error.NotFound("Unkown attribute `{}`. "
                             "Maybe misspelled?".format(aname, ctype))

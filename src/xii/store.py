@@ -32,12 +32,12 @@ class Store():
         values = self._values
         if root:
             values = self._values[root]
-        
+
         for key, value in iteratable.items():
             if not overwrite and key in values:
                 continue
             values[key] = value
-        
+
     def derive(self, key):
         return Store(parent=self.get(key))
 

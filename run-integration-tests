@@ -8,9 +8,9 @@ if [ -f $(pwd)/.xii-env ]; then
   source $(pwd)/.xii-env
 fi
 
-if [ -x ${XII_image} ] ||
-   [ -x ${XII_user} ] ||
-   [ -x ${XII_password} ]; then
+if [ -z ${XII_image} ] ||
+   [ -z ${XII_user} ] ||
+   [ -z ${XII_password} ]; then
   echo "!! no working setup found. Create .xii-env in !!"
   echo "!! top level source directory.                !!"
   exit 1

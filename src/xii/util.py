@@ -38,34 +38,41 @@ def file_read(path):
                              "directory".format(path))
 
 
+def md5digest(input):
+    return md5.new(input).hexdigest()
+
+
 def make_temp_name(seed):
-    hashed = md5.new(seed + str(time.time())).hexdigest()
+    hashed = md5digest(seed + str(time.time()))
     return "/tmp/xii-" + hashed
+
 
 def jinja_read(tpl, store):
     try:
         path, filename = os.path.split(tpl)
         from_file = jinja2.FileSystemLoader(path)
-        env = jinja2.Environment(loader = from_file,
-                                 undefined = jinja2.StrictUndefined)
+        env = jinja2.Environment(loader=from_file,
+                                 undefined=jinja2.StrictUndefined)
 
         yml = env.get_template(filename).render(store.values())
 
         return yaml.load(yml)
     except IOError:
-        raise error.ConnError("Could not open definition: No such file or directory")
+        raise error.ConnError("Could not open definition: "
+                              "No such file or directory")
     except yaml.YAMLError as err:
         raise error.ValidatorError("error parsing definition, {}".format(err))
     except jinja2.exceptions.UndefinedError as err:
         raise error.ValidatorError("error parsing definition, {}".format(err))
-    
+
 
 def yaml_read(path):
     try:
         with open(path, 'r') as stream:
             return yaml.load(stream)
     except IOError:
-        raise error.ConnError("Could not open definition: No such file or directory")
+        raise error.ConnError("Could not open definition: "
+                              "No such file or directory")
     except yaml.YAMLError as err:
         raise error.ValidatorError("Error parsing definition: {}".format(err))
 
@@ -106,6 +113,7 @@ def domain_wait_state(domain, state, timeout=5):
         time.sleep(1)
     return False
 
+
 def generate_rsa_key_pair():
     rsa = RSA.generate(4096)
     pub = rsa.publickey()
@@ -120,12 +128,12 @@ def parse_passwd(passwd):
         if len(user) < 6:
             continue
         users[user[0]] = {
-                'uid': int(user[2]),
-                'gid': int(user[3]),
-                'description': user[4],
-                'home': user[5],
-                'shell': user[6]
-                }
+            'uid': int(user[2]),
+            'gid': int(user[3]),
+            'description': user[4],
+            'home': user[5],
+            'shell': user[6]
+        }
     return users
 
 
