@@ -2,8 +2,9 @@
 ---
 single:
   type: node
-
-  image: http://download.opensuse.org/repositories/home:/fschnizlein:/images:/libvirt/images/leap-42.1.x86_64.qcow2
+  pool: default
+  image: /files/images/leap-42.1.x86_64.qcow2
+  # http://download.opensuse.org/repositories/home:/fschnizlein:/images:/libvirt/images/leap-42.1.x86_64.qcow2
 
   # centos 7 - generic cloud (x86_64)
   #image: http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2

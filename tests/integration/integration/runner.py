@@ -15,14 +15,14 @@ def load_variables_from_env(prefix="XII_"):
 def run_xii(deffile, cmd, variables={}, gargs=None, cargs=None, returncode=0):
 
     xii_env = os.environ.copy()
- 
+
     for key, value in variables.items():
         print("=> XII_" + key + " defined")
         xii_env["XII_" + key] = value
 
     call = ["xii", "--no-parallel", "--deffile", deffile, cmd]
     print("calling `{}`".format(" ".join(call)))
- 
+
     process = subprocess.Popen(call, stdout=subprocess.PIPE, env=xii_env)
 
     for line in process.stdout:
@@ -38,7 +38,7 @@ def run_xii(deffile, cmd, variables={}, gargs=None, cargs=None, returncode=0):
     return True
 
 
-def cleanup_instance(instance, pool="xii", connection="qemu:///system"):
+def cleanup_instance(instance, pool="default", connection="qemu:///system"):
     def _run(args):
         print(" ".join(args))
         subprocess.call(args)
@@ -49,9 +49,9 @@ def cleanup_instance(instance, pool="xii", connection="qemu:///system"):
     _run(["virsh", "-c", connection, "vol-delete", instance, pool])
     print("-------------------------------------------------------------------")
 
-    
 
-    
- 
+
+
+
 
 
