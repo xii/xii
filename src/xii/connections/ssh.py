@@ -77,7 +77,7 @@ class Ssh(connection.Connection, HasOutput):
                 self.sftp().mkdir(path)
 
     def stat(self, path):
-        return self.sftp.stat(path)
+        return self.sftp().stat(path)
 
     def exists(self, path):
         try:

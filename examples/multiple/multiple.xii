@@ -4,7 +4,8 @@
 multiple:
   type: node
   network: default
-  image: http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2
+  pool: default
+  image: {{ image }}
   count: 3
   graphic: yes
   ssh:

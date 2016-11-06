@@ -25,8 +25,8 @@ class NeedSSH(HasOutput):
     def ssh(self, host, user, password=None, keyfile=None):
         connection_hash = self._generate_hash(host, user)
 
-        retry = self.get_config().retry("ssh", default=20)
-        wait = self.get_config().wait(default=5)
+        retry = self.g_get("ssh/ssh_retry", 20)
+        wait = self.g_get("ssh/wait", 3)
 
         def _create_ssh_conn():
             ssh = Ssh(self, host, user, retry, wait, password, keyfile)

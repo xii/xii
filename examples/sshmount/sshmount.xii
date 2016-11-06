@@ -3,8 +3,9 @@
 sshmount:
   type: node
   network: default
-  count: 3
-  image: http://download.opensuse.org/repositories/home:/fschnizlein:/images:/libvirt/images/leap-42.1.x86_64.qcow2
+  pool: default
+  count: 1
+  image: {{ image }}
 
   graphic: yes
   user:

@@ -1,7 +1,7 @@
 import os
 import getpass
 
-from multiprocessing import Lock
+from multiprocessing import Condition
 
 
 from xii import error, util, need
@@ -10,12 +10,35 @@ from xii.validator import Dict, String, Required, Key, VariableKeys
 from base import NodeAttribute
 
 
-class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
+# sshmount:
+# mount ssh folder from spawned instance to host name
+# by:
+# spawning:
+#     - Generate ssh private key (unless generate-key: false)
+#     - Copy private key to instance and overwrite $HOME/.ssh/id_rsa.pub
+#     - Add public key to $HOME/.ssh/know_hosts on the spawning host
+# start:
+#     - Connect to instance using the default connection
+#     - running: sshmount {hostuser}@{host}:{hostfilepath} {instancefilepath}
+#     - check returncode
+# stop:
+#     - Connect to instance using default connection
+#     - running: fusermount -f -u {instancepath}
+#     - check returncode
+# destroy:
+#     - open $HOME/.ssh/known_hosts on host
+#     - check if public key entry exists
+#     - remove key if exists
+#     - write $HOME/.ssh/known_hosts
+    
+
+_pending = Condition()
+
+class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH, need.NeedIO):
     atype = "sshmount"
     requires = ["image", "ssh", "user", "network"]
 
     key_path = ".ssh/xii-sshfs.key"
-    lock = Lock()
 
     keys = Dict([
         VariableKeys(Dict([
@@ -24,12 +47,6 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
             Key("mode", String())
             ]))
         ])
-
-    def get_default_user(self):
-        return self.other_attribute("user").get_default_user()
-
-    def get_default_host(self):
-        return self.domain_get_ip(self.component_entity())
 
     def sshfs_key_path(self, name):
         home = self.guest_user_home(name)
@@ -41,12 +58,14 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
         self._check_sshfs_compability()
 
         required = self._get_required_users()
-        host = self._host_name()
+        host     = self._host_name()
 
-        self.lock.acquire()
+        _pending.acquire()
+
         authed_hosts = self._authorized_hosts()
 
         for user, home in required.items():
+
             path = os.path.join(home, self.key_path)
 
             sign = user + "@" + host
@@ -69,7 +88,7 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
         with open(self._authorized_keys_path(), "w") as auth:
             authed_hosts = filter(None, authed_hosts)
             auth.write("\n".join(authed_hosts))
-        self.lock.release()
+        _pending.release()
 
     def destroy(self):
         authed_hosts = self._authorized_hosts()
@@ -79,9 +98,10 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
             return
 
         # removing key from authorized_keys
-        self.lock.acquire()
-        for mount in self.settings().values():
-            user = self.get_default_user()
+
+        _pending.acquire()
+        for mount in self.settings().values():  
+            user = self.io().user()
 
             if "user" in mount:
                 user = mount["user"]
@@ -96,8 +116,8 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
         with open(self._authorized_keys_path(), "w") as auth:
             authed_hosts = filter(None, authed_hosts)
             auth.write("\n".join(authed_hosts))
+        _pending.release()
 
-        self.lock.release()
 
     def after_start(self):
         self._mount_dirs()
@@ -116,19 +136,17 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
         pass
 
     def _mount_dirs(self):
-        host = self.network_get_host_ip(self.other_attribute("network").settings)
-        user = getpass.getuser()
-        ssh  = self.default_ssh()
+        # local connection
+        host = self.network_get_host_ip(self.other_attribute("network").network_name())
         key  = os.path.join("~", self.key_path)
 
-        for dest, settings in self.settings().items():
-            user = self.get_default_user()
-            source = settings["source"]
+        # remote connection
+        ssh  = self.default_ssh()
 
-            if not os.path.isdir(source):
-                self.warn("sshfs source `{}` is not a directory"
-                          .format(source))
-                continue
+        for dest, settings in self.settings().items():
+
+            source = settings["source"]
+            user = self.io().user()
 
             if "user" in settings:
                 user = settings["user"]
@@ -138,6 +156,11 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
                 source = os.path.join(os.getcwd(), source)
             if not os.path.isabs(dest):
                 dest = os.path.join(ssh.user_home(), dest)
+ 
+            if not os.path.isdir(source):
+                self.warn("sshfs source `{}` is not a directory"
+                          .format(source))
+                continue
 
             ssh.mkdir(dest)
 
@@ -188,8 +211,9 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH):
 
     def _get_required_users(self):
         required = {}
-        users = self.guest_get_users()
-        default = self.other_attribute("user").get_default_user()
+
+        users   = self.guest_get_users()
+        default = self.default_ssh_user()
 
         for mount in self.settings().values():
             user = default

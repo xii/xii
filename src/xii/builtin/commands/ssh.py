@@ -39,7 +39,7 @@ class SSHCommand(command.Command):
                 raise error.ConnError("Could not connection to {}. You did not "
                                       "specifiy any user name."
                                       .format(domain_name))
-            user = user_attr.get_default_user()
+            user = user_attr.default_user()
 
         ip = cmpnt.domain_get_ip(domain_name)
 

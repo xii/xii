@@ -12,12 +12,14 @@ from base import NodeAttribute
 class UserAttribute(NodeAttribute, need.NeedGuestFS):
     atype = "user"
 
-    default_user = {"username": "xii",
-                    "description": "xii generated user",
-                    "shell": "/bin/bash",
-                    "password": "xii",
-                    "skel": True,
-                    "n": 0}
+    default_settings = {
+            "username": "xii",
+            "description": "xii generated user",
+            "shell": "/bin/bash",
+            "password": "xii",
+            "skel": True,
+            "n": 0
+            }
 
     keys = Dict([VariableKeys(
         Dict([
@@ -27,7 +29,7 @@ class UserAttribute(NodeAttribute, need.NeedGuestFS):
             ])
         )])
 
-    def get_default_user(self):
+    def default_user(self):
         if not self.settings():
             return "xii"
         return self.settings().iterkeys().next()
@@ -46,7 +48,7 @@ class UserAttribute(NodeAttribute, need.NeedGuestFS):
         user_index = 0
         for name, settings in self.settings().items():
             self.say("adding {}".format(name))
-            user = self.default_user.copy()
+            user = self.default_settings.copy()
             user['username'] = name
             user['n'] = user_index
             user.update(settings)

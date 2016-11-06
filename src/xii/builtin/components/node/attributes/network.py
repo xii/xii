@@ -11,6 +11,9 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
 
     keys = String()
 
+    def network_name(self):
+        return self.settings()
+
     def start(self):
         network = self._get_delayed_network(self.settings())
 
