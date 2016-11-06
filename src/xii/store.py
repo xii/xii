@@ -21,7 +21,8 @@ class Store():
         value = self._values
         try:
             for node in path:
-                if node not in value:
+                if ((not isinstance(value, dict)) or
+                        node not in value):
                     return default
                 value = value[node]
             return value
