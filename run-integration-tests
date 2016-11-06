@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-NO_TOX=0
 
 export PRESERVE_XII_ENV=${PRESERVE_XII_ENV:-0}
 
@@ -16,19 +15,20 @@ if [ -z ${XII_image} ] ||
   exit 1
 fi
 
-
-if [ "x$1" == "x--no-tox" ]; then
-  NO_TOX=1
-fi
-
 if [ "x${PRESERVE_XII_ENV}" == "x0" ]; then
   rm -rf ~/.xii
 fi
 
-if [ "x${NO_TOX}" == "x1" ]; then
-  pytest tests/integration
-  exit $?
+
+ACTION=$1
+shift
+
+if [ "x${ACTION}" == "xgate" ]; then
+    tox -e gate
+elif [ "x${ACTION}" == "xlocal" ]; then
+    pytest tests/integration $@
 else
-  tox -e integration
-  exit $?
+    tox -e integration
 fi
+
+exit $?

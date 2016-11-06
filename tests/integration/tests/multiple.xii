@@ -1,0 +1,20 @@
+# vim: set ts=2 sw=2 tw=0 ft=yaml:
+---
+multiple:
+  type: node
+  pool: default
+  count: 3
+
+  image: {{ image }}
+
+  user:
+    {{ user }}:
+      password: {{ password }}
+    root:
+      password: linux
+
+  ssh:
+    copy-key:
+      users:
+        - {{ user }}
+        - root
