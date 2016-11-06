@@ -53,7 +53,7 @@ class ShellAttribute(NodeAttribute, need.NeedSSH, need.NeedLibvirt):
         scripts = []
         for script in self.settings():
             if action in script:
-                shell = "/usr/bin/bash"
+                shell = "/bin/bash"
 
                 if "shell" in script:
                     shell = script["shell"]
@@ -61,7 +61,7 @@ class ShellAttribute(NodeAttribute, need.NeedSSH, need.NeedLibvirt):
                 scripts.append((script[action], shell))
         return scripts
 
-    def _run_shell(self, script, shell="/usr/bin/bash"):
+    def _run_shell(self, script, shell="/bin/bash"):
         if not os.path.isfile(script):
             raise error.NotFound("Could not find privisioner shell script ({})"
                                  .format(script))

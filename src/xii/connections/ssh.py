@@ -109,18 +109,18 @@ class Ssh(connection.Connection, HasOutput):
         while not stdout.channel.eof_received:
             sleep(1)
 
-    def put(self, msg, source, dest):
+    def put(self, source, dest):
         self.sftp().put(source, dest)
 
-    def get(self, msg, source, dest):
+    def get(self, source, dest):
         self.sftp().get(source, dest)
 
-    def download(self, msg, source, dest):
+    def download(self, source, dest):
         command = "wget --progress=dot {} -O {} 2>&1 | grep --color=none -o \"[0-9]\+%\"".format(source, dest)
         _, stdout, _ = self.ssh().exec_command(command)
 
-        for line in stdout:
-            perc = int(line.replace("%", "").strip())
+        # for line in stdout:
+        #     perc = int(line.replace("%", "").strip())
 
     def chmod(self, path, new_mode, append=False):
         if append:
