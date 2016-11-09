@@ -140,7 +140,6 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         self.finalize()
         self.each_child("after_spawn")
         try:
-            import pdb; pdb.set_trace()
             self.virt().defineXML(xml.safe_substitute(self.xml_dfn))
             domain = self.get_domain(self.entity())
             return domain
