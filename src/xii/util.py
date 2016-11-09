@@ -77,6 +77,16 @@ def yaml_read(path):
         raise error.ValidatorError("Error parsing definition: {}".format(err))
 
 
+def yaml_write(path, obj):
+    try:
+        with open(path, 'w') as hdl:
+            yaml.dump(obj, hdl, default_flow_style=False)
+    except IOError as err:
+        raise error.ExecError("Could not write yaml file: {}".format(err))
+    except yaml.YAMLError as err:
+        raise error.ExecError("Could not write yaml file: {}".format(err))
+
+
 def load_modules(paths):
     modules = []
 

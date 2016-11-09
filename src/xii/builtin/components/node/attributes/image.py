@@ -1,5 +1,6 @@
 import os
 import time
+import hashlib
 
 from multiprocessing import Condition
 
@@ -109,7 +110,34 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
             self.say("copy image...")
             self.io().copy(self.settings(), self._image_path())
 
+        (md5, sha256) = self._generate_hashes()
+
+        stats = {
+                "source": self.settings(),
+                "type": os.path.splitext(self.settings())[1][1:],
+                "size": self.io().stat(self._image_path()).st_size,
+                "md5": md5,
+                "sha256": sha256,
+                "added": time.time()
+                }
+
+        util.yaml_write(self._image_path() + ".yml", stats)
         _pending.release()
+
+    def _generate_hashes(self):
+        try:
+            self.say("generate image checksum...")
+            md5_hash    = hashlib.md5()
+            sha256_hash = hashlib.sha256()
+            with open(self._image_path(), 'rb') as hdl:
+                buf = hdl.read(65536)
+                while len(buf) > 0:
+                    md5_hash.update(buf)
+                    sha256_hash.update(buf)
+                    buf = hdl.read(65536)
+            return (md5_hash.hexdigest(), sha256_hash.hexdigest())
+        except IOError as err:
+            raise error.ExecError("Could not create validation hashes")
 
 
 EntityRegister.register_attribute("node", ImageAttribute)
