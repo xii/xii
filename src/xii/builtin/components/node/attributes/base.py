@@ -13,11 +13,16 @@ class NodeAttribute(attribute.Attribute, need.NeedLibvirt):
     def add_xml(self, section, xml):
         self.parent().add_xml(section, xml)
 
+    def add_meta(self, key, value):
+        self.parent().add_meta(key, value)
+
     def default_ssh_user(self):
-        return self.get("settings/user", self.other_attribute("user").default_user())
+        return self.get("settings/user",
+                        self.other_attribute("user").default_user())
 
     def default_ssh_host(self):
-        return self.get("settings/host", self.domain_get_ip(self.component_entity()))
+        return self.get("settings/host",
+                        self.domain_get_ip(self.component_entity()))
 
     def default_ssh_connection(self):
         user     = self.default_ssh_user()

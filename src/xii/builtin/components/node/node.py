@@ -1,13 +1,13 @@
 import libvirt
-from time import sleep
+from time import sleep, time
 
 from xii import paths, error
 from xii.component import Component
-from xii.need import NeedLibvirt
+from xii.need import NeedLibvirt, NeedIO
 from xii.util import domain_has_state, domain_wait_state, wait_until_inactive
 
 
-class NodeComponent(Component, NeedLibvirt):
+class NodeComponent(Component, NeedLibvirt, NeedIO):
     ctype = "node"
     required_attributes = ["pool", "image"]
     default_attributes = ["pool", "network", "hostname"]
@@ -18,12 +18,8 @@ class NodeComponent(Component, NeedLibvirt):
     def add_xml(self, section, xml):
         self.xml_dfn[section] += "\n" + xml
 
-    def metadata(self, key, value=None):
-        if value is not None:
-            self.xml_metadata[key] = value
-        if key in self.xml_metadata:
-            return self.xml_metadata[key]
-        return None
+    def add_meta(self, key, value):
+        self.xml_metadata[key] = value
 
     # every node has an image (only currently)
     def get_domain_image_path(self):
@@ -132,14 +128,19 @@ class NodeComponent(Component, NeedLibvirt):
         self.each_child("spawn")
 
         caps = self.get_capabilities()
+        self.add_meta('created', time())
+        self.add_meta('definition', self.g_get("runtime/definition"))
+        self.add_meta('user', self.io().user())
 
         xml = paths.template('node.xml')
         self.xml_dfn['name'] = self.entity()
+        self.xml_dfn['meta'] = self._generate_meta_xml()
         self.xml_dfn.update(caps)
 
         self.finalize()
         self.each_child("after_spawn")
         try:
+            import pdb; pdb.set_trace()
             self.virt().defineXML(xml.safe_substitute(self.xml_dfn))
             domain = self.get_domain(self.entity())
             return domain
@@ -163,6 +164,13 @@ class NodeComponent(Component, NeedLibvirt):
                 self.warn("could not be stopped")
                 return
         self.success("stopped!")
+
+    def _generate_meta_xml(self):
+        meta = "<xii:node xmlns:xii=\"http://xii-project.org/xmlns/node/1.0\">\n"
+        for k, v in self.xml_metadata.items():
+            meta += "<xii:{key}>{value}</xii:{key}>\n".format(key=k, value=v)
+        meta += "</xii:node>\n"
+        return meta
 
 
 NodeComponent.register()

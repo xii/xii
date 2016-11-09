@@ -4,13 +4,14 @@ import hashlib
 
 from multiprocessing import Condition
 
-from xii import paths, error, entity, need, util
+from xii import paths, error, need, util
 
 from xii.attribute import Attribute
 from xii.validator import String
 from xii.entity import EntityRegister
 
 _pending = Condition()
+
 
 class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
     atype = "image"
@@ -31,7 +32,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
             self.io().mkdir(self._image_store_path(), recursive=True)
 
         pool_name = self.other_attribute("pool").used_pool_name()
-        pool_type = self.other_attribute("pool").used_pool_type()
+        # pool_type = self.other_attribute("pool").used_pool_type()
 
         volume = self.get_volume(pool_name, self.component_entity(), raise_exception=False)
 
@@ -87,7 +88,9 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         return paths.xii_home(home, 'images')
 
     def _image_path(self):
-        return os.path.join(self._image_store_path(), util.md5digest(self.settings()))
+        name = util.md5digest(self.settings())
+        self.parent().add_meta("image", name)
+        return os.path.join(self._image_store_path(), name)
 
     def _remove_volume(self, volume, force=False):
         if self.g_get('global/auto_delete_volumes', False) or force:
