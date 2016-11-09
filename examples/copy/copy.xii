@@ -3,8 +3,9 @@
 copy:
   type: node
   network: default
+  pool: default
   count: 1
-  image: http://download.opensuse.org/repositories/home:/fschnizlein:/images:/libvirt/images/leap-42.1.x86_64.qcow2
+  image: {{ image }}
 
   graphic: yes
   user:

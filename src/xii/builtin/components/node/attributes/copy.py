@@ -17,7 +17,7 @@ class CopyAttribute(NodeAttribute, need.NeedGuestFS):
     ])
 
     def spawn(self):
-        for dest, source in self.settings.items():
+        for dest, source in self.settings().items():
 
             if not os.path.isabs(dest):
                 self.warn("destination path `{}` needs to be absolute"
