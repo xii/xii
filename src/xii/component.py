@@ -28,8 +28,10 @@ class Component(Entity, HasStore):
     def get_attribute(self, name):
         return self.get_child(name)
 
-    def load_defaults(self):
+    def load_defaults(self): 
         for default in self.default_attributes:
+            if default in self.store().values():
+                continue
             attr = EntityRegister.get_attribute(self.ctype, default)
             if attr.has_defaults():
                 self.add_attribute(attr(self))
