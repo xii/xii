@@ -19,7 +19,7 @@ class Attribute(Entity, HasStore):
     def settings(self, key=None, default=None):
         if self.get(self.atype):
             s = self.store().derive(self.atype)
-        if self.has_defaults():
+        elif self.has_defaults():
             s = Store(parent=self.defaults)
 
         if key is None:
