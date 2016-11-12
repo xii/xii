@@ -1,21 +1,37 @@
+import libvirt
+import xml.etree.ElementTree as etree
+
 from time import sleep
 
 from xii import paths, error, need
-from xii.validator import String
+from xii.validator import String, Or, Dict, RequiredKey, Ip
 
 from base import NodeAttribute
 
+
 class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
     atype = "network"
-    defaults = 'default'
+    defaults = "default"
 
-    keys = String()
+    keys = Or([
+        String(),
+        Dict([
+            RequiredKey("source", String()),
+            RequiredKey("ip", Ip())
+            ])
+        ])
 
     def network_name(self):
+        if self._need_ipv4():
+            return self.settings("source")
         return self.settings()
 
     def start(self):
-        network = self._get_delayed_network(self.settings())
+        network = self._get_delayed_network(self.network_name())
+
+        if self._need_ipv4():
+            mac = self._get_mac_address()
+            self._announce_static_ip(network, mac, self.settings("ip"))
 
         if network.isActive():
             return
@@ -24,11 +40,18 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
         network.create()
         self.success("network started!")
 
+    def stop(self):
+        network = self._get_delayed_network(self.network_name())
+
+        if self._need_ipv4():
+            mac = self._get_mac_address()
+            self._remove_mac(network, mac)
+
     def spawn(self):
-        network = self._get_delayed_network(self.settings())
+        network = self._get_delayed_network(self.network_name())
         if not network:
             raise error.NotFound("Network {} for domain "
-                                 "{}".format(self.settings(), self.component_entity()))
+                                 "{}".format(self.network_name(), self.component_entity()))
 
         if not network.isActive():
             self.start()
@@ -37,7 +60,50 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
 
     def _gen_xml(self):
         xml = paths.template('network.xml')
-        return xml.safe_substitute({'network': self.settings()})
+        return xml.safe_substitute({'network': self.network_name()})
+
+    def _get_mac_address(self):
+        def _uses_network(iface):
+            return iface.find("source").attrib["network"] == self.network_name()
+
+        node    = self.get_domain(self.component_entity())
+        desc    = etree.fromstring(node.XMLDesc())
+
+        ifaces  = filter(_uses_network, desc.findall("devices/interface"))
+
+        if len(ifaces) == 0:
+            raise error.NotFound("Could not find domain interface")
+
+        # FIXME: Add multiple interface support
+        #        When multiple interfaces using the same network
+
+        mac = ifaces[0].find("mac")
+
+        if mac is None:
+            raise error.NotFound("Could not find interface mac address")
+
+        return mac.attrib["address"]
+
+    def _need_ipv4(self):
+        return isinstance(self.settings(), dict)
+
+    def _announce_static_ip(self, network, mac, ip):
+        command  = libvirt.VIR_NETWORK_UPDATE_COMMAND_ADD_LAST
+        flags    = (libvirt.VIR_NETWORK_UPDATE_AFFECT_CONFIG |
+                    libvirt.VIR_NETWORK_UPDATE_AFFECT_LIVE)
+        section  = libvirt.VIR_NETWORK_SECTION_IP_DHCP_HOST
+        xml      = "<host mac='{}' ip='{}' />".format(mac, ip)
+
+        network.update(command, section, -1, xml, flags)
+
+    def _remove_mac(self, network, mac):
+        command  = libvirt.VIR_NETWORK_UPDATE_COMMAND_DELETE
+        flags    = (libvirt.VIR_NETWORK_UPDATE_AFFECT_CONFIG |
+                    libvirt.VIR_NETWORK_UPDATE_AFFECT_LIVE)
+        section  = libvirt.VIR_NETWORK_SECTION_IP_DHCP_HOST
+        xml      = "<host mac='{}' />".format(mac)
+
+        network.update(command, section, -1, xml, flags)
 
     def _get_delayed_network(self, name):
         network = self.get_network(name, raise_exception=False)
