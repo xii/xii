@@ -4,6 +4,7 @@
 *.egg-info
 .tox
 */__pycache__
+docs/_build
 build
 dist
 .ropeproject
