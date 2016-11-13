@@ -29,10 +29,6 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
     def start(self):
         network = self._get_delayed_network(self.network_name())
 
-        if self._need_ipv4():
-            mac = self._get_mac_address()
-            self._announce_static_ip(network, mac, self.settings("ip"))
-
         if network.isActive():
             return
 
@@ -40,12 +36,20 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
         network.create()
         self.success("network started!")
 
+    def after_start(self):
+        network = self._get_delayed_network(self.network_name())
+
+        if self._need_ipv4():
+            mac = self._get_mac_address()
+            self._remove_mac(network, mac, self.settings("ip"))
+            self._announce_static_ip(network, mac, self.settings("ip"))
+
     def stop(self):
         network = self._get_delayed_network(self.network_name())
 
         if self._need_ipv4():
             mac = self._get_mac_address()
-            self._remove_mac(network, mac)
+            self._remove_mac(network, mac, self.settings("ip"))
 
     def spawn(self):
         network = self._get_delayed_network(self.network_name())
@@ -92,18 +96,26 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
         flags    = (libvirt.VIR_NETWORK_UPDATE_AFFECT_CONFIG |
                     libvirt.VIR_NETWORK_UPDATE_AFFECT_LIVE)
         section  = libvirt.VIR_NETWORK_SECTION_IP_DHCP_HOST
-        xml      = "<host mac='{}' ip='{}' />".format(mac, ip)
+        xml      = "<host mac='{}' name='{}' ip='{}' />".format(mac, "xii-" + self.component_entity(), ip)
 
-        network.update(command, section, -1, xml, flags)
+        try:
+            network.update(command, section, -1, xml, flags)
+        except libvirt.libvirtError:
+            return False
+        return True
 
-    def _remove_mac(self, network, mac):
+    def _remove_mac(self, network, mac, ip):
         command  = libvirt.VIR_NETWORK_UPDATE_COMMAND_DELETE
         flags    = (libvirt.VIR_NETWORK_UPDATE_AFFECT_CONFIG |
                     libvirt.VIR_NETWORK_UPDATE_AFFECT_LIVE)
         section  = libvirt.VIR_NETWORK_SECTION_IP_DHCP_HOST
-        xml      = "<host mac='{}' />".format(mac)
+        xml      = "<host mac='{}' name='{}' ip='{}' />".format(mac, "xii-" + self.component_entity(), ip)
 
-        network.update(command, section, -1, xml, flags)
+        try:
+            network.update(command, section, -1, xml, flags)
+        except libvirt.libvirtError:
+            return False
+        return True
 
     def _get_delayed_network(self, name):
         network = self.get_network(name, raise_exception=False)
