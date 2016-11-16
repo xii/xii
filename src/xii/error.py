@@ -22,6 +22,10 @@ class XiiError(RuntimeError):
         return ". ".join(self.lines)
 
 
+class Interrupted(Exception):
+    pass
+
+
 class ValidatorError(XiiError):
     title = "Xii definition error"
     pass

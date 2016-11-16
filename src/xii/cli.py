@@ -3,7 +3,7 @@ import argparse
 
 from xii import paths, command, util, definition, extension
 from xii.store import Store
-from xii.error import XiiError
+from xii.error import XiiError, Interrupted
 from xii.output import warn
 
 
@@ -70,13 +70,13 @@ def run_cli():
         for envvar in filter(lambda x: x.startswith("XII_"), os.environ):
             print("define {} = {}".format(envvar[4:], os.environ[envvar]))
             store.set(envvar[4:], os.environ[envvar])
-            
+
         # parse definifition file
         defn = util.jinja_read(store.get("runtime/definition"), store)
 
         # construct component configurations
         definition.prepare_store(defn, store)
-        
+
         # run command
         instance = command.Register.get(cli_args.command, cli_args.command_args, store)
         # return exit code
@@ -84,8 +84,12 @@ def run_cli():
         if not instance:
             warn("Invalid command `{}`. Command not unknown.".format(cli_args.command))
             return 1
-        
+
         return instance.run()
+    except Interrupted:
+        warn("interrupted... stopping immediately!")
+        return 1
+
     except XiiError as e:
         it = iter(e.error())
         warn(e.error_title() + ": " + next(it))

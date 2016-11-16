@@ -1,13 +1,12 @@
 import argparse
-import os
+import multiprocessing
+import signal
 
 from abc import ABCMeta, abstractmethod
-from multiprocessing import Pool
 
 
-from xii import component
-from xii.output import HasOutput
-from xii.store import HasStore 
+from xii import component, error
+from xii.store import HasStore
 from xii.entity import Entity
 
 
@@ -38,18 +37,32 @@ class Command(Entity, HasStore):
         return self.get_child(name)
 
     def each_component(self, action):
+
+        def _init_worker():
+            signal.signal(signal.SIGINT, signal.SIG_IGN)
+
         components = self.get("components")
 
         if self.get("global/parallel", True):
-            pool = Pool(self.get("global/workers", 3))
+            pool = multiprocessing.Pool(self.get("global/workers", 3), _init_worker)
             table = []
 
             for cmpnt in self.children():
                 table.append((cmpnt, action))
 
-            result = pool.map_async(run_action_on_obj, table).get()
+            try:
+                pool.map_async(run_action_on_obj, table).get()
+                pool.close()
+            except KeyboardInterrupt:
+                pool.terminate()
+                raise error.Interrupted()
         else:
-            self.each_child(action, reverse=False)
+
+            try:
+                self.each_child(action, reverse=False)
+            except KeyboardInterrupt:
+                raise error.Interrupted()
+
 
     def _create_components(self):
         for cmpnt in component.from_definition(self.store(), self):
