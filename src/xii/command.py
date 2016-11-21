@@ -56,6 +56,10 @@ class Command(Entity, HasStore):
             except KeyboardInterrupt:
                 pool.terminate()
                 raise error.Interrupted()
+            except Exception as err:
+                self.warn("thread failed. stopping immediately!")
+                pool.terminate()
+                raise err
         else:
 
             try:
