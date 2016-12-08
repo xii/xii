@@ -1,7 +1,8 @@
 from pytest import raises
 
-
 from xii import store
+
+import factories
 
 
 sample = {

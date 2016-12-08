@@ -2,7 +2,9 @@ import io
 import libvirt
 from pytest import raises, xfail
 
+
 from fake.open import fake_open, fake_invalid_open
+from fixtures import load_fixture, load_raw_fixture
 
 from xii import util, error
 
@@ -38,7 +40,6 @@ def test_safe_get():
 
 
 def test_file_read(monkeypatch):
-
     monkeypatch.setattr("__builtin__.open", fake_open(u"test stream", "/tmp/test", "r"))
     assert(util.file_read("/tmp/test") == "test stream")
 
@@ -57,8 +58,7 @@ def test_make_temp_name(monkeypatch):
 
 
 def test_yaml_read(monkeypatch, data):
-    yaml = data.load("test_util_sample.yaml")
-
+    yaml = load_raw_fixture("util.yaml")
     monkeypatch.setattr("__builtin__.open", fake_open(yaml, "/tmp/yaml", "r"))
 
     result = util.yaml_read("/tmp/yaml")
@@ -66,8 +66,8 @@ def test_yaml_read(monkeypatch, data):
     assert(result["multiple"]["network"] == "default")
 
 
-def test_yaml_read_invalid(monkeypatch, data):
-    yaml = data.load("test_util_sample_invalid.yaml")
+def test_yaml_read_invalid(monkeypatch):
+    yaml = load_raw_fixture("util_invalid.yaml")
 
     monkeypatch.setattr("__builtin__.open", fake_open(yaml, "/tmp/yaml", "r"))
     

@@ -23,6 +23,6 @@ else
   if ! which ptw &>/dev/null; then
     pip install pytest-watch
   fi
-  ptw
+  ptw tests/unit
 fi
 
