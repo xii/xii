@@ -1,0 +1,18 @@
+components:
+  node:
+    single:
+      graphic: true
+      image: /files/images/leap-42.1.x86_64.qcow2
+      network: {ip: 192.168.122.112, source: default}
+      pool: default
+      settings: {connection: 'qemu:///system'}
+      ssh:
+        copy-key:
+          users: [felixsch, root]
+      type: node
+      user:
+        felixsch: {password: felix}
+        root: {password: linux}
+global: {connection: 'qemu:///system'}
+image: /files/images/leap-42.1.x86_64.qcow2
+runtime: {config: /home/felixsch/.xii/config.yml, definition: /files/share/xii/examples/single/single.xii}

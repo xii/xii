@@ -1,0 +1,3 @@
+global: {connection: 'qemu:///system'}
+image: /files/images/leap-42.1.x86_64.qcow2
+runtime: {config: /home/felixsch/.xii/config.yml, definition: /files/share/xii/examples/single/single.xii}
