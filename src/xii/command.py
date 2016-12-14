@@ -36,6 +36,17 @@ class Command(Entity, HasStore):
     def get_component(self, name):
         return self.get_child(name)
 
+    def has_component(self, ctype, cmpnt):
+        components = self.get("components")
+
+        if not components:
+            return False
+
+        if (ctype not in components or
+            cmpnt not in components[ctype][cmpnt]):
+            return False
+        return True
+
     def each_component(self, action):
 
         def _init_worker():
