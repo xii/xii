@@ -129,7 +129,7 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
 
         caps = self.get_capabilities()
         self.add_meta('created', time())
-        self.add_meta('definition', self.g_get("runtime/definition"))
+        self.add_meta('definition', self.config("runtime/definition"))
         self.add_meta('user', self.io().user())
 
         xml = paths.template('node.xml')

@@ -93,7 +93,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         return os.path.join(self._image_store_path(), name)
 
     def _remove_volume(self, volume, force=False):
-        if self.g_get('global/auto_delete_volumes', False) or force:
+        if self.config('global/auto_delete_volumes', False) or force:
             return volume.delete()
         raise error.ExecError(
                 ["Volume `{}` already exists".format(self.component_entity()),

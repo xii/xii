@@ -33,25 +33,10 @@ class Entity(HasOutput):
     def store(self):
         return self._store
 
-    def gstore(self):
+    def config(self, key, default=None):
         if self.has_parent():
-            return self.parent().gstore()
-        else:
-            return self.store()
-
-    def g_get(self, key, default=None):
-        return self.gstore().get(key, default)
-
-    def has_component(self, ctype, cmpnt):
-        components = self.get("components")
-
-        if not components:
-            return False
-
-        if (ctype not in components or
-            cmpnt not in components[ctype][cmpnt]):
-            return False
-        return True
+            return self.parent().config(key, default)
+        return self.store().get(key, default)
 
     def validate(self, required_children=None):
         self._reorder_childs()
