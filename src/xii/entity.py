@@ -68,7 +68,7 @@ class Entity(HasOutput):
 
     def run(self, action):
         if action in dir(self):
-            getattr(self, action)()
+            return getattr(self, action)()
 
     def add_child(self, new):
         for idx, child in enumerate(self._childs):
@@ -87,13 +87,15 @@ class Entity(HasOutput):
         return self._childs
 
     def each_child(self, action, reverse=False):
+        result = []
         if reverse:
             run = reversed(self._childs)
         else:
             run = self._childs
 
         for child in run:
-            child.run(action)
+            result.append(child.run(action))
+        return result
 
     def _child_index(self, entity):
         for idx, child in enumerate(self._childs):
