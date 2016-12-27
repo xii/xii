@@ -1,0 +1,5 @@
+<ip family="ipv6" address="$ip" prefix="$netmask">
+  <dhcp>
+    <range start="$start" end="$end" />
+  </dhcp>
+</ip>

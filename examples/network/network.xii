@@ -9,3 +9,8 @@ test-network:
     dhcp:
       start: 192.168.124.2
       end: 192.168.124.254
+  ipv6:
+    ip: 2001:db8:ca2:2::1
+    dhcp:
+      start: 2001:db8:ca2:2:1::10
+      end: 2001:db8:ca2:2:1::ff
