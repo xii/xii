@@ -14,6 +14,9 @@ class Component(Entity, HasStore):
     def __init__(self, name, command):
         Entity.__init__(self, name, parent=command)
 
+    def get_virt_url(self):
+        return self.get("settings/connection", "qemu://system")
+
     # limit access to component/type/concret_instance
     def store(self):
         path = "components/{}/{}".format(self.ctype, self.entity())
@@ -28,7 +31,7 @@ class Component(Entity, HasStore):
     def get_attribute(self, name):
         return self.get_child(name)
 
-    def load_defaults(self): 
+    def load_defaults(self):
         for default in self.default_attributes:
             if default in self.store().values():
                 continue
@@ -60,7 +63,7 @@ def _create_component(name, component_type, command):
 
     component.load_defaults()
 
-    for attr_name in component.store().values().keys():        
+    for attr_name in component.store().values().keys():
         if attr_name in non_attributes:
             continue
         attr = EntityRegister.get_attribute(component_type, attr_name)
