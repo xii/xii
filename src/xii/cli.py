@@ -1,7 +1,8 @@
 import os
 import argparse
 
-from xii import paths, command, util, definition, extension
+from xii import paths, command, util, definition
+from xii.extension import ExtensionManager
 from xii.store import Store
 from xii.error import XiiError, Interrupted
 from xii.output import warn
@@ -35,7 +36,6 @@ def cli_arg_parser():
 
 
 def run_cli():
-    extension.load_builtin()
     parser = cli_arg_parser()
     try:
 
@@ -76,6 +76,12 @@ def run_cli():
 
         # construct component configurations
         definition.prepare_store(defn, store)
+
+        mgr = ExtensionManager()
+        mgr.add_builtin_path()
+        mgr.load()
+
+        import pdb; pdb.set_trace()
 
         # run command
         instance = command.Register.get(cli_args.command, cli_args.command_args, store)

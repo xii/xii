@@ -1,6 +1,7 @@
 import os
 import pkgutil
 import inspect
+import imp
 import yaml
 import jinja2
 import time
@@ -160,3 +161,23 @@ def parse_groups(group):
         if len(group) > 2:
             groups[group[0]]['users'] = group[3].split(',')
     return groups
+
+
+def resource_from_path(path, ext=".py"):
+    name = os.path.basename(path)
+    return os.path.join(path, name + ext)
+
+
+def classes_from_module(name, path, types=[]):
+    classes = []
+    m = imp.load_source(name, path)
+
+    for _, inst in inspect.getmembers(m, inspect.isclass):
+        base = inspect.getmro(inst)
+        ok = True
+        for t in types:
+            if t not in base:
+                ok = False
+        if ok:
+            classes.append(inst)
+    return classes
