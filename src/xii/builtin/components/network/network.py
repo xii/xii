@@ -6,10 +6,10 @@ from xii import error, paths, util
 
 
 class NetworkComponent(Component, NeedLibvirt):
-    entity = "network"
+    ctype = "network"
 
-    defaults = ['stay']
-    requires = ['mode']
+    required_attributes = ["stay", "mode"]
+    default_attributes  = ["stay"]
 
     xml_net = []
 
@@ -17,12 +17,12 @@ class NetworkComponent(Component, NeedLibvirt):
         self.xml_net.append(xml)
 
     def start(self):
-        net = self.get_network(self.name, raise_exception=False)
+        net = self.get_network(self.entity(), raise_exception=False)
 
         if not net:
             net = self._spawn_network()
 
-        self.childs_run("start")
+        self.each_attribute("start")
 
         if net.isActive():
             self.say("is already started")
@@ -41,7 +41,7 @@ class NetworkComponent(Component, NeedLibvirt):
 
 
     def stop(self):
-        net = self.get_network(self.name, raise_exception=False)
+        net = self.get_network(self.entity(), raise_exception=False)
 
         if not net:
             self.warn("does not exist")
@@ -51,7 +51,7 @@ class NetworkComponent(Component, NeedLibvirt):
 
 
     def destroy(self):
-        net = self.get_network(self.name, raise_exception=False)
+        net = self.get_network(self.entity(), raise_exception=False)
 
         if not net:
             self.warn("does not exist")
@@ -60,7 +60,7 @@ class NetworkComponent(Component, NeedLibvirt):
         if net.isActive():
             self._stop_network(net)
 
-        self.childs_run("destroy")
+        self.each_attribute("destroy")
 
         net.undefine()
         self.success("removed!")
@@ -72,10 +72,10 @@ class NetworkComponent(Component, NeedLibvirt):
         pass
 
     def _spawn_network(self):
-        self.childs_run("spawn")
+        self.each_attribute("spawn")
 
         replace = {'config': "\n".join(self.xml_net),
-                   'name': self.name}
+                   'name': self.entity()}
 
         tpl = paths.template('network-component.xml')
         xml = tpl.safe_substitute(replace)
@@ -84,13 +84,13 @@ class NetworkComponent(Component, NeedLibvirt):
         # device
         try:
             self.virt().networkDefineXML(xml)
-            net = self.get_network(self.name)
+            net = self.get_network(self.entity())
             return net
         except libvirt.libvirtError as err:
-            raise error.ExecError("Could not define {}: {}".format(self.name, err))
+            raise error.ExecError("Could not define {}: {}".format(self.entity(), err))
 
     def _stop_network(self, net):
-        self.childs_run("stop")
+        self.each_attribute("stop")
 
         if not net.isActive():
             self.say("is already stopped")

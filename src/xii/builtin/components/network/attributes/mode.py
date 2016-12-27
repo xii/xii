@@ -1,12 +1,13 @@
 from xii import error, paths
-from xii.attributes.base import NetworkAttribute
 from xii.attribute import Attribute
 from xii.validator import Dict, Key, String, Required, Or
 
+from base import NetworkAttribute
+
 
 class ModeAttribute(NetworkAttribute):
-    entity = "mode"
-    needs = ["network"]
+    atype = "mode"
+
     defaults = {
         'type': 'nat'
     }
@@ -32,20 +33,19 @@ class ModeAttribute(NetworkAttribute):
             template = 'mode_route_dev.xml'
 
         xml = paths.template(template)
-        self.get_parent().add_xml(xml.safe_substitute({
+        self.add_xml(xml.safe_substitute({
             'type': self._get_mode(),
             'dev': self._get_dev()
         }))
 
     def _get_mode(self):
-        if isinstance(self.settings, dict):
-            return self.settings['type']
-        return self.settings
+        if isinstance(self.settings(), dict):
+            return self.settings('type')
+        return self.settings()
 
     def _get_dev(self):
-        if isinstance(self.settings, dict):
-            if 'dev' in self.settings:
-                return self.settings['dev']
+        if isinstance(self.settings(), dict):
+            return self.settings('dev')
         return None
 
 

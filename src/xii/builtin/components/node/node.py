@@ -25,9 +25,6 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
     def get_domain_image_path(self):
         return self.get_attribute('image').get_domain_image_path()
 
-    def get_virt_url(self):
-        return self.get("settings/connection", "FAILING")
-
     def start(self):
         domain = self.get_domain(self.entity(), raise_exception=False)
 

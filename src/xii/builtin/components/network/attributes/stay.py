@@ -1,19 +1,14 @@
-from xii.attributes.base import NetworkAttribute
 from xii.validator import Bool
+
+from base import NetworkAttribute
 
 
 class StayAttribute(NetworkAttribute):
-    entity = "stay"
-    needs = ["network"]
+    atype = "stay"
 
     defaults = False
 
     keys = Bool()
-
-    def info(self):
-        if self.settings:
-            pass
-            # show_setting("stay when stopped", "yes")
 
     def does_stay(self):
         return self.settings
