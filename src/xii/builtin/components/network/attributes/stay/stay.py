@@ -12,6 +12,3 @@ class StayAttribute(NetworkAttribute):
 
     def does_stay(self):
         return self.settings
-
-
-StayAttribute.register()

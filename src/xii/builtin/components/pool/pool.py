@@ -1,20 +1,19 @@
-import libvirt
-import etree
+# import libvirt
 
-from time import sleep
+# from time import sleep
 
-from xii import need, error, paths, component
-from xii.validator import String
-
-
-class PoolComponent(component.Component, need.NeedLibvirt):
-    entity = "pool"
-    keys = String()
-
-    # IMPLEMENT ME
+# from xii import need, error, paths, component
+# from xii.validator import String
 
 
+# class PoolComponent(component.Component, need.NeedLibvirt):
+#     entity = "pool"
+#     keys = String()
 
-PoolComponent.register(
+#     # IMPLEMENT ME
 
-)
+
+
+# PoolComponent.register(
+
+# )

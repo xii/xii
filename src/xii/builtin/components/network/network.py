@@ -103,6 +103,3 @@ class NetworkComponent(Component, NeedLibvirt):
             return
         self.say("stopped!")
         return
-
-
-NetworkComponent.register()

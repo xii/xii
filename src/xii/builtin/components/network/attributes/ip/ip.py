@@ -1,10 +1,10 @@
 from xii import paths
+from xii.attribute import Attribute
 from xii.validator import Dict, String, Key, Required, Ip
 
-from base import NetworkAttribute
+import foobar
 
-
-class IPAttribute(NetworkAttribute):
+class IPAttribute(Attribute):
 
     keys = Dict([
         Required(Key("ip", Ip())),
@@ -14,7 +14,6 @@ class IPAttribute(NetworkAttribute):
             Required(Key("end", Ip()))
             ])),
         ])
-
 
     def spawn(self):
         settings = {
@@ -34,7 +33,3 @@ class IPv4Attribute(IPAttribute):
 class IPv6Attribute(IPAttribute):
     atype = "ipv6"
     default_netmask = "64"
-
-
-IPv4Attribute.register()
-IPv6Attribute.register()

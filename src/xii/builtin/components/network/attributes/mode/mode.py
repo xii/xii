@@ -2,10 +2,7 @@ from xii import error, paths
 from xii.attribute import Attribute
 from xii.validator import Dict, Key, String, Required, Or
 
-from base import NetworkAttribute
-
-
-class ModeAttribute(NetworkAttribute):
+class ModeAttribute(Attribute):
     atype = "mode"
 
     defaults = {
@@ -47,6 +44,3 @@ class ModeAttribute(NetworkAttribute):
         if isinstance(self.settings(), dict):
             return self.settings('dev')
         return None
-
-
-ModeAttribute.register()
