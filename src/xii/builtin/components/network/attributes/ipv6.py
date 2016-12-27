@@ -1,18 +1,15 @@
-from xii.attributes.base import NetworkAttribute
 from xii.validator import Dict, String, Required, Key
 
 
-class IPv6Attribute(NetworkAttribute):
-    entity = "ipv6"
+from base import NetworkAttribute
 
-    needs = ["network"]
+
+class IPv6Attribute(NetworkAttribute):
+    atype = "ipv6"
 
     defaults = False
 
     keys = String()
-
-    def info(self):
-        pass
 
     def spawn(self):
         pass
