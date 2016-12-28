@@ -6,7 +6,7 @@ import os
 from xii import need
 from xii.validator import Dict, String, VariableKeys, Key, Required
 
-from base import NodeAttribute
+from xii.components.node import NodeAttribute
 
 
 class UserAttribute(NodeAttribute, need.NeedGuestFS):
@@ -169,6 +169,3 @@ class UserAttribute(NodeAttribute, need.NeedGuestFS):
     def _generate_salt(self, length=16):
         chars = string.ascii_letters + string.digits
         return ''.join([random.choice(chars) for _ in range(length)])
-
-
-UserAttribute.register()

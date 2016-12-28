@@ -5,8 +5,7 @@ import md5
 from xii import error, util, need
 from xii.validator import Dict, String, Required, Key, VariableKeys
 
-from base import NodeAttribute
-
+from xii.components.node import NodeAttribute
 
 class CopyAttribute(NodeAttribute, need.NeedGuestFS):
     atype = "copy"
@@ -41,6 +40,3 @@ class CopyAttribute(NodeAttribute, need.NeedGuestFS):
             else:
                 with open(source, "r") as src:
                     self.guest().write(dest, src.read())
-
-
-CopyAttribute.register()

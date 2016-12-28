@@ -2,7 +2,6 @@ from xii import paths
 from xii.attribute import Attribute
 from xii.validator import Dict, String, Key, Required, Ip
 
-import foobar
 
 class IPAttribute(Attribute):
 

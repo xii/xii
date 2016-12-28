@@ -3,7 +3,7 @@ import os
 from xii import error, need
 from xii.validator import String, List, Key, Dict
 
-from base import NodeAttribute
+from xii.components.node import NodeAttribute
 
 
 class ShellAttribute(NodeAttribute, need.NeedSSH, need.NeedLibvirt):
@@ -68,6 +68,3 @@ class ShellAttribute(NodeAttribute, need.NeedSSH, need.NeedLibvirt):
         ssh = self.default_ssh()
         script_location = ssh.copy_to_tmp(script)
         ssh.run(shell + " " + script_location)
-
-
-ShellAttribute.register()

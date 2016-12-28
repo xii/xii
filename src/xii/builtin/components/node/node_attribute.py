@@ -3,10 +3,6 @@ from xii import attribute, entity, need
 
 class NodeAttribute(attribute.Attribute, need.NeedLibvirt):
 
-    @classmethod
-    def register(cls):
-        entity.EntityRegister.register_attribute("node", cls)
-
     def get_tmp_volume_path(self):
         return self.other_attribute("image").get_tmp_volume_path()
 

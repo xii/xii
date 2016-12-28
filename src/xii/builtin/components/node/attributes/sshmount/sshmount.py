@@ -7,7 +7,7 @@ from multiprocessing import Condition
 from xii import error, util, need
 from xii.validator import Dict, String, Required, Key, VariableKeys
 
-from base import NodeAttribute
+from xii.components.node import NodeAttribute
 
 
 # sshmount:
@@ -30,7 +30,7 @@ from base import NodeAttribute
 #     - check if public key entry exists
 #     - remove key if exists
 #     - write $HOME/.ssh/known_hosts
-    
+
 
 _pending = Condition()
 
@@ -100,7 +100,7 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH, need.Need
         # removing key from authorized_keys
 
         _pending.acquire()
-        for mount in self.settings().values():  
+        for mount in self.settings().values():
             user = self.io().user()
 
             if "user" in mount:
@@ -156,7 +156,7 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH, need.Need
                 source = os.path.join(os.getcwd(), source)
             if not os.path.isabs(dest):
                 dest = os.path.join(ssh.user_home(), dest)
- 
+
             if not os.path.isdir(source):
                 self.warn("sshfs source `{}` is not a directory"
                           .format(source))
@@ -232,6 +232,3 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH, need.Need
 
             required[user] = users[user]["home"]
         return required
-
-
-SSHMountAttribute.register()

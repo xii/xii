@@ -167,6 +167,3 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
             meta += "<xii:{key}>{value}</xii:{key}>\n".format(key=k, value=v)
         meta += "</xii:node>\n"
         return meta
-
-
-NodeComponent.register()

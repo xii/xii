@@ -1,5 +1,4 @@
 import os
-
 from functools import partial
 
 from xii import error, util
@@ -8,25 +7,35 @@ from xii.component import Component
 from xii.attribute import Attribute
 from xii.command import Command
 
-# directory structure of a extension
-# .
-#  components/
-#    component1/
-#      templates/
-#        co1.xml
-#      component1.py
-#      attributes/
-#        attr1/
-#         attr1.py
-#         templates/
-#           a1.xml
-#  commands/
-#    command1/
-#     command1.py
-#     templates/
-#       co1.xml
 
 class ExtensionManager():
+    """
+    Loads all extensions (commands, components, attributes)
+
+    Try to load a directory structure which looks like:
+
+        path/
+        |---- commands/
+        |---- command1/
+        |     |---- __init__.py
+        |     |     '---- ...
+        |     |---- ...
+        |     '---- commandN
+        '---- components/
+              |---- __init__.py
+              |---- ...
+              '---- attributes/
+                    |---- attribute1
+                    |     |---- __init__.py
+                    |     '---- ...
+                    '---- attributeN
+
+    each subdirectory can have a 'templates/' directory containing all
+    templates to be loaded
+
+    Note: classes/methods from component exports can be accessed via
+    "xii.components.<component name>.<target>"
+    """
 
     def __init__(self):
         self._known = {
@@ -35,6 +44,8 @@ class ExtensionManager():
             "components": {}
         }
         self._paths = set()
+        util.new_namespace("xii.components")
+        util.new_namespace("xii.attributes")
 
     def add_path(self, path):
         if not os.path.exists(path):
@@ -57,6 +68,24 @@ class ExtensionManager():
             if os.path.exists(commands):
                 self._add_commands(commands)
 
+    def get_command(self, name):
+        if name not in self._known["commands"]:
+            return None
+        return self._known["commands"][name]
+
+    def get_component(self, name):
+        if name not in self._known["components"]:
+            return None
+        return self._known["components"][name]
+
+    def get_attribute(self, component, name):
+        if component not in self._known["attributes"]:
+            return None
+
+        if name not in self._known["attributes"][component]:
+            return None
+        return self._known["attributes"][component][name]
+
     def _find_components(self, base_path):
         dirs = os.listdir(base_path)
         paths = map(partial(os.path.join, base_path), dirs)
@@ -64,6 +93,7 @@ class ExtensionManager():
         for name, path in zip(dirs, paths):
             if not os.path.isdir(path):
                 continue
+            print("loading {}...".format(path))
             self._load_components(name, path)
 
             # load all attributes
@@ -76,22 +106,17 @@ class ExtensionManager():
     def _find_attributes(self, component, base_path):
         dirs = os.listdir(base_path)
         paths = map(partial(os.path.join, base_path), dirs)
-        
+
         for name, path in zip(dirs, paths):
             if (os.path.isdir(path) or
                 os.path.splitext(path)[1] == ".py"):
+                print("loading {}...".format(path))
                 self._load_attributes(name, component, path)
 
     def _load_attributes(self, name, component, path):
-        module_name = "xii.attribute." + name
-
-        if os.path.basename(path).startswith("__"):
-            return
-
-        if os.path.isdir(path):
-            path = util.resource_from_path(path)
-
-        classes = util.classes_from_module(module_name, path, [Entity, Attribute])
+        module_name = "xii.attributes." + component
+        mod = util.load_module(module_name, path)
+        classes = util.classes_from_module(mod, [Entity, Attribute])
 
         for klass in classes:
             if klass.atype == "":
@@ -100,22 +125,22 @@ class ExtensionManager():
                 self._known["attributes"][component] = {}
 
             self._known["attributes"][component][klass.atype] = {
-                    "class": klass,
-                    "templates": self._find_templates(path)
+                "class": klass,
+                "templates": self._find_templates(path)
             }
 
     def _load_components(self, name, path):
-        # load component class
-        classes = util.classes_from_module("xii.component." + name,
-                                            util.resource_from_path(path),
-                                            [Entity, Component])
+        mod = util.load_module("xii.components." + name, path)
+        classes = util.classes_from_module(mod, [Entity, Component])
+
         for klass in classes:
             # skip base component class
             if klass.ctype == "":
                 continue
+            util.new_namespace("xii.attributes." + name)
             self._known["components"][klass.ctype] = {
-                    "class": klass,
-                    "templates": self._find_templates(path)
+                "class": klass,
+                "templates": self._find_templates(path)
             }
 
     def _add_commands(self, path):
@@ -123,7 +148,7 @@ class ExtensionManager():
 
     def _find_templates(self, path):
         tpl_path = os.path.join(path, "templates/")
-        tpls     = {}
+        tpls = {}
 
         if not os.path.exists(tpl_path):
             return tpls
