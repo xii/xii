@@ -25,6 +25,3 @@ class DestroyCommand(command.Command):
         args = parser.parse_args(self.args)
 
         return args.dfn_file
-
-
-command.Register.register(DestroyCommand)

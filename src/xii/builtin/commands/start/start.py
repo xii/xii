@@ -18,5 +18,3 @@ class StartCommand(command.Command):
 
         self.each_component("start")
         self.finalize()
-
-command.Register.register(StartCommand)

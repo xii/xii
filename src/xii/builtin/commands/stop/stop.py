@@ -1,7 +1,7 @@
 import os
 import argparse
 
-from xii import definition, command 
+from xii import definition, command
 
 
 class StopCommand(command.Command):
@@ -14,6 +14,3 @@ class StopCommand(command.Command):
         args = parser.parse_args(self.args())
 
         self.each_component("stop")
-
-
-command.Register.register(StopCommand)

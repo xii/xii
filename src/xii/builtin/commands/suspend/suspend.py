@@ -10,6 +10,3 @@ class SuspendCommand(command.Command):
         args = parser.parse_args(self.args())
 
         self.each_component("suspend")
-
-
-command.Register.register(SuspendCommand)
