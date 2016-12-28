@@ -39,7 +39,7 @@ class ExtensionManager():
 
     def __init__(self):
         self._known = {
-            "commands": {},
+            "commands": [],
             "attributes": {},
             "components": {}
         }
@@ -57,21 +57,11 @@ class ExtensionManager():
         path = os.path.join(os.path.dirname(__file__), "builtin")
         self.add_path(path)
 
-    def load(self):
-        for base_path in self._paths:
-            commands = os.path.join(base_path, "commands")
-            components = os.path.join(base_path, "components")
-
-            if os.path.exists(components):
-                self._find_components(components)
-
-            if os.path.exists(commands):
-                self._add_commands(commands)
-
     def get_command(self, name):
-        if name not in self._known["commands"]:
-            return None
-        return self._known["commands"][name]
+        for cmd in self._known["commands"]:
+            if name in cmd["class"].name:
+                return cmd
+        return None
 
     def get_component(self, name):
         if name not in self._known["components"]:
@@ -85,6 +75,17 @@ class ExtensionManager():
         if name not in self._known["attributes"][component]:
             return None
         return self._known["attributes"][component][name]
+
+    def load(self):
+        for base_path in self._paths:
+            commands = os.path.join(base_path, "commands")
+            components = os.path.join(base_path, "components")
+
+            if os.path.exists(components):
+                self._find_components(components)
+
+            if os.path.exists(commands):
+                self._find_commands(commands)
 
     def _find_components(self, base_path):
         dirs = os.listdir(base_path)
@@ -143,8 +144,27 @@ class ExtensionManager():
                 "templates": self._find_templates(path)
             }
 
-    def _add_commands(self, path):
-        pass
+    def _find_commands(self, base_path):
+        dirs = os.listdir(base_path)
+        paths = map(partial(os.path.join, base_path), dirs)
+
+        for name, path in zip(dirs, paths):
+            if not os.path.isdir(path):
+                continue
+            print("loading {}...".format(path))
+            self._load_commands(name, path)
+
+    def _load_commands(self, name, path):
+        mod = util.load_module("xii.commands." + name, path)
+        classes = util.classes_from_module(mod, [Entity, Command])
+
+        for klass in classes:
+            if klass.name == []:
+                continue
+            self._known["commands"].append({
+                "class": klass,
+                "templates": self._find_templates(path)
+            })
 
     def _find_templates(self, path):
         tpl_path = os.path.join(path, "templates/")

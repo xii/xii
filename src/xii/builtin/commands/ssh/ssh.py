@@ -70,8 +70,8 @@ class SSHCommand(command.Command):
             self.counted(step, "connection refused! Retrying...")
             time.sleep(self.get("global/wait", 3))
             self._run_ssh_cmd(domain_name, user, ip, options, retry, step+1)
-            
-    
+
+
     def _parse_command(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("domain", nargs="?", default=None,
@@ -84,7 +84,3 @@ class SSHCommand(command.Command):
         args = parser.parse_args(self.args())
 
         return args.domain, args.user
-
-
-
-command.Register.register(SSHCommand)
