@@ -1,7 +1,7 @@
 from xii import paths
 from xii.validator import Bool
 
-from base import NodeAttribute
+from xii.components.node import NodeAttribute
 
 
 class GraphicAttribute(NodeAttribute):
@@ -14,6 +14,3 @@ class GraphicAttribute(NodeAttribute):
             return
         xml = paths.template('graphic.xml')
         self.add_xml('devices', xml.safe_substitute())
-
-
-GraphicAttribute.register()

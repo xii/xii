@@ -1,7 +1,7 @@
 from xii import error, need
 from xii.validator import Bool
 
-from base import NodeAttribute
+from xii.components.node import NodeAttribute
 
 
 class HostnameAttribute(NodeAttribute, need.NeedGuestFS):
@@ -22,6 +22,3 @@ class HostnameAttribute(NodeAttribute, need.NeedGuestFS):
 
         self.say("setting hostname to {}...".format(name))
         self.guest().write('/etc/hostname', name)
-
-
-HostnameAttribute.register()

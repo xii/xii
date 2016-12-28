@@ -5,7 +5,7 @@ from Crypto.PublicKey import RSA
 from xii import util, need
 from xii.validator import Dict, List, String, Required, Key, Bool
 
-from base import NodeAttribute
+from xii.components.node import NodeAttribute
 
 
 class SSHAttribute(NodeAttribute, need.NeedGuestFS):
@@ -109,8 +109,3 @@ class SSHAttribute(NodeAttribute, need.NeedGuestFS):
                 self.warn("distribute key failed: user {} does "
                           "not exist".format(user))
                 continue
-
-        print("add keys but nope...")
-
-
-SSHAttribute.register()

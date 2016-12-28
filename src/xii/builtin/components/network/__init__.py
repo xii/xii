@@ -1,1 +1,1 @@
-from .attributes import *
+from network import NetworkComponent

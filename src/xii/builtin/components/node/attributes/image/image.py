@@ -8,7 +8,6 @@ from xii import paths, error, need, util
 
 from xii.attribute import Attribute
 from xii.validator import String
-from xii.entity import EntityRegister
 
 _pending = Condition()
 
@@ -141,6 +140,3 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
             return (md5_hash.hexdigest(), sha256_hash.hexdigest())
         except IOError as err:
             raise error.ExecError("Could not create validation hashes")
-
-
-EntityRegister.register_attribute("node", ImageAttribute)

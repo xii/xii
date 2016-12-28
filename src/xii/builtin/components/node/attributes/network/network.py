@@ -6,7 +6,7 @@ from time import sleep
 from xii import paths, error, need
 from xii.validator import String, Or, Dict, RequiredKey, Ip
 
-from base import NodeAttribute
+from xii.components.node import NodeAttribute
 
 
 class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
@@ -135,6 +135,3 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
             raise error.ExecError("Network {} has not become ready in "
                                   "time. Giving up".format(name))
         return network
-
-
-NetworkAttribute.register()

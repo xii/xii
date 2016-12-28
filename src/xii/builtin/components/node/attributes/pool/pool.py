@@ -4,7 +4,7 @@ import xml.etree.ElementTree as etree
 from xii import error, need
 from xii.attribute import Attribute
 from xii.validator import String
-from xii.entity import EntityRegister
+
 
 class PoolAttribute(Attribute, need.NeedLibvirt):
     atype = "pool"
@@ -42,5 +42,3 @@ class PoolAttribute(Attribute, need.NeedLibvirt):
         pool = self.used_pool()
         xml = etree.fromstring(pool.XMLDesc())
         return xml.attrib["type"]
-
-EntityRegister.register_attribute("node", PoolAttribute)

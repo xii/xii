@@ -1,9 +1,8 @@
+from xii.attribute import Attribute
 from xii.validator import Bool
 
-from base import NetworkAttribute
 
-
-class StayAttribute(NetworkAttribute):
+class StayAttribute(Attribute):
     atype = "stay"
 
     defaults = False
