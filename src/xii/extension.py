@@ -133,6 +133,10 @@ class ExtensionManager():
             if component not in self._known["attributes"]:
                 self._known["attributes"][component] = {}
 
+            # FIXME: Check why is the duplication happing
+            if klass.atype in self._known["attributes"][component]:
+                continue
+
             self._known["attributes"][component][klass.atype] = {
                 "class": klass,
                 "templates": self._find_templates(path)

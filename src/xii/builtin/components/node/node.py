@@ -1,7 +1,7 @@
 import libvirt
 from time import sleep, time
 
-from xii import paths, error
+from xii import error
 from xii.component import Component
 from xii.need import NeedLibvirt, NeedIO
 from xii.util import domain_has_state, domain_wait_state, wait_until_inactive
@@ -46,6 +46,7 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         domain = self.get_domain(self.entity())
 
         self.each_child("stop", reverse=True)
+        # FIXME: really?
         sleep(4)
         self._stop_domain(domain, force)
         self.each_child("after_stop", reverse=True)
@@ -129,7 +130,7 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         self.add_meta('definition', self.config("runtime/definition"))
         self.add_meta('user', self.io().user())
 
-        xml = paths.template('node.xml')
+        xml = self.template('node.xml')
         self.xml_dfn['name'] = self.entity()
         self.xml_dfn['meta'] = self._generate_meta_xml()
         self.xml_dfn.update(caps)

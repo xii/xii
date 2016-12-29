@@ -1,6 +1,6 @@
 import argparse
 
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, Future
 from functools import partial
 from abc import ABCMeta, abstractmethod
 
@@ -61,7 +61,14 @@ class Command(Entity, HasStore):
 
         try:
             executor = ThreadPoolExecutor(workers)
-            map(partial(executor.submit, run_action), self.children())
+            futures = map(partial(executor.submit, run_action), self.children())
+
+            # handle possible errors
+            errors = filter(None, map(Future.exception, futures))
+
+            if errors:
+                for err in errors:
+                    raise err
         finally:
             executor.shutdown(wait=False)
 

@@ -1,4 +1,4 @@
-from xii import error, paths
+from xii import error
 from xii.attribute import Attribute
 from xii.validator import Dict, Key, String, Required, Or
 
@@ -29,7 +29,7 @@ class ModeAttribute(Attribute):
         if self._get_dev():
             template = 'mode_route_dev.xml'
 
-        xml = paths.template(template)
+        xml = self.template(template)
         self.add_xml(xml.safe_substitute({
             'type': self._get_mode(),
             'dev': self._get_dev()
