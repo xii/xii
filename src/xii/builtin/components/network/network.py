@@ -2,7 +2,7 @@ import libvirt
 
 from xii.component import Component
 from xii.need import NeedLibvirt
-from xii import error, paths, util
+from xii import error, util
 
 
 class NetworkComponent(Component, NeedLibvirt):
@@ -77,7 +77,7 @@ class NetworkComponent(Component, NeedLibvirt):
         replace = {'config': "\n".join(self.xml_net),
                    'name': self.entity()}
 
-        tpl = paths.template('network-component.xml')
+        tpl = self.template('network.xml')
         xml = tpl.safe_substitute(replace)
 
         # FIXME: Handle case where the network already is used by another

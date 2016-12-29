@@ -16,7 +16,7 @@ class Attribute(Entity, HasStore):
         Entity.__init__(self,
                         name=self.atype,
                         parent=component,
-                        templates={})
+                        templates=tpls)
 
     def settings(self, key=None, default=None):
         if self.get(self.atype):

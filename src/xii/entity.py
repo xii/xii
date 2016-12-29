@@ -1,5 +1,4 @@
-import inspect
-
+import string
 from xii import error, util
 from xii.output import HasOutput
 
@@ -38,6 +37,13 @@ class Entity(HasOutput):
         if self.has_parent():
             return self.parent().config(key, default)
         return self.store().get(key, default)
+
+    def template(self, key):
+        if key not in self._templates:
+            raise error.Bug("Could not find template {}".format(key))
+
+        content = util.file_read(self._templates[key])
+        return string.Template(content)
 
     def validate(self, required_children=None):
         self._reorder_childs()

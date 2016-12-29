@@ -1,4 +1,3 @@
-from xii import paths
 from xii.attribute import Attribute
 from xii.validator import Dict, String, Key, Required, Ip
 
@@ -22,7 +21,7 @@ class IPAttribute(Attribute):
             "start": self.settings("dhcp/start"),
             "end": self.settings("dhcp/end")
         }
-        xml = paths.template(self.atype + ".xml")
+        xml = self.template(self.atype + ".xml")
         self.add_xml(xml.safe_substitute(settings))
 
 class IPv4Attribute(IPAttribute):

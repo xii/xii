@@ -3,7 +3,7 @@ import xml.etree.ElementTree as etree
 
 from time import sleep
 
-from xii import paths, error, need
+from xii import error, need
 from xii.validator import String, Or, Dict, RequiredKey, Ip
 
 from xii.components.node import NodeAttribute
@@ -63,7 +63,7 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
         self.add_xml('devices', self._gen_xml())
 
     def _gen_xml(self):
-        xml = paths.template('network.xml')
+        xml = self.template('network.xml')
         return xml.safe_substitute({'network': self.network_name()})
 
     def _get_mac_address(self):

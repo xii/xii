@@ -9,6 +9,7 @@ from xii import paths, error, need, util
 from xii.attribute import Attribute
 from xii.validator import String
 
+
 _pending = Condition()
 
 
@@ -47,7 +48,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
     def after_spawn(self):
         pool = self.other_attribute("pool").used_pool()
         size = self.io().stat(self.get_tmp_volume_path()).st_size
-        volume_tpl = paths.template("volume.xml")
+        volume_tpl = self.template("volume.xml")
         xml = volume_tpl.safe_substitute({
             "name": self.component_entity(),
             "capacity": size
@@ -66,7 +67,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
             stream.sendAll(read_handler, image)
             stream.finish()
 
-        disk_tpl = paths.template("disk.xml")
+        disk_tpl = self.template("disk.xml")
         xml = disk_tpl.safe_substitute({
             "pool": pool.name(),
             "volume": self.component_entity()
