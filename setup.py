@@ -28,7 +28,7 @@ setupdict = dict(
             "Programming Language :: Python :: 2.6",
             "Programming Language :: Python :: 2.7",
             ],
-        install_requires=["paramiko", "PyYAML", "pycrypto", "jinja2"],
+        install_requires=["paramiko", "PyYAML", "pycrypto", "jinja2", "futures"],
         include_package_data=True,
         packages=find_packages("src"),
         package_dir={"": "src"},
