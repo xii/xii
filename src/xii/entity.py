@@ -6,12 +6,13 @@ from xii.output import HasOutput
 class Entity(HasOutput):
     requires = []
 
-    def __init__(self, name, store=None, parent=None):
+    def __init__(self, name,store=None, parent=None, templates={}):
         self._entity = name
         self._parent = parent
         self._store = store
         self._childs = []
         self._shares = {}
+        self._templates = templates
 
     def has_parent(self):
         return self._parent is not None
@@ -62,7 +63,6 @@ class Entity(HasOutput):
             child.finalize()
         for name, shared in self._shares.items():
             if shared["finalizer"] is not None:
-                print("running finalizer for {}".format(name))
                 shared["finalizer"](shared['value'])
             del self._shares[name]
 
@@ -124,52 +124,3 @@ class Entity(HasOutput):
             if not has_moved:
                 idx += 1
             rounds += 1
-
-
-class EntityRegister():
-    _registered = {
-        'component': {},
-        'attribute': {}
-    }
-
-    @classmethod
-    def register_component(cls, klass):
-        print("registering component {}".format(klass.__name__))
-        if Entity not in inspect.getmro(klass):
-            raise error.Bug("{} is not a entity".format(klass.__name__))
-
-        if klass.entity in cls._registered["component"]:
-            raise error.Bug("{}/{} is already defined"
-                            .format("component", klass.entity))
-
-        cls._registered["component"][klass.ctype] = klass
-
-    @classmethod
-    def register_attribute(cls, component, klass):
-        print("registering attribute {}/{}".format(component, klass.__name__))
-        if Entity not in inspect.getmro(klass):
-            raise error.Bug("{} is not a entity".format(klass.__name__))
-
-        if component not in cls._registered["attribute"]:
-            cls._registered["attribute"][component] = {}
-
-        if klass.entity in cls._registered["attribute"][component]:
-            raise error.Bug("{}/{}/{} is already defined"
-                            .format("attribute", component, klass.entity))
-
-        cls._registered["attribute"][component][klass.atype] = klass
-
-    @classmethod
-    def get_component(cls, ctype):
-        if ctype not in cls._registered["component"]:
-            raise error.NotFound("Unknown component `{}`. Maybe misspelled?".format(ctype))
-        return cls._registered["component"][ctype]
-
-    @classmethod
-    def get_attribute(cls, ctype, aname):
-        print("getting attribute {} => {}".format(str(ctype), str(aname)))
-        if (ctype not in cls._registered["attribute"] or
-            aname not in cls._registered["attribute"][ctype]):
-            raise error.NotFound("Unkown attribute `{}`. "
-                            "Maybe misspelled?".format(aname, ctype))
-        return cls._registered["attribute"][ctype][aname]

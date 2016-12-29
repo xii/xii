@@ -8,7 +8,6 @@ def prepare_store(defn, store):
             store.set("global/" + key, value)
 
     for ctype, cname, component in get_components(defn):
-        print("adding {}/{}". format(ctype, cname))
         tmp = {}
         tmp["settings"] = store.get("global").copy()
         tmp.update(component)
