@@ -1,6 +1,11 @@
 import os
 
+from threading import Lock
 from abc import ABCMeta, abstractmethod
+
+
+# synchronize output from multiple threads
+output_lock = Lock()
 
 
 class colors:
@@ -59,7 +64,9 @@ class HasOutput:
 
         if wrap:
             line = wrap + line + colors.CLEAR
+        output_lock.acquire()
         print(line)
+        output_lock.release()
 
     def _generate_tag(self):
         tag = ""

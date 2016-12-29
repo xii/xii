@@ -1,17 +1,13 @@
 import argparse
-import multiprocessing
-import signal
 
+from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 from abc import ABCMeta, abstractmethod
 
-
-from xii import component, error
+from xii import error
 from xii.store import HasStore
 from xii.entity import Entity
 
-
-def run_action_on_obj((obj, action)):
-    obj.run(action)
 
 class Command(Entity, HasStore):
     __meta__ = ABCMeta
@@ -47,35 +43,27 @@ class Command(Entity, HasStore):
         return True
 
     def each_component(self, action):
-
-        def _init_worker():
-            signal.signal(signal.SIGINT, signal.SIG_IGN)
-
-        components = self.get("components")
-
-        if self.get("global/parallel", True):
-            pool = multiprocessing.Pool(self.get("global/workers", 3), _init_worker)
-            table = []
-
-            for cmpnt in self.children():
-                table.append((cmpnt, action))
-
-            try:
-                pool.map_async(run_action_on_obj, table).get()
-                pool.close()
-            except KeyboardInterrupt:
-                pool.terminate()
-                raise error.Interrupted()
-            except Exception as err:
-                self.warn("thread failed. stopping immediately!")
-                pool.terminate()
-                raise err
-        else:
-
-            try:
+        try:
+            if self.get("global/parallel", True):
+                try:
+                    self._run_parallel(self.get("global/workers", 3), action)
+                except Exception as err:
+                    self.warn("thread failed. stopping immediately!")
+                    raise err
+            else:
                 self.each_child(action, reverse=False)
-            except KeyboardInterrupt:
-                raise error.Interrupted()
+        except KeyboardInterrupt:
+            raise error.Interrupted()
+
+    def _run_parallel(self, workers, action, args=[]):
+        def run_action(obj):
+            obj.run(action)
+
+        try:
+            executor = ThreadPoolExecutor(workers)
+            map(partial(executor.submit, run_action), self.children())
+        finally:
+            executor.shutdown(wait=False)
 
     def default_arg_parser(self):
         parser = argparse.ArgumentParser()
