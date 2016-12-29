@@ -18,8 +18,8 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
     requires = ['pool']
     keys = String()
 
-    def __init__(self, component):
-        Attribute.__init__(self, component)
+    def __init__(self, component, templates):
+        Attribute.__init__(self, component, templates)
         self._tempdir = self.io().mktempdir("xii-" + self.component_entity())
 
     def get_tmp_volume_path(self):

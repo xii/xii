@@ -19,10 +19,9 @@ class Command(Entity, HasStore):
     name = ["invalidcommand"]
     help = "No help given"
 
-    def __init__(self, args, store):
-        Entity.__init__(self, self.name[0], store, parent=None)
+    def __init__(self, args, tpls, store):
+        Entity.__init__(self, self.name[0], store, parent=None, templates=tpls)
         self._args = args
-        self._create_components()
 
     # store() is already defined by Entity
 
@@ -78,41 +77,10 @@ class Command(Entity, HasStore):
             except KeyboardInterrupt:
                 raise error.Interrupted()
 
-
-    def _create_components(self):
-        for cmpnt in component.from_definition(self.store(), self):
-            self.add_component(cmpnt)
-        self.validate()
-
     def default_arg_parser(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("dfn_file", nargs="?", default=None)
-
         return parser
 
     def args(self):
         return self._args
-
-
-class Register(object):
-    registered = []
-
-    @classmethod
-    def get(cls, name, args, store):
-        for command in cls.registered:
-            if name in command.name:
-                return command(args, store)
-        return None
-
-    @classmethod
-    def available(cls):
-        output = ["", "shortcut  action    description",
-                  "-------------------------------"]
-        for command in cls.registered:
-            output.append(" {:9}{:10}{}".format(", ".join(command.name[1:]), command.name[0], command.help))
-        output.append(" ")
-        return output
-
-    @classmethod
-    def register(cls, command):
-        cls.registered.append(command)

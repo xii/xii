@@ -1,5 +1,6 @@
-from xii.entity import Entity, EntityRegister
+from xii.entity import Entity
 from xii.store import HasStore
+from xii import error
 
 non_attributes = ["count", "type", "settings"]
 
@@ -7,12 +8,8 @@ class Component(Entity, HasStore):
     ctype = ""
     default_attrs = []
 
-    @classmethod
-    def register(cls):
-        EntityRegister.register_component(cls)
-
-    def __init__(self, name, command):
-        Entity.__init__(self, name, parent=command)
+    def __init__(self, name, command, tpls={}):
+        Entity.__init__(self, name, parent=command, templates=tpls)
 
     def get_virt_url(self):
         return self.get("settings/connection", "qemu://system")
@@ -31,14 +28,6 @@ class Component(Entity, HasStore):
     def get_attribute(self, name):
         return self.get_child(name)
 
-    def load_defaults(self):
-        for default in self.default_attributes:
-            if default in self.store().values():
-                continue
-            attr = EntityRegister.get_attribute(self.ctype, default)
-            if attr.has_defaults():
-                self.add_attribute(attr(self))
-
     def run(self, action):
         if action in dir(self):
             getattr(self, action)()
@@ -47,32 +36,31 @@ class Component(Entity, HasStore):
         Entity.validate(self, self.required_attributes)
 
 
-def from_definition(store, command):
-    components = []
-
-    definition = store.get("components")
+def from_definition(definition, command, ext_mgr):
     for component_type in definition:
         for name in definition[component_type].keys():
-            components.append(_create_component(name, component_type, command))
-    return components
+            cmpnt = ext_mgr.get_component(component_type)
 
-def _create_component(name, component_type, command):
+            if not cmpnt:
+                raise error.NotFound("Could not find component type {}!"
+                                     .format(component_type))
+            instance = cmpnt["class"](name, command, cmpnt["templates"])
+            _initialize_attributes(instance, ext_mgr)
 
-    component_class = EntityRegister.get_component(component_type)
-    component = component_class(name, command)
+            yield instance
 
-    component.load_defaults()
 
-    for attr_name in component.store().values().keys():
-        if attr_name in non_attributes:
-            continue
-        attr = EntityRegister.get_attribute(component_type, attr_name)
+def _initialize_attributes(instance, ext_mgr):
+
+    # uniq attributes
+    all_attrs = instance.default_attributes + instance.store().values().keys()
+
+    to_load = [x for x in set(all_attrs) if x not in non_attributes]
+    for name in to_load:
+        attr = ext_mgr.get_attribute(instance.ctype, name)
+
         if not attr:
-            raise NotFound("Invalid attribute `{}` for component "
+            raise error.NotFound("Invalid attribute `{}` for component "
                            "{}. Maybe Missspelled?"
-                           .format(attr_name, component.entity()))
-        component.add_attribute(attr(component))
-
-    # check if component is correctly initialized
-    component.validate()
-    return component
+                           .format(name, instance.entity()))
+        instance.add_attribute(attr["class"](instance, attr["templates"]))

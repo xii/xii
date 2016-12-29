@@ -63,6 +63,16 @@ class ExtensionManager():
                 return cmd
         return None
 
+    def commands_available(self):
+        output = ["", "shortcut  action    description",
+                  "-------------------------------"]
+
+        for command in [c["class"] for c in self._known["commands"]]:
+            output.append(" {:9}{:10}{}".format(", ".join(command.name[1:]), command.name[0], command.help))
+        output.append(" ")
+        return output
+
+
     def get_component(self, name):
         if name not in self._known["components"]:
             return None
@@ -94,7 +104,6 @@ class ExtensionManager():
         for name, path in zip(dirs, paths):
             if not os.path.isdir(path):
                 continue
-            print("loading {}...".format(path))
             self._load_components(name, path)
 
             # load all attributes
@@ -111,7 +120,6 @@ class ExtensionManager():
         for name, path in zip(dirs, paths):
             if (os.path.isdir(path) or
                 os.path.splitext(path)[1] == ".py"):
-                print("loading {}...".format(path))
                 self._load_attributes(name, component, path)
 
     def _load_attributes(self, name, component, path):
@@ -151,7 +159,6 @@ class ExtensionManager():
         for name, path in zip(dirs, paths):
             if not os.path.isdir(path):
                 continue
-            print("loading {}...".format(path))
             self._load_commands(name, path)
 
     def _load_commands(self, name, path):

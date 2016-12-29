@@ -1,4 +1,4 @@
-from xii.entity import EntityRegister, Entity
+from xii.entity import Entity
 from xii.store import HasStore, Store
 
 class Attribute(Entity, HasStore):
@@ -12,9 +12,11 @@ class Attribute(Entity, HasStore):
             return False
         return True
 
-    def __init__(self, component):
-        Entity.__init__(self, name=self.atype,
-                              parent=component)
+    def __init__(self, component, tpls):
+        Entity.__init__(self,
+                        name=self.atype,
+                        parent=component,
+                        templates={})
 
     def settings(self, key=None, default=None):
         if self.get(self.atype):
@@ -40,7 +42,6 @@ class Attribute(Entity, HasStore):
 
     def validate(self):
         self.keys.validate(self.component_entity() + " > " + self.entity(), self.settings())
-        print("{} validated".format(self.entity()))
 
     def get_virt_url(self):
         return self.get("settings/connection", "FAILING")
