@@ -1,0 +1,23 @@
+# vim: set ts=2 sw=2 tw=0 ft=yaml:
+---
+
+test-pool:
+  type: pool
+  directory: {{ directory_pool }}
+
+test-pool-nodes:
+  type: node
+  network: default
+  image: {{ image }}
+  count: 2
+  ssh:
+    copy-key:
+      users:
+        - root
+        - felixsch
+  user:
+    felixsch:
+      password: linux
+    root:
+      password: linux
+  pool: test-pool

@@ -6,7 +6,8 @@ non_attributes = ["count", "type", "settings"]
 
 class Component(Entity, HasStore):
     ctype = ""
-    default_attrs = []
+    default_attributes = []
+    required_attributes = []
 
     def __init__(self, name, command, tpls={}):
         Entity.__init__(self, name, parent=command, templates=tpls)
@@ -18,6 +19,9 @@ class Component(Entity, HasStore):
     def store(self):
         path = "components/{}/{}".format(self.ctype, self.entity())
         return self.parent().store().derive(path)
+
+    def attributes(self):
+        return self._childs
 
     def add_attribute(self, attribute):
         return self.add_child(attribute)

@@ -13,7 +13,7 @@ class DestroyCommand(command.Command):
     help = "Destroy xii vm's"
 
     def run(self):
-        self.each_component("destroy")
+        self.each_component("destroy", reverse=True)
 
 
     def parse_command(self):
