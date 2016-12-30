@@ -70,6 +70,6 @@ class HasOutput:
 
     def _generate_tag(self):
         tag = ""
-        for ident in self.entity_path():
+        for ident in self.entity_path()[1:]:
             tag += "[" + ident + "]"
         return tag

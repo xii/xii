@@ -31,37 +31,35 @@ class Command(Entity, HasStore):
     def get_component(self, name):
         return self.get_child(name)
 
-    def has_component(self, ctype, cmpnt):
-        components = self.get("components")
-
-        if not components:
-            return False
-
-        if (ctype not in components or
-            cmpnt not in components[ctype][cmpnt]):
-            return False
-        return True
-
-    def each_component(self, action):
+    def each_component(self, action, reverse=False):
         try:
             if self.get("global/parallel", True):
                 try:
-                    self._run_parallel(self.get("global/workers", 3), action)
+                    self._run_parallel(self.get("global/workers", 3), action, reverse)
                 except Exception as err:
                     self.warn("thread failed. stopping immediately!")
                     raise err
             else:
-                self.each_child(action, reverse=False)
+                self.each_child(action, reverse)
         except KeyboardInterrupt:
             raise error.Interrupted()
 
-    def _run_parallel(self, workers, action, args=[]):
+
+    # overwrite behaviour from entity class. Search for ctype instead
+    # of the entity name
+    def _child_index(self, ctype):
+        for idx, child in enumerate(self._childs):
+            if child.ctype == ctype:
+                return idx
+        return None
+
+    def _run_parallel(self, workers, action, reverse, args=[]):
         def run_action(obj):
             obj.run(action)
 
         try:
             executor = ThreadPoolExecutor(workers)
-            futures = map(partial(executor.submit, run_action), self.children())
+            futures = map(partial(executor.submit, run_action), reversed(self.children()))
 
             # handle possible errors
             errors = filter(None, map(Future.exception, futures))

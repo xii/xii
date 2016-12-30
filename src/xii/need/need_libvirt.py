@@ -42,47 +42,62 @@ class NeedLibvirt(HasOutput):
 
         return self.share("libvirt", _create_connection, _close_connection)
 
+    def get_resource(self, typ, *args, **kwargs):
+        r = True
+        if "raise_exception" in kwargs:
+            r = kwargs["raise_exception"]
+        if "throw" in kwargs:
+            r = kwargs["throw"]
 
-    def get_domain(self, name, raise_exception=True):
-        try:
-            return self.virt().lookupByName(name)
-        except libvirt.libvirtError:
-            if raise_exception:
-                raise error.NotFound("Could not find domain "
-                                        "({})".format(name))
-            else:
-                return None
+        mapping = {
+            "domain": "lookupByName",
+            "pool": "storagePoolLookupByName",
+            "network": "networkLookupByName",
+        }
 
-    def get_pool(self, name, raise_exception=True):
         try:
-            return self.virt().storagePoolLookupByName(name)
+            if typ == "volume":
+                pool = self.get_resource("pool", args[0], throw=r)
+                if not pool:
+                    return None
+                return pool.storageVolLookupByName(args[1])
+
+            return getattr(self.virt(), mapping[typ])(*args)
         except libvirt.libvirtError:
-            if raise_exception:
-                raise error.NotFound("Could not find pool "
-                                     "({})".format(name))
-            else:
-                return None
+            if r:
+                raise error.NotFound("Could not find {}"
+                                     "({})".format(typ, name))
+            return None
+
 
     def get_network(self, name, raise_exception=True):
-        try:
-            return self.virt().networkLookupByName(name)
-        except libvirt.libvirtError:
-            if raise_exception:
-                raise error.NotFound("Could not find network "
-                                     "({})".format(name))
-            else:
-                return None
+        r = raise_exception
+        return self.get_resource("network", name, throw=r)
 
     def get_volume(self, pool_name, name, raise_exception=True):
-        try:
-            pool = self.get_pool(pool_name)
-            return pool.storageVolLookupByName(name)
-        except libvirt.libvirtError:
-            if raise_exception:
-                raise error.NotFound("Could not find volume "
-                                     "({})".format(name))
-            else:
-                return None
+        r = raise_exception
+        return self.get_resource("volume", pool_name, name, throw=r)
+
+    def get_domain(self, name, raise_exception=True):
+        r = raise_exception
+        return self.get_resource("domain", name, throw=r)
+
+    def get_pool(self, name, raise_exception=True):
+        r = raise_exception
+        return self.get_resource("pool", name, throw=r)
+
+    def wait_for_resource(self, *args):
+        resource = self.get_resource(*args, raise_exception=False)
+        if resource:
+            return resource
+
+        for _ in range(self.global_get("global/retry", 20)):
+            resource = self.get_resource(*args, raise_exception=False)
+
+            if resource:
+                return resource
+            sleep(self.global_get("global/wait", 3))
+        return None
 
     def get_capabilities(self, arch='x86_64', prefer_kvm=True):
         try:

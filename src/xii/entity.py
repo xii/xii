@@ -33,6 +33,18 @@ class Entity(HasOutput):
     def store(self):
         return self._store
 
+    # FIXME: Find better place
+    def has_component(self, ctype, cmpnt):
+        components = self.get("components")
+
+        if not components:
+            return False
+
+        if (ctype not in components or
+            cmpnt not in components[ctype][cmpnt]):
+            return False
+        return True
+
     def config(self, key, default=None):
         if self.has_parent():
             return self.parent().config(key, default)

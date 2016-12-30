@@ -1,0 +1,4 @@
+<pool type="$type">
+  <name>$name</name>
+  $config
+</pool>

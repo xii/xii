@@ -12,6 +12,8 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
     required_attributes = ["pool", "image"]
     default_attributes = ["pool", "network", "hostname"]
 
+    requires = ["pool", "network"]
+
     xml_dfn = {'devices': ""}
     xml_metadata = {}
 

@@ -23,7 +23,6 @@ class Attribute(Entity, HasStore):
             s = self.store().derive(self.atype)
         elif self.has_defaults():
             s = Store(parent=self.defaults)
-
         if key is None:
             return s.values()
         return s.get(key, default)
