@@ -1,0 +1,26 @@
+# vim: set ts=2 sw=2 tw=0 ft=yaml:
+---
+ansible-test:
+  type: node
+  pool: default
+  image: {{ image }}
+  count: 2
+
+  graphic: yes
+  user:
+    felixsch:
+      password: felix
+    root:
+      password: linux
+  ssh:
+    copy-key:
+      users:
+        - felixsch
+        - root
+
+deploy-stuff:
+  type: ansible
+  hosts: ansible-test-1 ansible-test-2
+  run: deploy.yml
+  env:
+    test-var: fooobar
