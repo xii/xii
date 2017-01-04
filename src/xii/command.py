@@ -49,9 +49,14 @@ class Command(Entity, HasStore):
 
     def each_component(self, action, reverse=False):
         try:
+            if reverse:
+                groups = reversed(self._grouped_components())
+            else:
+                groups = self._grouped_components()
+
             if self.get("global/parallel", True):
                 count = self.get("global/workers", 3)
-                for name, group in self._grouped_components():
+                for name, group in groups:
                     self.say("{}ing {}s..".format(action, name))
                     in_parallel(count, group, lambda o: o.run(action))
             else:
