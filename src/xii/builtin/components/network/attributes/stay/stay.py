@@ -1,8 +1,8 @@
-from xii.attribute import Attribute
 from xii.validator import Bool
+from xii.components.network import NetworkAttribute
 
 
-class StayAttribute(Attribute):
+class StayAttribute(NetworkAttribute):
     atype = "stay"
 
     defaults = False
@@ -10,4 +10,4 @@ class StayAttribute(Attribute):
     keys = Bool()
 
     def does_stay(self):
-        return self.settings
+        return self.settings()

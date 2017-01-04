@@ -1,8 +1,8 @@
 from xii import error
-from xii.attribute import Attribute
 from xii.validator import Dict, Key, String, Required, Or
+from xii.components.network import NetworkAttribute
 
-class ModeAttribute(Attribute):
+class ModeAttribute(NetworkAttribute):
     atype = "mode"
 
     defaults = {
@@ -18,7 +18,7 @@ class ModeAttribute(Attribute):
         ])
 
     def validate_settings(self):
-        Attribute.validate_settings(self)
+        NetworkAttribute.validate_settings(self)
 
         if self._get_mode() not in ['nat', 'route']:
             raise error.DefError("Unknown network mode '{}'".format(self._get_mode()))

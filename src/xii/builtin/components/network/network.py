@@ -17,6 +17,7 @@ class NetworkComponent(Component, NeedLibvirt):
         self.xml_net.append(xml)
 
     def start(self):
+        self.say("starting...")
         net = self.get_network(self.entity(), raise_exception=False)
 
         if not net:
@@ -37,10 +38,11 @@ class NetworkComponent(Component, NeedLibvirt):
             self.warn("could not start network")
             return False
 
-        self.success("network started")
+        self.success("network started!")
 
 
     def stop(self):
+        self.say("stopping...")
         net = self.get_network(self.entity(), raise_exception=False)
 
         if not net:
@@ -72,6 +74,7 @@ class NetworkComponent(Component, NeedLibvirt):
         pass
 
     def _spawn_network(self):
+        self.say("creating...")
         self.each_attribute("spawn")
 
         replace = {'config': "\n".join(self.xml_net),
@@ -85,11 +88,13 @@ class NetworkComponent(Component, NeedLibvirt):
         try:
             self.virt().networkDefineXML(xml)
             net = self.get_network(self.entity())
+            self.success("created!")
             return net
         except libvirt.libvirtError as err:
             raise error.ExecError("Could not define {}: {}".format(self.entity(), err))
 
     def _stop_network(self, net):
+        self.say("stopping...")
         self.each_attribute("stop")
 
         if not net.isActive():
@@ -101,5 +106,5 @@ class NetworkComponent(Component, NeedLibvirt):
         if not util.wait_until_inactive(net):
             self.warn("could not stop network")
             return
-        self.say("stopped!")
+        self.success("stopped!")
         return

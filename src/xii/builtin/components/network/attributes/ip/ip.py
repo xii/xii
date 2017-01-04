@@ -1,8 +1,8 @@
-from xii.attribute import Attribute
+from xii.components.network import NetworkAttribute
 from xii.validator import Dict, String, Key, Required, Ip
 
 
-class IPAttribute(Attribute):
+class IPAttribute(NetworkAttribute):
 
     keys = Dict([
         Required(Key("ip", Ip())),
