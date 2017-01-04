@@ -117,6 +117,4 @@ def run_cli():
         for line in it:
             warn(line)
 
-        if cli_args.debug:
-            store.dump()
         return 1
