@@ -37,6 +37,9 @@ class Attribute(Entity, HasStore):
     def store(self):
         return self.parent().store()
 
+    def component(self):
+        return self.parent()
+
     def component_entity(self):
         return self.parent().entity()
 
