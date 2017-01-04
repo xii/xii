@@ -58,7 +58,7 @@ class Entity(HasOutput):
         return string.Template(content)
 
     def validate(self, required_children=None):
-        self._reorder_childs()
+        self.reorder_childs()
         if required_children:
             for required in required_children:
                 child = self.get_child(required)
@@ -115,13 +115,13 @@ class Entity(HasOutput):
             result.append(child.run(action))
         return result
 
-    def _child_index(self, entity):
+    def child_index(self, entity):
         for idx, child in enumerate(self._childs):
             if child.entity() == entity:
                 return idx
         return None
 
-    def _reorder_childs(self):
+    def reorder_childs(self):
         idx = 0
         rounds = 0
         size = len(self._childs)
@@ -132,7 +132,7 @@ class Entity(HasOutput):
                 raise error.Bug("Cyclic dependencies.")
 
             for requirement in self._childs[idx].requires:
-                move = self._child_index(requirement)
+                move = self.child_index(requirement)
                 if move is None:
                     continue
 

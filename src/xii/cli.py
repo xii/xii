@@ -78,7 +78,6 @@ def run_cli():
         # prepare local environment xii runs in
         paths.prepare_local_paths()
 
-
         # parse arguments
         parser = cli_arg_parser(ext_mgr)
         cli_args = parser.parse_args()

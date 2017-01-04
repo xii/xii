@@ -10,11 +10,10 @@ simple-cluster:
       start: 192.168.111.2
       end: 192.168.111.254
 
-
 admin:
   type: node
   network: simple-cluster
-  image: http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2
+  image: {{ image }}
   graphic: yes
   ssh:
     copy-key:
@@ -23,14 +22,14 @@ admin:
         - root
   user:
     felixsch:
-      password: "1"
+      password: felix
     root:
       password: linux
 
 worker:
   type: node
   network: simple-cluster
-  image: http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2
+  image: {{ image }}
   count: 2
   graphic: yes
   ssh:
@@ -40,6 +39,6 @@ worker:
         - root
   user:
     felixsch:
-      password: "1"
+      password: felix
     root:
       password: linux

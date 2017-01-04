@@ -32,6 +32,9 @@ class Component(Entity, HasStore):
     def get_attribute(self, name):
         return self.get_child(name)
 
+    def has_attribute(self, name):
+        return not self.get_child(name) is None
+
     def run(self, action):
         if action in dir(self):
             getattr(self, action)()
@@ -55,16 +58,28 @@ def from_definition(definition, command, ext_mgr):
 
 
 def _initialize_attributes(instance, ext_mgr):
-
-    # uniq attributes
-    all_attrs = instance.default_attributes + instance.store().values().keys()
-
-    to_load = [x for x in set(all_attrs) if x not in non_attributes]
-    for name in to_load:
+    def add_attr(name):
         attr = ext_mgr.get_attribute(instance.ctype, name)
 
         if not attr:
             raise error.NotFound("Invalid attribute `{}` for component "
-                           "{}. Maybe Missspelled?"
-                           .format(name, instance.entity()))
+                                 "{}. Maybe Missspelled?"
+                                 .format(name, instance.entity()))
+
         instance.add_attribute(attr["class"](instance, attr["templates"]))
+
+    # load defined attributes
+    for n in instance.store().values().keys():
+        if n not in non_attributes:
+            add_attr(n)
+
+    # add defaults
+    for name in instance.default_attributes:
+        if not instance.has_attribute(name):
+            add_attr(name)
+
+    # check if all required attributes are set
+    for name in instance.required_attributes:
+        if not instance.has_attribute(name):
+            raise error.NotFound("{} needs a {} attribute but not found, "
+                                 "add one!".format(instance.ctype, name))
