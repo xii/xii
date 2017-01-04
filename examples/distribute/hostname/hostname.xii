@@ -1,0 +1,51 @@
+# vim: set ts=2 sw=2 tw=0 ft=yaml:
+---
+
+node:
+  type: node
+  network: default
+  pool: default
+  image: {{ image }}
+  count: 3
+  graphic: yes
+  ssh:
+    copy-key:
+      users:
+        - root
+        - felixsch
+  user:
+    felixsch:
+      password: linux
+    root:
+      password: linux
+
+admin:
+  type: node
+  network: default
+  pool: default
+  image: {{ image }}
+  count: 3
+  graphic: yes
+  ssh:
+    copy-key:
+      users:
+        - root
+        - felixsch
+  user:
+    felixsch:
+      password: linux
+    root:
+      password: linux
+
+distribute-nodes:
+  type: distribute
+  hostname: [ node-1, node-2, node-3 ]
+
+distribute-admin:
+  type: distribute
+  hostname:
+    admin: [ node-1, node-2, node-3 ]
+
+
+
+
