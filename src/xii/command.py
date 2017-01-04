@@ -9,6 +9,22 @@ from xii.store import HasStore
 from xii.entity import Entity
 
 
+# move me to util if time is ready
+def in_parallel(worker_count, objects, executor):
+    try:
+        pool = ThreadPoolExecutor(worker_count)
+        futures = map(partial(pool.submit, executor), objects)
+
+        # handle possible errors
+        errors = filter(None, map(Future.exception, futures))
+
+        if errors:
+            for err in errors:
+                raise err
+    finally:
+        pool.shutdown(wait=False)
+
+
 class Command(Entity, HasStore):
     __meta__ = ABCMeta
 
@@ -34,16 +50,15 @@ class Command(Entity, HasStore):
     def each_component(self, action, reverse=False):
         try:
             if self.get("global/parallel", True):
-                try:
-                    self._run_parallel(self.get("global/workers", 3), action, reverse)
-                except Exception as err:
-                    self.warn("thread failed. stopping immediately!")
-                    raise err
+                count = self.get("global/workers", 3)
+                import pdb; pdb.set_trace()
+                for name, group in self._grouped_components():
+                    self.say("{}ing {}s..".format(action, name))
+                    in_parallel(count, group, lambda o: o.run(action))
             else:
                 self.each_child(action, reverse)
         except KeyboardInterrupt:
             raise error.Interrupted()
-
 
     # overwrite behaviour from entity class. Search for ctype instead
     # of the entity name
@@ -53,23 +68,6 @@ class Command(Entity, HasStore):
                 return idx
         return None
 
-    def _run_parallel(self, workers, action, reverse, args=[]):
-        def run_action(obj):
-            obj.run(action)
-
-        try:
-            executor = ThreadPoolExecutor(workers)
-            futures = map(partial(executor.submit, run_action), reversed(self.children()))
-
-            # handle possible errors
-            errors = filter(None, map(Future.exception, futures))
-
-            if errors:
-                for err in errors:
-                    raise err
-        finally:
-            executor.shutdown(wait=False)
-
     def default_arg_parser(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("dfn_file", nargs="?", default=None)
@@ -77,3 +75,26 @@ class Command(Entity, HasStore):
 
     def args(self):
         return self._args
+
+    def child_index(self, component):
+        for idx, child in enumerate(self._childs):
+            if child.ctype == component:
+                return idx
+        return None
+
+    def _grouped_components(self):
+        self.reorder_childs();
+        groups = []
+        childs = self.children()
+        name = childs[0].ctype
+        next = [childs[0]]
+
+        for child in childs[1:]:
+            if child.ctype == name:
+                next.append(child)
+            else:
+                groups.append((name, next))
+                name = child.ctype
+                next = [child]
+        groups.append((name, next))
+        return groups
