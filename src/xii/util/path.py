@@ -8,8 +8,12 @@ from pkg_resources import resource_filename
 from xii import error
 from xii.util.misc import md5digest
 
+
+def local(extend=""):
+    return os.path.join(os.path.expanduser('~'), '.xii', extend)
+
 def defaults(file):
-    return resource_filename(__name__, os.path.join('defaults', file))
+    return resource_filename("xii", os.path.join('defaults', file))
 
 
 def resource_from_path(path, ext=".py"):
@@ -21,16 +25,6 @@ def make_temp_name(seed):
     hashed = md5digest(seed + str(time.time()))
     return "/tmp/xii-" + hashed
 
-
-def template(file):
-    path = resource_filename(__name__, os.path.join('templates', file))
-
-    if not os.path.isfile(path):
-        raise error.Bug("Could not find template {}".format(path))
-    content = util.file_read(path)
-    return string.Template(content)
-
-
 def find_definition_file(path):
     if not path:
         cwd = os.getcwd()
@@ -40,8 +34,6 @@ def find_definition_file(path):
     return path
 
 
-def local(extend=""):
-    return os.path.join(os.path.expanduser('~'), '.xii', extend)
 
 
 def xii_home(home, extend=""):
