@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 
 import guestfs
 
-from xii import util
+from xii import util, error
 
 
 class NeedGuestFS():
@@ -14,15 +14,18 @@ class NeedGuestFS():
 
     def guest(self):
         def _start_guestfs():
-            path = self.get_tmp_volume_path()
-            guest = guestfs.GuestFS()
+            try:
+                path = self.get_tmp_volume_path()
+                guest = guestfs.GuestFS()
 
-            guest.add_drive(path)
-            guest.launch()
-            guest.mount("/dev/sda1", "/")
+                guest.add_drive(path)
+                guest.launch()
+                guest.mount("/dev/sda1", "/")
 
-            if guest.exists('/etc/sysconfig/selinux'):
-                guest.get_selinux = lambda: 1
+                if guest.exists('/etc/sysconfig/selinux'):
+                    guest.get_selinux = lambda: 1
+            except RuntimeError as e:
+                raise error.ExecError("guestfs error: {}".format(e))
 
             return guest
 
