@@ -19,12 +19,8 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
     requires = ['pool']
     keys = String()
 
-    def __init__(self, component, templates):
-        Attribute.__init__(self, component, templates)
-        self._tempdir = self.io().mktempdir("xii-" + self.component_entity())
-
     def get_tmp_volume_path(self):
-        return os.path.join(self._tempdir, "image")
+        return os.path.join(self.component().get_temp_dir(), "image")
 
     def spawn(self):
         # create image store if needed
@@ -74,7 +70,6 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         })
 
         self.parent().add_xml('devices', xml)
-        self.io().rm(self._tempdir)
 
     def destroy(self):
         pool = self.other_attribute("pool").used_pool()
@@ -94,6 +89,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
 
     def _remove_volume(self, volume, force=False):
         if self.config('global/auto_delete_volumes', False) or force:
+            volume.wipe()
             return volume.delete()
         raise error.ExecError(
                 ["Volume `{}` already exists".format(self.component_entity()),
