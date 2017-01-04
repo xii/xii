@@ -51,7 +51,6 @@ class Command(Entity, HasStore):
         try:
             if self.get("global/parallel", True):
                 count = self.get("global/workers", 3)
-                import pdb; pdb.set_trace()
                 for name, group in self._grouped_components():
                     self.say("{}ing {}s..".format(action, name))
                     in_parallel(count, group, lambda o: o.run(action))

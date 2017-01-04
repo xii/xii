@@ -58,7 +58,7 @@ class HasOutput:
                      colors.SUCCESS + colors.BOLD)
 
     def _tprint(self, tag, msg, wrap=None):
-        stop = 35
+        stop = 40
         fill = stop - len(tag)
         line = "{} {}: {}".format(tag, "." * fill, msg)
 
@@ -70,6 +70,6 @@ class HasOutput:
 
     def _generate_tag(self):
         tag = ""
-        for ident in self.entity_path()[1:]:
+        for ident in self.entity_path():
             tag += "[" + ident + "]"
         return tag
