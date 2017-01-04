@@ -12,6 +12,8 @@ from xii.components.node import NodeAttribute
 class UserAttribute(NodeAttribute, need.NeedGuestFS):
     atype = "user"
 
+    requires = ["image"]
+
     default_settings = {
             "username": "xii",
             "description": "xii generated user",
