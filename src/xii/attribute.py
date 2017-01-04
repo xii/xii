@@ -1,5 +1,6 @@
 from xii.entity import Entity
 from xii.store import HasStore, Store
+from xii import error
 
 class Attribute(Entity, HasStore):
     atype=""
@@ -23,6 +24,9 @@ class Attribute(Entity, HasStore):
             s = self.store().derive(self.atype)
         elif self.has_defaults():
             s = Store(parent=self.defaults)
+        else:
+            raise error.Bug("Try to get default settings for {} but "
+                            "no defaults are defined".format(self.entity()))
         if key is None:
             return s.values()
         return s.get(key, default)
