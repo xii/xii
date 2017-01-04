@@ -1,3 +1,5 @@
+import time
+
 def wait_until_active(obj, state=1, timeout=5):
     for _ in range(timeout):
         if obj.isActive() == state:
