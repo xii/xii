@@ -17,15 +17,32 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
     xml_dfn = {'devices': ""}
     xml_metadata = {}
 
+    def __init__(self, name, command, tpls):
+        Component.__init__(self, name, command, tpls)
+        self._temp_dir = None
+
     def add_xml(self, section, xml):
         self.xml_dfn[section] += "\n" + xml
 
     def add_meta(self, key, value):
         self.xml_metadata[key] = value
 
-    # every node has an image (only currently)
+    # every node has an image
     def get_domain_image_path(self):
         return self.get_attribute('image').get_domain_image_path()
+
+    def get_temp_dir(self):
+        if self._temp_dir is None:
+            self._temp_dir = self.io().mktempdir("xii-" + self.entity())
+        return self._temp_dir
+
+    def run(self, action):
+        try:
+            Component.run(self, action)
+        finally:
+            if (self._temp_dir is not None and
+                self.io().exists(self._temp_dir)):
+                self.io().rm(self._temp_dir)
 
     def start(self):
         domain = self.get_domain(self.entity(), raise_exception=False)
@@ -48,8 +65,6 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         domain = self.get_domain(self.entity())
 
         self.each_child("stop", reverse=True)
-        # FIXME: really?
-        sleep(4)
         self._stop_domain(domain, force)
         self.each_child("after_stop", reverse=True)
 
