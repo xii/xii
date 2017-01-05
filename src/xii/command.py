@@ -29,7 +29,7 @@ class Command(Entity, HasStore):
     __meta__ = ABCMeta
 
     name = ["invalidcommand"]
-    help = "No help given"
+    help = None
 
     def __init__(self, args, tpls, store):
         Entity.__init__(self, self.name[0], store, parent=None, templates=tpls)
@@ -72,9 +72,11 @@ class Command(Entity, HasStore):
                 return idx
         return None
 
-    def default_arg_parser(self):
-        parser = argparse.ArgumentParser()
-        parser.add_argument("dfn_file", nargs="?", default=None)
+    @classmethod
+    def argument_parser(cls):
+        parser = argparse.ArgumentParser(prog="xii " + cls.name[0])
+        parser.add_argument("--verbose", action="store_true", default=None,
+                            help="Show verbose output")
         return parser
 
     def args(self):

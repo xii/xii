@@ -3,7 +3,7 @@ import tarfile
 import md5
 
 from xii import error, util, need
-from xii.validator import Dict, String, Required, Key, VariableKeys
+from xii.validator import Dict, String, Key, VariableKeys
 
 from xii.components.node import NodeAttribute
 

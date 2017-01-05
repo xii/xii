@@ -4,7 +4,7 @@ import string
 import os
 
 from xii import need
-from xii.validator import Dict, String, VariableKeys, Key, Required
+from xii.validator import Dict, String, VariableKeys, Key, RequiredKey
 
 from xii.components.node import NodeAttribute
 
@@ -25,7 +25,7 @@ class UserAttribute(NodeAttribute, need.NeedGuestFS):
 
     keys = Dict([VariableKeys(
         Dict([
-            Required(Key('password', String())),
+            RequiredKey('password', String()),
             Key('description', String()),
             Key('shell', String())
             ])
