@@ -3,7 +3,7 @@ import os
 from Crypto.PublicKey import RSA
 
 from xii import util, need
-from xii.validator import Dict, List, String, Required, Key, Bool
+from xii.validator import Dict, List, String, RequiredKey, Key, Bool
 
 from xii.components.node import NodeAttribute
 
@@ -17,10 +17,10 @@ class SSHAttribute(NodeAttribute, need.NeedGuestFS):
     keys = Dict([
         Key('copy-key', Dict([
             Key('ssh-keys', List(String())),
-            Required(Key('users', List(String())))
+            RequiredKey('users', List(String()))
         ])),
         Key('distribute-keys', Dict([
-            Required(Key('users', List(String()))),
+            RequiredKey('users', List(String())),
             Key('hosts', List(String())),
             Key('same-hosts', Bool())
         ]))

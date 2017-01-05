@@ -1,5 +1,5 @@
 from xii import error
-from xii.validator import Dict, Key, String, Required, Or
+from xii.validator import Dict, Key, String, RequiredKey, Or
 from xii.components.network import NetworkAttribute
 
 class ModeAttribute(NetworkAttribute):
@@ -12,8 +12,8 @@ class ModeAttribute(NetworkAttribute):
     keys = Or([
         String(),
         Dict([
-            Required(Key('type', String())),
-            Required(Key('dev', String()))
+            RequiredKey('type', String()),
+            RequiredKey('dev', String())
             ])
         ])
 
