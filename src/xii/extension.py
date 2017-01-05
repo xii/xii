@@ -84,7 +84,7 @@ class ExtensionManager():
         return self._known["components"][name]
 
     def get_components(self):
-        return self._known["components"]
+        return self._known["components"].values()
 
     def get_attribute(self, component, name):
         if component not in self._known["attributes"]:

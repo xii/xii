@@ -1,5 +1,5 @@
-Usage
-============
+Documentation
+====================
 
 NO DOCUMENTATION
 

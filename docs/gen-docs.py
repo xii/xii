@@ -39,20 +39,10 @@ def save_file(filename, content):
         hdl.truncate()
 
 
-def section(section):
-    stop = 50
-    fill = stop - len(section)
-    print("[{}] {}".format(section, "-" * fill))
-
-
 def item(item, action):
     pad = 15
     fill = pad - len(item)
     print("{}{} {}".format(item, " " * fill, action))
-
-
-def note(msg):
-    print(msg)
 
 def text_if(maybe_text, replace=""):
     if maybe_text is None:
@@ -61,38 +51,37 @@ def text_if(maybe_text, replace=""):
 
 
 def text_block_if(maybe_text):
-    text_if(maybe_text, no_text)
+    return text_if(maybe_text, no_text)
 
 
-# Commands --------------------------------------------------------------------
+def generate_category(category, items, generator):
+    print("GENERATE " + (category + "s").upper())
+    dir = relative(category + "s")
+    single_tpl = load_template(category + ".rst.tpl")
+    overview_tpl = load_template(category + "s.rst.tpl")
+    overview_toc = []
 
-def generate_commands(ext_mgr):
-    section("CREATE COMMANDS")
-    commands = ext_mgr.get_commands()
-    commands_dir = relative("commands")
-    command_tpl = load_template("command.rst.tpl")
-    commands_tpl = load_template("commands.rst.tpl")
-    commands_toc = []
+    if os.path.exists(dir):
+        shutil.rmtree(dir)
+    os.mkdir(dir)
 
-    if os.path.exists(commands_dir):
-        shutil.rmtree(commands_dir)
-        os.mkdir(commands_dir)
-
-    if os.path.exists(relative("commands.rst")):
-        os.remove(relative("commands.rst"))
-
-    for command in [c["class"] for c in commands]:
-        name = generate_command(command, command_tpl)
+    if os.path.exists(relative(category + "s.rst")):
+        os.remove(relative(category + "s.rst"))
+    for i in [i["class"] for i in items]:
+        name = generator(i, single_tpl)
         item(name, "generated")
-        commands_toc.append(os.path.join("commands", name))
+        overview_toc.append(os.path.join(category + "s", name))
 
-    save_file(relative("commands.rst"), commands_tpl.render({
-        "toc": commands_toc
+    save_file(relative(category + "s.rst"), overview_tpl.render({
+        "toc": overview_toc
     }))
-    item("command index", "generated!")
+    item(category + " index", "generated!")
 
+
+# generator ------------------------------------------------------------------
 
 def generate_command(command, tpl):
+    commandline = command.argument_parser().format_help().split("\n")
     help = text_if(command.help)
     description = text_block_if(command.__doc__)
 
@@ -101,12 +90,20 @@ def generate_command(command, tpl):
         if len(n) > name:
             name = n
 
+
     save_file("commands/{}.rst".format(name), tpl.render({
         "name": name,
         "help": help,
-        "description": description
+        "description": description,
+        "commandline": commandline
     }))
     return name
+
+def generate_component(component, tpl):
+    return component.ctype
+
+def generate_attribute(attribute, tpl):
+    return attribute.atype
 
 
 # Main ------------------------------------------------------------------------
@@ -116,12 +113,8 @@ def main():
     ext_mgr.add_builtin_path()
     ext_mgr.load()
 
-    generate_commands(ext_mgr)
-
-    
-
-
-
+    generate_category("command", ext_mgr.get_commands(), generate_command)
+    generate_category("component", ext_mgr.get_components(), generate_component)
 
 if __name__ == "__main__":
     main()
