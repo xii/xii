@@ -15,16 +15,13 @@ def load_module(module_name, path):
     if os.path.basename(path) == "__init__.py":
         path = os.path.dirname(path)
 
-    try:
-        if os.path.isdir(path):
-            mod_info = ("py", "r", imp.PKG_DIRECTORY)
-            mod = imp.load_module(module_name, None, path, mod_info)
-        else:
-            mod_info = ("py", "r", imp.PY_SOURCE)
-            with open(path, "r") as module_file:
-                mod = imp.load_module(module_name, module_file, path, mod_info)
-    except Exception:
-        raise error.ExecError("Could not load extension: {}".format(path))
+    if os.path.isdir(path):
+        mod_info = ("py", "r", imp.PKG_DIRECTORY)
+        mod = imp.load_module(module_name, None, path, mod_info)
+    else:
+        mod_info = ("py", "r", imp.PY_SOURCE)
+        with open(path, "r") as module_file:
+            mod = imp.load_module(module_name, module_file, path, mod_info)
     return mod
 
 

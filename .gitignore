@@ -5,6 +5,10 @@
 .tox
 */__pycache__
 docs/_build
+docs/commands
+docs/commands.rst
+docs/components
+docs/components.rst
 build
 dist
 .ropeproject

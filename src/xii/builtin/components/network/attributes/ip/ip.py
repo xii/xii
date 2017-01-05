@@ -1,15 +1,15 @@
 from xii.components.network import NetworkAttribute
-from xii.validator import Dict, String, Key, Required, Ip
+from xii.validator import Dict, String, Key, RequiredKey, Ip
 
 
 class IPAttribute(NetworkAttribute):
 
     keys = Dict([
-        Required(Key("ip", Ip())),
+        RequiredKey("ip", Ip()),
         Key("netmask", String()),
         Key("dhcp", Dict([
-            Required(Key("start", Ip())),
-            Required(Key("end", Ip()))
+            RequiredKey("start", Ip()),
+            RequiredKey("end", Ip())
             ])),
         ])
 

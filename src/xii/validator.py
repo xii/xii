@@ -3,9 +3,31 @@ import socket
 from xii import error, util
 
 
-class TypeCheck():
+# sample validator
+# keys = Dict(
+#     [
+#         RequiredKey("foo", String(), desc="A string to manipulate something"),
+#         Key("bar", String(), desc="something usefull")
+#     ],
+#     desc="Implement this stuff as you want"
+# )
+class Desc():
+    desc = "undocumented"
+
+    def __init__(self, desc=None):
+        if desc is not None:
+            self.desc = desc
+
+
+class TypeCheck(Desc):
     want_type = None
     want = "none"
+
+    def __init__(self, desc=None):
+        if desc is None:
+            Desc.__init__(self, self.want_type)
+        else:
+            Desc.__init__(self, desc)
 
     def validate(self, pre, structure):
         if isinstance(structure, self.want_type):
@@ -47,20 +69,12 @@ class Ip(TypeCheck):
                 pass
         raise error.ValidatorError("{} is not a valid IP address".format(pre))
 
-#TODO: Remove me
-class Required():
-    def __init__(self, schema):
-        self.schema = schema
-
-    def validate(self, pre, structure):
-        return self.schema.validate(pre, structure)
-
-
 class List(TypeCheck):
     want = "list"
     want_type = list
 
-    def __init__(self, schema):
+    def __init__(self, schema, desc=None):
+        TypeCheck.__init__(self, desc)
         self.schema = schema
 
     def validate(self, pre, structure):
@@ -71,8 +85,9 @@ class List(TypeCheck):
         return sum(map(_validate_each, structure)) > 1
 
 
-class Or():
-    def __init__(self, schemas, exclusive=True):
+class Or(Desc):
+    def __init__(self, schemas, desc=None, exclusive=True):
+        Desc.__init__(self, desc)
         self.schemas = schemas
         self.exclusive = exclusive
 
@@ -100,8 +115,9 @@ class Or():
         return True
 
 
-class VariableKeys():
-    def __init__(self, schema):
+class VariableKeys(Desc):
+    def __init__(self, schema, desc=None):
+        Desc.__init__(self, desc)
         self.schema = schema
 
     def validate(self, pre, structure):
@@ -115,8 +131,9 @@ class VariableKeys():
         return sum(map(_validate_each, structure.items())) >= 1
 
 
-class Key():
-    def __init__(self, name, schema):
+class Key(Desc):
+    def __init__(self, name, schema, desc=None):
+        Desc.__init__(self, desc)
         self.name = name
         self.schema = schema
 
@@ -129,8 +146,9 @@ class Key():
         return self.schema.validate(pre + " > " + self.name, value_of_key)
 
 
-class RequiredKey():
-    def __init__(self, name, schema):
+class RequiredKey(Desc):
+    def __init__(self, name, schema, desc=None):
+        Desc.__init__(self, desc)
         self.name = name
         self.schema = schema
 
@@ -146,7 +164,8 @@ class Dict(TypeCheck):
     want = "dictonary"
     want_type = dict
 
-    def __init__(self, schemas):
+    def __init__(self, schemas, desc=None):
+        TypeCheck.__init__(self, desc)
         self.schemas = schemas
 
     def validate(self, pre, structure):
