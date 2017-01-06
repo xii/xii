@@ -3,7 +3,11 @@
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
+    'sphinx.ext.intersphinx'
 ]
+
+
+intersphinx_mapping = {'python': ('https://docs.python.org/2.7', None)}
 
 templates_path = ['_templates']
 
