@@ -19,8 +19,9 @@ Further reading
 ---------------
 
 .. toctree::
-  :maxdepth: 3
+  :maxdepth: 2
 
   configuration
   commands
   components
+  developer
