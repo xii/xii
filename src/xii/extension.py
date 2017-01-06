@@ -97,7 +97,7 @@ class ExtensionManager():
     def get_attributes(self, component):
         if component not in self._known["attributes"]:
             return None
-        return self._known["attributes"][component]
+        return self._known["attributes"][component].values()
 
     def load(self):
         for base_path in self._paths:
