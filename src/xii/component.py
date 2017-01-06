@@ -7,6 +7,7 @@ class Component(Entity, HasStore):
     ctype = ""
     default_attributes = []
     required_attributes = []
+    short_description = None
 
     def __init__(self, name, command, tpls={}):
         Entity.__init__(self, name, parent=command, templates=tpls)
