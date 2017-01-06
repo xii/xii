@@ -110,7 +110,6 @@ def generate_component(ext_mgr, component, tpl):
 
     # prepare directory
     os.mkdir(component_path)
-    os.mkdir(os.path.join(component_path, component.ctype))
 
     attributes = [a["class"] for a in ext_mgr.get_attributes(component.ctype)]
     attribute_tpl = load_template("attribute.rst.tpl")
@@ -118,7 +117,7 @@ def generate_component(ext_mgr, component, tpl):
     for attr in attributes:
         item(" :: " + attr.atype, "generating...")
         name = generate_attribute(component.ctype, attr, attribute_tpl)
-        toc.append(os.path.join(component_path, component.ctype, name))
+        toc.append(os.path.join(component.ctype, name))
 
     save_file("components/{}.rst".format(component.ctype), tpl.render({
         "name": component.ctype,
