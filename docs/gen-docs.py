@@ -1,6 +1,7 @@
 import os
 import jinja2
 import shutil
+from functools import partial
 
 from xii.extension import ExtensionManager
 
@@ -99,10 +100,41 @@ def generate_command(command, tpl):
     }))
     return name
 
-def generate_component(component, tpl):
+def generate_component(ext_mgr, component, tpl):
+    component_path = relative("components", component.ctype)
+    print(" component path = {}".format(component_path))
+
+    doc = text_block_if(component.__doc__)
+    short_desc = text_if(component.short_description)
+    toc = []
+
+    # prepare directory
+    os.mkdir(component_path)
+    os.mkdir(os.path.join(component_path, component.ctype))
+
+    attributes = [a["class"] for a in ext_mgr.get_attributes(component.ctype)]
+    attribute_tpl = load_template("attribute.rst.tpl")
+
+    for attr in attributes:
+        item(" :: " + attr.atype, "generating...")
+        name = generate_attribute(component.ctype, attr, attribute_tpl)
+        toc.append(os.path.join(component_path, component.ctype, name))
+
+    save_file("components/{}.rst".format(component.ctype), tpl.render({
+        "name": component.ctype,
+        "require_components": component.requires,
+        "require_attributes": component.required_attributes,
+        "short_desc": short_desc,
+        "doc": doc,
+        "toc": toc
+    }))
+
     return component.ctype
 
-def generate_attribute(attribute, tpl):
+def generate_attribute(component, attribute, tpl):
+    save_file("components/{}/{}.rst".format(component, attribute.atype), tpl.render({
+        "name": attribute.atype
+    }))
     return attribute.atype
 
 
@@ -114,7 +146,7 @@ def main():
     ext_mgr.load()
 
     generate_category("command", ext_mgr.get_commands(), generate_command)
-    generate_category("component", ext_mgr.get_components(), generate_component)
+    generate_category("component", ext_mgr.get_components(), partial(generate_component, ext_mgr))
 
 if __name__ == "__main__":
     main()
