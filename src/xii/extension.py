@@ -13,6 +13,7 @@ class ExtensionManager():
     Loads all extensions (commands, components, attributes)
 
     Try to load a directory structure which looks like:
+    ::
 
         path/
         |---- commands/

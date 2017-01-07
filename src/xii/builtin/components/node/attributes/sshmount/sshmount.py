@@ -42,10 +42,9 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH, need.Need
 
     keys = Dict([
         VariableKeys(Dict([
-            RequiredKey("source", String()),
-            Key("user", String()),
-            Key("mode", String())
-            ]))
+            RequiredKey("source", String("/path/to/source/directory")),
+            Key("user", String("xii"))
+            ]), example="/path/to/dest/directory")
         ])
 
     def sshfs_key_path(self, name):

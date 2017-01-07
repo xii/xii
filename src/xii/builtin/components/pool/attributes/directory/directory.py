@@ -7,7 +7,7 @@ from xii.components.pool import PoolAttribute
 class DirectoryAttribute(PoolAttribute):
     atype = "directory"
     pool_type = "dir"
-    keys = String()
+    keys = String("/path/to/pool/directory")
 
     def validate(self):
         PoolAttribute.validate(self)

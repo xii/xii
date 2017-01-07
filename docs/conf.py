@@ -3,11 +3,7 @@
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
-    'sphinx.ext.intersphinx'
 ]
-
-
-intersphinx_mapping = {'python': ('https://docs.python.org/2.7', None)}
 
 templates_path = ['_templates']
 
@@ -33,8 +29,9 @@ todo_include_todos = False
 html_theme = 'alabaster'
 
 html_theme_options = {
-        'description': "A virtual environment manager",
-        'travis_button': False,
+    'description': "A virtual environment manager",
+    'travis_button': False,
+    'table_border': "0px solid #eee",
 }
 
 html_sidebars = {

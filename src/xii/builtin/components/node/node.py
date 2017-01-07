@@ -8,6 +8,12 @@ from xii.util import domain_has_state, domain_wait_state, wait_until_inactive
 
 
 class NodeComponent(Component, NeedLibvirt, NeedIO):
+    """Define, create, manage virtual machines
+
+    das ja mehr als strange
+    """
+    short_description="Define and manage virtual machines"
+
     ctype = "node"
     required_attributes = ["pool", "image"]
     default_attributes = ["pool", "network", "hostname"]

@@ -11,23 +11,27 @@ from xii import error, util
 #     ],
 #     desc="Implement this stuff as you want"
 # )
-class Desc():
-    desc = "undocumented"
-
-    def __init__(self, desc=None):
-        if desc is not None:
-            self.desc = desc
 
 
-class TypeCheck(Desc):
+class Validator():
+    def __init__(self, example=None, description=None):
+        self._description = description
+        self._example = example
+
+    def structure(self, accessor):
+        if accessor == "example":
+            return self._example
+        return self._description
+
+
+class TypeCheck(Validator):
     want_type = None
     want = "none"
 
-    def __init__(self, desc=None):
+    def __init__(self, example, desc=None):
         if desc is None:
-            Desc.__init__(self, self.want_type)
-        else:
-            Desc.__init__(self, desc)
+            desc = self.want
+        Validator.__init__(self, example, desc)
 
     def validate(self, pre, structure):
         if isinstance(structure, self.want_type):
@@ -84,10 +88,13 @@ class List(TypeCheck):
             return self.schema.validate(pre, item)
         return sum(map(_validate_each, structure)) > 1
 
+    def structure(self, accessor):
+        return [self.schema.structure(accessor)]
 
-class Or(Desc):
+
+class Or(Validator):
     def __init__(self, schemas, desc=None, exclusive=True):
-        Desc.__init__(self, desc)
+        Validator.__init__(self, desc)
         self.schemas = schemas
         self.exclusive = exclusive
 
@@ -114,10 +121,34 @@ class Or(Desc):
                                        list(_error_lines()))
         return True
 
+    def structure(self, accessor):
+        desc = []
+        descs = [ s.structure(accessor) for s in self.schemas ]
 
-class VariableKeys(Desc):
-    def __init__(self, schema, desc=None):
-        Desc.__init__(self, desc)
+        for d in descs[:-1]:
+            desc.append(d)
+            desc.append("__or__")
+        desc.append(descs[-1])
+        return desc
+
+
+# Key validators --------------------------------------------------------------
+
+class KeyValidator(Validator):
+
+    def structure(self, accessor, overwrite=None):
+        name = self.name
+        if overwrite:
+            name = overwrite
+        return ("{}".format(name), self.schema.structure(accessor))
+
+
+class VariableKeys(KeyValidator):
+
+    def __init__(self, schema, example, desc=None):
+        KeyValidator.__init__(self, desc, example)
+        self.name = "*"
+        self.example = example
         self.schema = schema
 
     def validate(self, pre, structure):
@@ -130,10 +161,16 @@ class VariableKeys(Desc):
             return self.schema.validate(pre + " > " + name, next_structure)
         return sum(map(_validate_each, structure.items())) >= 1
 
+    def structure(self, accessor):
+        if accessor == "example":
+            return KeyValidator.structure(self, accessor, self.example)
+        return KeyValidator.structure(self, accessor)
 
-class Key(Desc):
-    def __init__(self, name, schema, desc=None):
-        Desc.__init__(self, desc)
+
+class Key(KeyValidator):
+
+    def __init__(self, name, schema, desc=None, example=None):
+        KeyValidator.__init__(self, desc, example)
         self.name = name
         self.schema = schema
 
@@ -146,9 +183,10 @@ class Key(Desc):
         return self.schema.validate(pre + " > " + self.name, value_of_key)
 
 
-class RequiredKey(Desc):
-    def __init__(self, name, schema, desc=None):
-        Desc.__init__(self, desc)
+class RequiredKey(KeyValidator):
+
+    def __init__(self, name, schema, desc=None, example=None):
+        Validator.__init__(self, desc, example)
         self.name = name
         self.schema = schema
 
@@ -174,3 +212,9 @@ class Dict(TypeCheck):
         def _validate(schema):
             return schema.validate(pre, structure)
         return sum(map(_validate, self.schemas)) >= 1
+
+    def structure(self, accessor):
+        desc_dict = {}
+        for key, value in [s.structure(accessor) for s in self.schemas]:
+            desc_dict[key] = value
+        return desc_dict
