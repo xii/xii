@@ -1,5 +1,6 @@
 import os
 import jinja2
+import yaml
 import shutil
 from functools import partial
 
@@ -16,6 +17,9 @@ no_text = ("This part is currently undocumented.\n\n"
 def relative(*path):
     return os.path.join(os.path.dirname(__file__), *path)
 
+def fill_filter(str, len):
+    return str.ljust(len)
+
 
 def load_template(filename):
     extpath, name = os.path.split(filename)
@@ -25,6 +29,7 @@ def load_template(filename):
                              trim_blocks=True,
                              lstrip_blocks=True,
                              undefined=jinja2.StrictUndefined)
+    env.filters['fill'] = fill_filter
     return env.get_template(name)
 
 
@@ -39,11 +44,25 @@ def save_file(filename, content):
             hdl.write(content)
         hdl.truncate()
 
+def to_yaml(descs):
+    if isinstance(descs, basestring):
+        return descs
+    if isinstance(descs, list) and "__or__" in descs:
+        desc = ""
+        for d in descs:
+            if d == "__or__":
+                desc = desc + "\n**Or** ---\n"
+                continue
+            desc = desc + to_yaml(d)
+        return desc
+    return yaml.dump(descs, default_flow_style=False, default_style=None)
+
 
 def item(item, action):
     pad = 15
     fill = pad - len(item)
     print("{}{} {}".format(item, " " * fill, action))
+
 
 def text_if(maybe_text, replace=""):
     if maybe_text is None:
@@ -100,13 +119,14 @@ def generate_command(command, tpl):
     }))
     return name
 
+
 def generate_component(ext_mgr, component, tpl):
     component_path = relative("components", component.ctype)
     print(" component path = {}".format(component_path))
 
     doc = text_block_if(component.__doc__)
     short_desc = text_if(component.short_description)
-    toc = []
+    attrs = []
 
     # prepare directory
     os.mkdir(component_path)
@@ -115,9 +135,8 @@ def generate_component(ext_mgr, component, tpl):
     attribute_tpl = load_template("attribute.rst.tpl")
 
     for attr in attributes:
-        item(" :: " + attr.atype, "generating...")
-        name = generate_attribute(component.ctype, attr, attribute_tpl)
-        toc.append(os.path.join(component.ctype, name))
+        attr = generate_attribute(component, attr, attribute_tpl)
+        attrs.append(attr)
 
     save_file("components/{}.rst".format(component.ctype), tpl.render({
         "name": component.ctype,
@@ -125,16 +144,42 @@ def generate_component(ext_mgr, component, tpl):
         "require_attributes": component.required_attributes,
         "short_desc": short_desc,
         "doc": doc,
-        "toc": toc
+        "attrs": attrs,
     }))
 
     return component.ctype
 
+
 def generate_attribute(component, attribute, tpl):
-    save_file("components/{}/{}.rst".format(component, attribute.atype), tpl.render({
-        "name": attribute.atype
-    }))
-    return attribute.atype
+
+    description = attribute.keys.structure("description")
+    example = text_if(attribute.keys.structure("example"), "No example")
+
+    attr = {
+        "extra_info": False,
+        "required": "No",
+        "default": text_if(attribute.defaults, "No default"),
+        "name": attribute.atype,
+        "key_desc": to_yaml(description).split("\n"),
+        "example": to_yaml(example).split("\n")
+    }
+
+    attr["key_desc_len"] = len(attr["key_desc"])
+    attr["example_len"] = len(attr["example"])
+
+    if attribute.atype in component.required_attributes:
+        attr["required"] = "Yes"
+
+    if attribute.__doc__ is None:
+        return attr
+
+    attr["extra_info"] = True
+    attr["doc"] = attribute.__doc__
+
+    item(" :: " + attr.atype, "generating...")
+    path = "components/{}/{}.rst".format(component.ctype, attribute.atype)
+    save_file(path, attr)
+    return attr
 
 
 # Main ------------------------------------------------------------------------

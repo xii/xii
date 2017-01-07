@@ -16,13 +16,13 @@ class SSHAttribute(NodeAttribute, need.NeedGuestFS):
 
     keys = Dict([
         Key('copy-key', Dict([
-            Key('ssh-keys', List(String())),
-            RequiredKey('users', List(String()))
+            Key('ssh-keys', List(String("/path/to/public_key_file"))),
+            RequiredKey('users', List(String("username")))
         ])),
         Key('distribute-keys', Dict([
-            RequiredKey('users', List(String())),
-            Key('hosts', List(String())),
-            Key('same-hosts', Bool())
+            RequiredKey('users', List(String("username"))),
+            Key('hosts', List(String("hostname.local"))),
+            Key('same-hosts', Bool(True))
         ]))
     ])
 

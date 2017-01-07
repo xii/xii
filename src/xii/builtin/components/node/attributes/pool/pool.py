@@ -8,7 +8,7 @@ from xii.validator import String
 
 class PoolAttribute(Attribute, need.NeedLibvirt):
     atype = "pool"
-    keys = String()
+    keys = String("default-pool")
     defaults = "default"
 
     def after_spawn(self):

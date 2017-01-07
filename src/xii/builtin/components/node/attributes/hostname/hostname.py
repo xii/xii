@@ -9,7 +9,7 @@ class HostnameAttribute(NodeAttribute, need.NeedGuestFS):
     requires = ["image"]
     defaults = True
 
-    keys = Bool()
+    keys = Bool(True)
 
     def spawn(self):
         if not self.settings():

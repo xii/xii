@@ -12,7 +12,7 @@ class CopyAttribute(NodeAttribute, need.NeedGuestFS):
     requires = ["image"]
 
     keys = Dict([
-        VariableKeys(String())
+        VariableKeys(String("/path/to/dest"), example="/path/to/source")
     ])
 
     def spawn(self):

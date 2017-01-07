@@ -6,7 +6,7 @@ from xii.components.node import NodeAttribute
 class GraphicAttribute(NodeAttribute):
     atype = "graphic"
 
-    keys = Bool()
+    keys = Bool(True)
 
     def spawn(self):
         if not self.settings():

@@ -11,12 +11,12 @@ class ShellAttribute(NodeAttribute, need.NeedSSH, need.NeedLibvirt):
     requires = ["ssh", "user"]
 
     keys = List(Dict([
-        Key("start", String()),
-        Key("stop", String()),
-        Key("spawn", String()),
-        Key("suspend", String()),
-        Key("resume", String()),
-        Key("shell", String())
+        Key("start", String("scripts/start.sh")),
+        Key("stop", String("scripts/stop.sh")),
+        Key("spawn", String("scripts/spawn.sh")),
+        Key("suspend", String("scripts/suspend.sh")),
+        Key("resume", String("scripts/resume.sh")),
+        Key("shell", String("/bin/bash"))
     ]))
 
     def get_default_user(self):

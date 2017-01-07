@@ -10,10 +10,10 @@ class ModeAttribute(NetworkAttribute):
     }
 
     keys = Or([
-        String(),
+        String("nat"),
         Dict([
-            RequiredKey('type', String()),
-            RequiredKey('dev', String())
+            RequiredKey('type', String("route")),
+            RequiredKey('dev', String("eth0"))
             ])
         ])
 
