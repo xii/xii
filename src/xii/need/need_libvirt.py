@@ -15,6 +15,13 @@ class NeedLibvirt(HasOutput):
         pass
 
     def virt(self):
+        """ get the libvirt handle
+
+        Connects to a libvirt host using the standard uri scheme
+
+        Returns:
+            A libvirt handle connected to the libvit host
+        """
         def _error_handler(_, err):
             if err[3] != libvirt.VIR_ERR_ERROR:
                 self.warn("Non-error from libvirt: '{}'".format(err[2]))
@@ -43,6 +50,29 @@ class NeedLibvirt(HasOutput):
         return self.share("libvirt", _create_connection, _close_connection)
 
     def get_resource(self, typ, *args, **kwargs):
+        """returns a libvirt resource
+
+        search a libvirt resource. `typ` defines which type should be searched.
+        Currently supported is:
+
+        * domain
+        * pool
+        * network
+        * volume
+
+        Args:
+            typ: Resource type
+            args: name or the resource or in case of volume name of the pool and
+                  name of the volume
+            kwargs: either throw or raise_exception set to boolean
+
+        Returns:
+            Returns the searched resource or None if set non throwing
+
+        Throws:
+            If throw or raise_exception is not set to False a exception is
+            raised if the resource could not be found
+        """
         r = True
         if "raise_exception" in kwargs:
             r = kwargs["raise_exception"]
@@ -71,22 +101,88 @@ class NeedLibvirt(HasOutput):
 
 
     def get_network(self, name, raise_exception=True):
+        """Get a network resource
+
+        Args:
+            name: Name of the resource
+            raise_exception: Should this method raise a exception if no resource
+                             is found
+
+        Returns:
+            Network object or None if not found
+
+        Throws:
+            A exception if not disabled via raise_exception
+        """
         r = raise_exception
         return self.get_resource("network", name, throw=r)
 
     def get_volume(self, pool_name, name, raise_exception=True):
+        """Get a volume resource
+
+        Args:
+            pool_name: Name of the pool
+            name: Name of the volume
+            raise_exception: Should this method raise a exception if no resource
+                             is found
+
+        Returns:
+            Volume object or None if not found
+
+        Throws:
+            A exception if not disabled via raise_exception
+        """
         r = raise_exception
         return self.get_resource("volume", pool_name, name, throw=r)
 
     def get_domain(self, name, raise_exception=True):
+        """Get a domain resource
+
+        Args:
+            name: Name of the domain
+            raise_exception: Should this method raise a exception if no resource
+                             is found
+
+        Returns:
+            Domain object or None if not found
+
+        Throws:
+            A exception if not disabled via raise_exception
+        """
         r = raise_exception
         return self.get_resource("domain", name, throw=r)
 
     def get_pool(self, name, raise_exception=True):
+        """get a pool resource
+
+        Args:
+            name: Name of the pool
+            raise_exception: Should this method raise a exception if no resource
+                             is found
+
+        Returns:
+            Pool object or None if not found
+
+        Throws:
+            A exception if not disabled via raise_exception
+        """
         r = raise_exception
         return self.get_resource("pool", name, throw=r)
 
     def wait_for_resource(self, *args):
+        """block until a resource exists
+
+        Call _`get_resource` until a the resource exists.
+
+        Args:
+            See _`get_resource`
+
+        Returns:
+            The requested resource
+
+        Throws:
+            See _`get_resource`
+        """
         resource = self.get_resource(*args, raise_exception=False)
         if resource:
             return resource
@@ -100,6 +196,8 @@ class NeedLibvirt(HasOutput):
         return None
 
     def get_capabilities(self, arch='x86_64', prefer_kvm=True):
+        """get libvirt capabilities
+        """
         try:
             capabilities = self.virt().getCapabilities()
         except libvirt.libvirtError as err:
@@ -115,6 +213,17 @@ class NeedLibvirt(HasOutput):
 
 
     def domain_get_ip(self, domain_name, retry=20, wait=3):
+        """fetch ipv4 for a given domain name
+
+        Args:
+            domain_name: Domain name
+            retry: n times until exception
+            wait: n seconds between each cycle
+
+        Returns:
+            Returns the bound ipv4 address
+        """
+
         domain = self.get_domain(domain_name)
         nets = []
 
@@ -142,6 +251,15 @@ class NeedLibvirt(HasOutput):
         return net['addrs'][0]['addr']
 
     def network_get_host_ip(self, network_name, version="ipv4"):
+        """get host ip for a virtual network
+
+        Args:
+            network_name: Name of the virtual network
+            version: ipv4 or ipv6
+
+        Returns:
+            A ipv4 or ipv6 address
+        """
         network = self.get_network(network_name, raise_exception=False)
 
         if not network:

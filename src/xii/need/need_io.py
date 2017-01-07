@@ -13,6 +13,13 @@ class NeedIO():
         pass
 
     def io(self):
+        """get a io object to the local or remote host
+        Will return a local connection object in case of a local connection
+        used or a remote ssh/sftp connection if the host is remote.
+
+        Returns:
+            A connection object
+        """
         def _create_connection():
             url = self.get_virt_url()
 
