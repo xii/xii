@@ -158,7 +158,7 @@ class Entity(HasOutput):
             child.validate()
 
     def share(self, name, creator, finalizer=None):
-        """Share a object
+        """share a object
         Share a object between this entity and all childs
 
         Example:

@@ -11,23 +11,31 @@ from xii import error, util
 #     ],
 #     desc="Implement this stuff as you want"
 # )
-class Desc():
-    desc = "undocumented"
-
-    def __init__(self, desc=None):
-        if desc is not None:
-            self.desc = desc
 
 
-class TypeCheck(Desc):
+def ins(str, indent):
+    return [util.indented(str, indent)]
+
+class Validator():
+    def __init__(self, description, example=None):
+        self._description = description
+
+    def example(self):
+        return None
+
+    def description(self, indent=0):
+        return self._description
+
+
+class TypeCheck(Validator):
     want_type = None
     want = "none"
 
     def __init__(self, desc=None):
         if desc is None:
-            Desc.__init__(self, self.want_type)
+            Validator.__init__(self, self.want)
         else:
-            Desc.__init__(self, desc)
+            Validator.__init__(self, desc)
 
     def validate(self, pre, structure):
         if isinstance(structure, self.want_type):
@@ -84,10 +92,18 @@ class List(TypeCheck):
             return self.schema.validate(pre, item)
         return sum(map(_validate_each, structure)) > 1
 
+    def description(self, indent=0):
+        return [self.schema.description()]
+        # desc = self.schema.description(0)
+        # if isinstance(desc, list):
+        #     return ["["] + desc + ["]"]
+        # else:
+        #     return "[" + desc + "]"
 
-class Or(Desc):
+
+class Or(Validator):
     def __init__(self, schemas, desc=None, exclusive=True):
-        Desc.__init__(self, desc)
+        Validator.__init__(self, desc)
         self.schemas = schemas
         self.exclusive = exclusive
 
@@ -114,10 +130,44 @@ class Or(Desc):
                                        list(_error_lines()))
         return True
 
+    def description(self, indent=0):
+        def add(desc, x):
+            if isinstance(x, list):
+                map(desc.append, x)
+            else:
+                desc.append(x)
 
-class VariableKeys(Desc):
-    def __init__(self, schema, desc=None):
-        Desc.__init__(self, desc)
+        desc = []
+        descs = [ s.description(0) for s in self.schemas ]
+
+        for d in descs[:-1]:
+            add(desc, d)
+            desc.append("__or__")
+        add(desc, descs[-1])
+        return desc
+
+
+# Key validators --------------------------------------------------------------
+
+class KeyValidator(Validator):
+    key_desc = "{}"
+
+    def description(self, indent=0):
+        return (self.key_desc.format(self.name), self.schema.description())
+        # key = self.key_desc.format(self.name)
+        # desc = util.flatten(self.schema.description(indent=0))
+
+        # if len(desc) == 1:
+        #     return key + desc[0]
+
+        # desc[0] = key + desc[0]
+        # return desc
+
+class VariableKeys(KeyValidator):
+
+    def __init__(self, schema, desc=None, example=None):
+        KeyValidator.__init__(self, desc, example)
+        self.name = "*"
         self.schema = schema
 
     def validate(self, pre, structure):
@@ -129,11 +179,13 @@ class VariableKeys(Desc):
             (name, next_structure) = pair
             return self.schema.validate(pre + " > " + name, next_structure)
         return sum(map(_validate_each, structure.items())) >= 1
+        return ins("`variable keys`:", indent) + desc
 
 
-class Key(Desc):
-    def __init__(self, name, schema, desc=None):
-        Desc.__init__(self, desc)
+class Key(KeyValidator):
+
+    def __init__(self, name, schema, desc=None, example=None):
+        KeyValidator.__init__(self, desc, example)
         self.name = name
         self.schema = schema
 
@@ -146,9 +198,10 @@ class Key(Desc):
         return self.schema.validate(pre + " > " + self.name, value_of_key)
 
 
-class RequiredKey(Desc):
-    def __init__(self, name, schema, desc=None):
-        Desc.__init__(self, desc)
+class RequiredKey(KeyValidator):
+
+    def __init__(self, name, schema, desc=None, example=None):
+        Validator.__init__(self, desc, example)
         self.name = name
         self.schema = schema
 
@@ -174,3 +227,16 @@ class Dict(TypeCheck):
         def _validate(schema):
             return schema.validate(pre, structure)
         return sum(map(_validate, self.schemas)) >= 1
+
+    def description(self, indent=0):
+        desc_dict = {}
+        for key, value in [s.description() for s in self.schemas]:
+            desc_dict[key] = value
+        return desc_dict
+        # desc = ["{"]
+
+        # for s in self.schemas:
+        #     d = util.flatten(s.description(indent=0))
+        #     map(desc.append, util.flatten(s.description(indent=0)))
+
+        # return desc + ["}"]
