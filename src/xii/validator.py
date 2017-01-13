@@ -13,17 +13,14 @@ from xii import error, util
 # )
 
 
-def ins(str, indent):
-    return [util.indented(str, indent)]
-
 class Validator():
-    def __init__(self, description, example=None):
+    def __init__(self, example=None, description=None):
         self._description = description
+        self._example = example
 
-    def example(self):
-        return None
-
-    def description(self, indent=0):
+    def structure(self, accessor):
+        if accessor == "example":
+            return self._example
         return self._description
 
 
@@ -31,11 +28,10 @@ class TypeCheck(Validator):
     want_type = None
     want = "none"
 
-    def __init__(self, desc=None):
+    def __init__(self, example, desc=None):
         if desc is None:
-            Validator.__init__(self, self.want)
-        else:
-            Validator.__init__(self, desc)
+            desc = self.want
+        Validator.__init__(self, example, desc)
 
     def validate(self, pre, structure):
         if isinstance(structure, self.want_type):
@@ -92,13 +88,8 @@ class List(TypeCheck):
             return self.schema.validate(pre, item)
         return sum(map(_validate_each, structure)) > 1
 
-    def description(self, indent=0):
-        return [self.schema.description()]
-        # desc = self.schema.description(0)
-        # if isinstance(desc, list):
-        #     return ["["] + desc + ["]"]
-        # else:
-        #     return "[" + desc + "]"
+    def structure(self, accessor):
+        return [self.schema.structure(accessor)]
 
 
 class Or(Validator):
@@ -130,44 +121,34 @@ class Or(Validator):
                                        list(_error_lines()))
         return True
 
-    def description(self, indent=0):
-        def add(desc, x):
-            if isinstance(x, list):
-                map(desc.append, x)
-            else:
-                desc.append(x)
-
+    def structure(self, accessor):
         desc = []
-        descs = [ s.description(0) for s in self.schemas ]
+        descs = [ s.structure(accessor) for s in self.schemas ]
 
         for d in descs[:-1]:
-            add(desc, d)
+            desc.append(d)
             desc.append("__or__")
-        add(desc, descs[-1])
+        desc.append(descs[-1])
         return desc
 
 
 # Key validators --------------------------------------------------------------
 
 class KeyValidator(Validator):
-    key_desc = "{}"
 
-    def description(self, indent=0):
-        return (self.key_desc.format(self.name), self.schema.description())
-        # key = self.key_desc.format(self.name)
-        # desc = util.flatten(self.schema.description(indent=0))
+    def structure(self, accessor, overwrite=None):
+        name = self.name
+        if overwrite:
+            name = overwrite
+        return ("{}".format(name), self.schema.structure(accessor))
 
-        # if len(desc) == 1:
-        #     return key + desc[0]
-
-        # desc[0] = key + desc[0]
-        # return desc
 
 class VariableKeys(KeyValidator):
 
-    def __init__(self, schema, desc=None, example=None):
+    def __init__(self, schema, example, desc=None):
         KeyValidator.__init__(self, desc, example)
         self.name = "*"
+        self.example = example
         self.schema = schema
 
     def validate(self, pre, structure):
@@ -179,7 +160,11 @@ class VariableKeys(KeyValidator):
             (name, next_structure) = pair
             return self.schema.validate(pre + " > " + name, next_structure)
         return sum(map(_validate_each, structure.items())) >= 1
-        return ins("`variable keys`:", indent) + desc
+
+    def structure(self, accessor):
+        if accessor == "example":
+            return KeyValidator.structure(self, accessor, self.example)
+        return KeyValidator.structure(self, accessor)
 
 
 class Key(KeyValidator):
@@ -228,15 +213,8 @@ class Dict(TypeCheck):
             return schema.validate(pre, structure)
         return sum(map(_validate, self.schemas)) >= 1
 
-    def description(self, indent=0):
+    def structure(self, accessor):
         desc_dict = {}
-        for key, value in [s.description() for s in self.schemas]:
+        for key, value in [s.structure(accessor) for s in self.schemas]:
             desc_dict[key] = value
         return desc_dict
-        # desc = ["{"]
-
-        # for s in self.schemas:
-        #     d = util.flatten(s.description(indent=0))
-        #     map(desc.append, util.flatten(s.description(indent=0)))
-
-        # return desc + ["}"]

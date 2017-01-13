@@ -7,7 +7,7 @@ class StayAttribute(NetworkAttribute):
 
     defaults = False
 
-    keys = Bool()
+    keys = Bool(example=True)
 
     def does_stay(self):
         return self.settings()

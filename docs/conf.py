@@ -3,11 +3,7 @@
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
-    'sphinx.ext.intersphinx'
 ]
-
-
-intersphinx_mapping = {'python': ('https://docs.python.org/2.7', None)}
 
 templates_path = ['_templates']
 
@@ -33,8 +29,9 @@ todo_include_todos = False
 html_theme = 'alabaster'
 
 html_theme_options = {
-        'description': "A virtual environment manager",
-        'travis_button': False,
+    'description': "A virtual environment manager",
+    'travis_button': False,
+    'table_border': "0px solid #eee",
 }
 
 html_sidebars = {
@@ -72,7 +69,7 @@ html_short_title = "xii"
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 #
-html_logo = '_static/logo-name.png'
+html_logo = '_static/logo.png'
 
 # The name of an image file (relative to this directory) to use as a favicon of
 # the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32

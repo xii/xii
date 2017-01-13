@@ -1,11 +1,27 @@
 
+@import url('https://fonts.googleapis.com/css?family=Roboto:100,200,300,500');
+
 body {
-  background-color: #fcfcfc;
+  color: #333;
+  background-color: #eee;
+  font-family: 'Roboto', sans-serif;
 }
 
 div.body {
-  background-color: #fcfcfc;
+  background-color: #eee;
 }
+
+
+a {
+  font-weight: 300;
+}
+
+table pre {
+  margin: 0;
+  padding: 5px 2px;
+  border: 0px solid #ccc;
+}
+
 
 pre {
   border: 1px solid #ccc;
@@ -39,7 +55,7 @@ dl.attribute dt {
 }
 
 dl.docutils dt {
-  background-color: #fcfcfc;
+  background-color: #eee;
 }
 
 

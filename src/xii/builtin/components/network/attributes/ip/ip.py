@@ -5,11 +5,11 @@ from xii.validator import Dict, String, Key, RequiredKey, Ip
 class IPAttribute(NetworkAttribute):
 
     keys = Dict([
-        RequiredKey("ip", Ip()),
-        Key("netmask", String()),
+        RequiredKey("ip", Ip("192.168.124.1")),
+        Key("netmask", String("255.255.255.0")),
         Key("dhcp", Dict([
-            RequiredKey("start", Ip()),
-            RequiredKey("end", Ip())
+            RequiredKey("start", Ip("192.168.124.2")),
+            RequiredKey("end", Ip("192.168.124.254"))
             ])),
         ])
 

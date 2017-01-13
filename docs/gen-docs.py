@@ -44,11 +44,25 @@ def save_file(filename, content):
             hdl.write(content)
         hdl.truncate()
 
+def to_yaml(descs):
+    if isinstance(descs, basestring):
+        return descs
+    if isinstance(descs, list) and "__or__" in descs:
+        desc = ""
+        for d in descs:
+            if d == "__or__":
+                desc = desc + "\n**Or** ---\n"
+                continue
+            desc = desc + to_yaml(d)
+        return desc
+    return yaml.dump(descs, default_flow_style=False, default_style=None)
+
 
 def item(item, action):
     pad = 15
     fill = pad - len(item)
     print("{}{} {}".format(item, " " * fill, action))
+
 
 def text_if(maybe_text, replace=""):
     if maybe_text is None:
@@ -105,6 +119,7 @@ def generate_command(command, tpl):
     }))
     return name
 
+
 def generate_component(ext_mgr, component, tpl):
     component_path = relative("components", component.ctype)
     print(" component path = {}".format(component_path))
@@ -123,10 +138,6 @@ def generate_component(ext_mgr, component, tpl):
         attr = generate_attribute(component, attr, attribute_tpl)
         attrs.append(attr)
 
-    import tabulate
-    attrs_table = [[a["name"], a["required"], a["key_desc"], a["example"]] for a in attrs]
-
-    table = tabulate.tabulate(attrs_table, headers=["Name", "Required", "Type", "Example"], tablefmt="rst")
     save_file("components/{}.rst".format(component.ctype), tpl.render({
         "name": component.ctype,
         "require_components": component.requires,
@@ -134,35 +145,27 @@ def generate_component(ext_mgr, component, tpl):
         "short_desc": short_desc,
         "doc": doc,
         "attrs": attrs,
-        "table": table
     }))
 
     return component.ctype
 
 
-def to_yaml(descs):
-    if isinstance(descs, basestring):
-        return descs
-    if isinstance(descs, list) and "__or__" in descs:
-        desc = ""
-        for d in descs:
-            if d == "__or__":
-                desc = desc + "\n**Or** ---\n"
-                continue
-            desc = desc + to_yaml(d)
-        return desc
-    return yaml.dump(descs, default_flow_style=False, default_style=None)
-
-
 def generate_attribute(component, attribute, tpl):
+
+    description = attribute.keys.structure("description")
+    example = text_if(attribute.keys.structure("example"), "No example")
+
     attr = {
         "extra_info": False,
         "required": "No",
         "default": text_if(attribute.defaults, "No default"),
         "name": attribute.atype,
-        "key_desc": to_yaml(attribute.keys.description()).split("\n"),
-        "example": to_yaml("foo")
+        "key_desc": to_yaml(description).split("\n"),
+        "example": to_yaml(example).split("\n")
     }
+
+    attr["key_desc_len"] = len(attr["key_desc"])
+    attr["example_len"] = len(attr["example"])
 
     if attribute.atype in component.required_attributes:
         attr["required"] = "Yes"

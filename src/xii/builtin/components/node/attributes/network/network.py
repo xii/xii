@@ -14,10 +14,10 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
     defaults = "default"
 
     keys = Or([
-        String(),
+        String("default"),
         Dict([
-            RequiredKey("source", String()),
-            RequiredKey("ip", Ip())
+            RequiredKey("source", String("default")),
+            RequiredKey("ip", Ip("192.168.124.87"))
             ])
         ])
 

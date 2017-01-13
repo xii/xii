@@ -17,7 +17,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
     atype = "image"
 
     requires = ['pool']
-    keys = String()
+    keys = String("~/images/openSUSE-leap-42.2.qcow2")
 
     def get_tmp_volume_path(self):
         return os.path.join(self.component().get_temp_dir(), "image")

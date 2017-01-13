@@ -25,11 +25,11 @@ class UserAttribute(NodeAttribute, need.NeedGuestFS):
 
     keys = Dict([VariableKeys(
         Dict([
-            RequiredKey('password', String()),
-            Key('description', String()),
-            Key('shell', String())
+            RequiredKey('password', String("12345")),
+            Key('description', String("a users description")),
+            Key('shell', String("/usr/bin/bash"))
             ])
-        )])
+        , example="username")])
 
     def default_user(self):
         if not self.settings():
