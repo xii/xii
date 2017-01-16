@@ -1,3 +1,5 @@
+import os
+
 from xii.entity import Entity
 from xii.store import HasStore, Store
 from xii import error
@@ -36,7 +38,7 @@ class Attribute(Entity, HasStore):
           Key("key2", String()),
           Key("key3", List(String()))
         ])
-        
+
         # a string `or` a boolean
         keys = Or([String(), Bool()])
     """
@@ -129,6 +131,13 @@ class Attribute(Entity, HasStore):
         """
         return self.parent().store()
 
+    def get_temp_dir(self, ext=None):
+        path = self.component().get_temp_dir()
+        if not ext:
+            return path
+        return os.path.join(path, ext)
+
+
     def component(self):
         """get the owning component
 
@@ -147,7 +156,7 @@ class Attribute(Entity, HasStore):
 
     def other_attribute(self, name):
         """get another attribute which is also used by the owning component
-        
+
         Args:
             Name of the attribute to fetch
 

@@ -1,3 +1,5 @@
+import os
+
 from xii.entity import Entity
 from xii.store import HasStore
 from xii import error
@@ -83,6 +85,17 @@ class Component(Entity, HasStore):
             True if found or False
         """
         return not self.get_child(name) is None
+
+    def get_temp_dir(self):
+        """ Get the temp path for this command
+
+        You must take care that the directory actually exists
+        on your host
+
+        Returns:
+            The temp path
+        """
+        return os.path.join(self.parent().get_temp_dir(), self.entity())
 
     def run(self, action):
         if action in dir(self):

@@ -1,4 +1,5 @@
 import argparse
+import uuid
 
 from concurrent.futures import ThreadPoolExecutor, Future
 from functools import partial
@@ -143,8 +144,20 @@ class Command(Entity, HasStore):
         Returns:
             The parsed subcommand arguments
         """
-
         return self._args
+
+    def get_temp_dir(self):
+        """ Get the temp path for this command
+
+        You must take care that the directory actually exists
+        on your host
+
+        Returns:
+            The temp path
+        """
+        if not self._temp_hash:
+            self._temp_hash = "xii-" + self.entity() + "-" + str(uuid.uuid4())
+        return os.path.join("/var/lib/tmp", self._temp_hash)
 
     def child_index(self, component):
         for idx, child in enumerate(self._childs):

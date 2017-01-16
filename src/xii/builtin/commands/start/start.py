@@ -1,10 +1,4 @@
-import argparse
-
 from xii import command
-
-
-def start_command(cmpnt):
-    cmpnt.run("start")
 
 
 class StartCommand(command.Command):
@@ -12,5 +6,9 @@ class StartCommand(command.Command):
     help = "load xii definition and start vm's"
 
     def run(self):
+        self.each_component("create")
+        import pdb; pdb.set_trace()
+        self.finalize()
+        self.each_component("spawn")
         self.each_component("start")
         self.finalize()

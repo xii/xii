@@ -113,6 +113,36 @@ class Entity(HasOutput):
             return self.parent().config(key, default)
         return self.store().get(key, default)
 
+    def add_info(self, key, value):
+        """ add runtime informations to the system.
+
+        This information can also be used in later components/attributes to get
+        runtime informations and in delayed template subtitution.
+
+        Args:
+            key: Key path for the information
+            value: Value to set
+
+        Returns:
+            Nothing
+        """
+        if self.has_parent():
+            self.parent().add_info(os.path.join(self.entity, key), value, default)
+        self.store().set(os.path.join("runtime", "info", key), value)
+
+    def info(self, key):
+        """ get a runtime information from the system.
+
+        Args:
+            key: Key path to the information
+
+        Returns:
+            None if not found or value which is available
+        """
+        if self.has_parent():
+            return self.parent().info(os.path.join(self.entity, key), value, default)
+        return self.store().get(os.path.join("runtime", "info", key), value)
+
     def template(self, key):
         """get template
         Get a template which was added to the filesystem in the corresponding

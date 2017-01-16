@@ -50,11 +50,47 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
                 self.io().exists(self._temp_dir)):
                 self.io().rm(self._temp_dir)
 
-    def start(self):
+    def create(self):
         domain = self.get_domain(self.entity(), raise_exception=False)
 
-        if not domain:
-            domain = self._spawn_domain()
+        if domain:
+            return
+
+        self.each_attribute("create")
+
+
+    def spawn(self):
+        domain = self.get_domain(self.entity(), raise_exception=False)
+
+        if domain:
+            return
+
+        self.say("spawning...")
+        self.xml_dfn = {'devices': ''}
+        self.each_child("spawn")
+
+        caps = self.get_capabilities()
+        self.add_meta('created', time())
+        self.add_meta('definition', self.config("runtime/definition"))
+        self.add_meta('user', self.io().user())
+
+        xml = self.template('node.xml')
+        self.xml_dfn['name'] = self.entity()
+        self.xml_dfn['meta'] = self._generate_meta_xml()
+        self.xml_dfn.update(caps)
+
+        self.finalize()
+        self.each_child("after_spawn")
+        try:
+            self.virt().defineXML(xml.safe_substitute(self.xml_dfn))
+            domain = self.get_domain(self.entity())
+            return domain
+        except libvirt.libvirtError as err:
+            raise error.ExecError("Could not start {}: {}".format(self.entity(), str(err)))
+
+
+    def start(self):
+        domain = self.get_domain(self.entity(), raise_exception=False)
 
         if domain.isActive():
             self.say("is already started")
@@ -142,30 +178,6 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
 
         self.success("resumed!")
         self.each_child("after_resume")
-
-    def _spawn_domain(self):
-        self.say("spawning...")
-        self.xml_dfn = {'devices': ''}
-        self.each_child("spawn")
-
-        caps = self.get_capabilities()
-        self.add_meta('created', time())
-        self.add_meta('definition', self.config("runtime/definition"))
-        self.add_meta('user', self.io().user())
-
-        xml = self.template('node.xml')
-        self.xml_dfn['name'] = self.entity()
-        self.xml_dfn['meta'] = self._generate_meta_xml()
-        self.xml_dfn.update(caps)
-
-        self.finalize()
-        self.each_child("after_spawn")
-        try:
-            self.virt().defineXML(xml.safe_substitute(self.xml_dfn))
-            domain = self.get_domain(self.entity())
-            return domain
-        except libvirt.libvirtError as err:
-            raise error.ExecError("Could not start {}: {}".format(self.entity(), str(err)))
 
     def _stop_domain(self, domain, force=False):
         if not domain.isActive():

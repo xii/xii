@@ -17,15 +17,34 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
     atype = "image"
 
     requires = ['pool']
-    keys = String("~/images/openSUSE-leap-42.2.qcow2")
+    keys = String(example="~/images/openSUSE-leap-42.2.qcow2")
+
+    def _image_store_path():
+        if self.info("images_path"):
+            return self.info("images_path")
+        path = util.paths.xii_home(self.io().user_home(), "images")
+
+        if not self.io().exists(path):
+            self.io().mkdir(path, recursive=True)
+        return path
+
+    def _init_vars():
+        images_path = util.paths.xii_home(self.io().user_home(), "images")
+        image_path  = os.path.join(self.get_temp_dir(), "image")
+
+        self.add_info("images_path", images_path)
+        self.add_info("image", image_path)
+        self.add_info("source", self.settings())
+        self.add_info("pool_name", self.other_attribute("pool").used_pool_name())
+
+
+
 
     def get_tmp_volume_path(self):
         return os.path.join(self.component().get_temp_dir(), "image")
 
-    def spawn(self):
-        # create image store if needed
-        if not self.io().exists(self._image_store_path()):
-            self.io().mkdir(self._image_store_path(), recursive=True)
+    def create(self):
+        self._init_paths()
 
         pool_name = self.other_attribute("pool").used_pool_name()
         # pool_type = self.other_attribute("pool").used_pool_type()
@@ -41,7 +60,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         self.say("cloning image...")
         self.io().copy(self._image_path(), self.get_tmp_volume_path())
 
-    def after_spawn(self):
+    def spawn(self):
         pool = self.other_attribute("pool").used_pool()
         size = self.io().stat(self.get_tmp_volume_path()).st_size
         volume_tpl = self.template("volume.xml")
