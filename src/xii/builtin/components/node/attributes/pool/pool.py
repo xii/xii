@@ -11,7 +11,7 @@ class PoolAttribute(Attribute, need.NeedLibvirt):
     keys = String("default-pool")
     defaults = "default"
 
-    def after_spawn(self):
+    def spawn(self):
         pool = self.used_pool()
 
         if not pool.isActive():
