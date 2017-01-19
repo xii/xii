@@ -20,12 +20,12 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
     keys = String("~/images/openSUSE-leap-42.2.qcow2")
 
     def get_tmp_volume_path(self):
-        return os.path.join(self.component().get_temp_dir(), "image")
+        ext = os.path.splitext(self.settings())[1]
+        return self.get_temp_path("image" + ext)
 
     def create(self):
         # create image store if needed
-        if not self.io().exists(self._image_store_path()):
-            self.io().mkdir(self._image_store_path(), recursive=True)
+        self.io().ensure_path_exists(self._image_store_path())
 
         pool_name = self.other_attribute("pool").used_pool_name()
         # pool_type = self.other_attribute("pool").used_pool_type()

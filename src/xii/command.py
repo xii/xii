@@ -45,6 +45,7 @@ class Command(Entity, HasStore):
     def __init__(self, args, tpls, store):
         Entity.__init__(self, self.name[0], store, parent=None, templates=tpls)
         self._args = args
+        self._id = None
 
     # store() is already defined by Entity
 
@@ -158,8 +159,9 @@ class Command(Entity, HasStore):
         This only creates the path but does not check if the
         path is already created
         """
-        id = str(uuid.uuid4())
-        return os.path.join("/var/lib/tmp", "xii-{}-start".format(id), *args)
+        if self._id is None:
+            self._id = str(uuid.uuid4())
+        return os.path.join("/var/tmp", "xii-{}-start".format(self._id), *args)
 
     def child_index(self, component):
         for idx, child in enumerate(self._childs):
