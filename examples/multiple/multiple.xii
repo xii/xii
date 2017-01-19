@@ -7,7 +7,7 @@ multiple:
   pool: default
   image: {{ image }}
   count: 3
-  graphic: yes
+  graphic: False
   ssh:
     copy-key:
       users:

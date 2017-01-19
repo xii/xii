@@ -68,7 +68,7 @@ class Connection():
         if self.exists(path):
             return
 
-        self.mkdir(path)
+        self.mkdir(path, recursive=True)
         self.chmod(path, S_IRWXU)
 
     def mktempdir(self, prefix):

@@ -37,23 +37,12 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
     def get_domain_image_path(self):
         return self.get_attribute('image').get_domain_image_path()
 
-    def get_temp_dir(self):
-        if self._temp_dir is None:
-            self._temp_dir = self.io().mktempdir("xii-" + self.entity())
-        return self._temp_dir
-
-    def run(self, action):
-        #try:
-            Component.run(self, action)
-        #finally:
-        #    if (self._temp_dir is not None and
-        #        self.io().exists(self._temp_dir)):
-        #        self.io().rm(self._temp_dir)
-
     def create(self):
         domain = self.get_domain(self.entity(), raise_exception=False)
         if domain is not None:
             return
+
+        self.io().ensure_path_exists(self.get_temp_path())
 
         self.say("creating...")
         self.each_attribute("create")
@@ -97,6 +86,10 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
 
         self.success("started!")
         self.each_child("after_start")
+
+        # remove template path
+        self.io().rm(self.get_temp_path())
+
 
     def stop(self, force=False):
         domain = self.get_domain(self.entity())

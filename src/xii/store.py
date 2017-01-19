@@ -29,6 +29,20 @@ class Store():
         except KeyError:
             return default
 
+    def has_key(self, key):
+        path = key.split("/")
+        value = self._values
+        try:
+            for node in path:
+                if ((not isinstance(value, dict)) or
+                        node not in value):
+                    return False
+                value = value[node]
+            return True
+        except KeyError:
+            pass
+        return False
+
     def merge(self, iteratable, overwrite=True, root=None):
         values = self._values
         if root:

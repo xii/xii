@@ -74,7 +74,7 @@ class Attribute(Entity, HasStore):
         Returns:
             Value specified in `default` or None
         """
-        if self.get(self.atype):
+        if self.store().has_key(self.atype):
             s = self.store().derive(self.atype)
         elif self.has_defaults():
             s = Store(parent=self.defaults)
