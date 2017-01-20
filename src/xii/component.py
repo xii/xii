@@ -38,6 +38,14 @@ class Component(Entity, HasStore):
         path = "components/{}/{}".format(self.ctype, self.entity())
         return self.parent().store().derive(path)
 
+    def command(self):
+        """get owning command
+
+        Returns:
+            The command which this component is associated with
+        """
+        return self.parent()
+
     def attributes(self):
         """get all attributes
 
@@ -83,6 +91,16 @@ class Component(Entity, HasStore):
             True if found or False
         """
         return not self.get_child(name) is None
+
+    def get_temp_path(self, *args):
+        """get the template path for this component
+
+        All arguments are joined to one path
+
+        Returns:
+            Path to the template directory or file
+        """
+        return self.command().get_temp_path(self.entity(), *args)
 
     def run(self, action):
         if action in dir(self):

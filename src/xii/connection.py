@@ -64,6 +64,13 @@ class Connection():
     def get_groups(self):
         pass
 
+    def ensure_path_exists(self, path):
+        if self.exists(path):
+            return
+
+        self.mkdir(path)
+        self.chmod(path, S_IRWXU)
+
     def mktempdir(self, prefix):
         user = self.user()
         users = self.get_users()

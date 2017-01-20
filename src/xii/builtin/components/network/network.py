@@ -9,7 +9,7 @@ class NetworkComponent(Component, NeedLibvirt):
     ctype = "network"
 
     required_attributes = ["stay", "mode"]
-    default_attributes  = ["stay"]
+    default_attributes = ["stay"]
 
     xml_net = []
 
@@ -39,7 +39,8 @@ class NetworkComponent(Component, NeedLibvirt):
             self.success("created!")
             return net
         except libvirt.libvirtError as err:
-            raise error.ExecError("Could not define {}: {}".format(self.entity(), err))
+            raise error.ExecError("Could not define {}: {}"
+                                  .format(self.entity(), err))
 
     def start(self):
         self.say("starting...")
@@ -62,7 +63,6 @@ class NetworkComponent(Component, NeedLibvirt):
 
         self.success("network started!")
 
-
     def stop(self):
         self.say("stopping...")
         net = self.get_network(self.entity(), raise_exception=False)
@@ -72,7 +72,6 @@ class NetworkComponent(Component, NeedLibvirt):
             return
 
         self._stop_network(net)
-
 
     def destroy(self):
         net = self.get_network(self.entity(), raise_exception=False)
@@ -88,12 +87,6 @@ class NetworkComponent(Component, NeedLibvirt):
 
         net.undefine()
         self.success("removed!")
-
-    def suspend(self):
-        pass
-
-    def resume(self):
-        pass
 
     def _stop_network(self, net):
         self.say("stopping...")
