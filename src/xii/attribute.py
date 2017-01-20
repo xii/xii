@@ -4,7 +4,7 @@ from xii import error
 
 
 class Attribute(Entity, HasStore):
-    atype=""
+    atype = ""
     """
     Set the attributes name
     """
@@ -36,7 +36,7 @@ class Attribute(Entity, HasStore):
           Key("key2", String()),
           Key("key3", List(String()))
         ])
-        
+
         # a string `or` a boolean
         keys = Or([String(), Bool()])
     """
@@ -103,7 +103,7 @@ class Attribute(Entity, HasStore):
 
             def custom_ssh_to_host():
                 def _create_ssh():
-                    ssh = Ssh(self, "xii-project.org", "example", password="foo")
+                    ssh = Ssh(self, "example.org", "example", password="foo")
                     return ssh
 
                 def _close_ssh(ssh):
@@ -147,7 +147,7 @@ class Attribute(Entity, HasStore):
 
     def other_attribute(self, name):
         """get another attribute which is also used by the owning component
-        
+
         Args:
             Name of the attribute to fetch
 
@@ -167,7 +167,18 @@ class Attribute(Entity, HasStore):
 
         Check _`exception handling` for more information on execeptions.
         """
-        self.keys.validate(self.component_entity() + " > " + self.entity(), self.settings())
+        path = self.component_entity() + " > " + self.entity()
+        self.keys.validate(path, self.settings())
+
+    def get_temp_path(self, *args):
+        """get the temporay path for this attribute
+
+        All arguments are joined to one path
+
+        Returns:
+            Path, with no checks if it's valid
+        """
+        return self.component().get_temp_path(*args)
 
     def get_virt_url(self):
         return self.get("settings/connection", "FAILING")
