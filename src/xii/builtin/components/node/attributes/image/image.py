@@ -17,12 +17,12 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
     atype = "image"
 
     requires = ['pool']
-    keys = String()
+    keys = String("~/images/openSUSE-leap-42.2.qcow2")
 
     def get_tmp_volume_path(self):
         return os.path.join(self.component().get_temp_dir(), "image")
 
-    def spawn(self):
+    def create(self):
         # create image store if needed
         if not self.io().exists(self._image_store_path()):
             self.io().mkdir(self._image_store_path(), recursive=True)
@@ -41,7 +41,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         self.say("cloning image...")
         self.io().copy(self._image_path(), self.get_tmp_volume_path())
 
-    def after_spawn(self):
+    def spawn(self):
         pool = self.other_attribute("pool").used_pool()
         size = self.io().stat(self.get_tmp_volume_path()).st_size
         volume_tpl = self.template("volume.xml")
@@ -53,6 +53,9 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         # FIXME: Add error handling
         volume = pool.createXML(xml)
 
+    def start(self):
+        pool = self.other_attribute("pool").used_pool_name()
+        volume = self.get_volume(pool, self.component_entity())
         def read_handler(stream, data, file_):
             return file_.read(data)
 
@@ -65,7 +68,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
 
         disk_tpl = self.template("disk.xml")
         xml = disk_tpl.safe_substitute({
-            "pool": pool.name(),
+            "pool": pool,
             "volume": self.component_entity()
         })
 

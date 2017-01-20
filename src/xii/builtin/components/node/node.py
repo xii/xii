@@ -8,6 +8,12 @@ from xii.util import domain_has_state, domain_wait_state, wait_until_inactive
 
 
 class NodeComponent(Component, NeedLibvirt, NeedIO):
+    """Define, create, manage virtual machines
+
+    das ja mehr als strange
+    """
+    short_description="Define and manage virtual machines"
+
     ctype = "node"
     required_attributes = ["pool", "image"]
     default_attributes = ["pool", "network", "hostname"]
@@ -37,25 +43,56 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         return self._temp_dir
 
     def run(self, action):
-        try:
+        #try:
             Component.run(self, action)
-        finally:
-            if (self._temp_dir is not None and
-                self.io().exists(self._temp_dir)):
-                self.io().rm(self._temp_dir)
+        #finally:
+        #    if (self._temp_dir is not None and
+        #        self.io().exists(self._temp_dir)):
+        #        self.io().rm(self._temp_dir)
+
+    def create(self):
+        domain = self.get_domain(self.entity(), raise_exception=False)
+        if domain is not None:
+            return
+
+        self.say("creating...")
+        self.each_attribute("create")
+
+    def spawn(self):
+        domain = self.get_domain(self.entity(), raise_exception=False)
+        if domain is not None:
+            return
+
+        self.say("spawning...")
+        self.xml_dfn = {'devices': ''}
+        self.each_attribute("spawn")
+
+        caps = self.get_capabilities()
+        self.add_meta('created', time())
+        self.add_meta('definition', self.config("runtime/definition"))
+        self.add_meta('user', self.io().user())
+
+        xml = self.template('node.xml')
+        self.xml_dfn['name'] = self.entity()
+        self.xml_dfn['meta'] = self._generate_meta_xml()
+        self.xml_dfn.update(caps)
+
+        try:
+            self.virt().defineXML(xml.safe_substitute(self.xml_dfn))
+        except libvirt.libvirtError as err:
+            raise error.ExecError("Could not start {}: {}".format(self.entity(), str(err)))
+        self.each_attribute("after_spawn")
+
 
     def start(self):
-        domain = self.get_domain(self.entity(), raise_exception=False)
-
-        if not domain:
-            domain = self._spawn_domain()
+        domain = self.get_domain(self.entity())
 
         if domain.isActive():
             self.say("is already started")
             return
 
         self.say("starting ...")
-        self.each_child("start")
+        self.each_attribute("start")
         domain.create()
 
         self.success("started!")
@@ -136,30 +173,6 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
 
         self.success("resumed!")
         self.each_child("after_resume")
-
-    def _spawn_domain(self):
-        self.say("spawning...")
-        self.xml_dfn = {'devices': ''}
-        self.each_child("spawn")
-
-        caps = self.get_capabilities()
-        self.add_meta('created', time())
-        self.add_meta('definition', self.config("runtime/definition"))
-        self.add_meta('user', self.io().user())
-
-        xml = self.template('node.xml')
-        self.xml_dfn['name'] = self.entity()
-        self.xml_dfn['meta'] = self._generate_meta_xml()
-        self.xml_dfn.update(caps)
-
-        self.finalize()
-        self.each_child("after_spawn")
-        try:
-            self.virt().defineXML(xml.safe_substitute(self.xml_dfn))
-            domain = self.get_domain(self.entity())
-            return domain
-        except libvirt.libvirtError as err:
-            raise error.ExecError("Could not start {}: {}".format(self.entity(), str(err)))
 
     def _stop_domain(self, domain, force=False):
         if not domain.isActive():

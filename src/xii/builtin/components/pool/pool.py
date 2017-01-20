@@ -25,12 +25,34 @@ class PoolComponent(Component, NeedLibvirt):
     def add_xml(self, xml):
         self.xml_pool.append(xml)
 
+    def spawn(self):
+        self.say("spawning...")
+        self.xml_pool = []
+        self.each_attribute("spawn")
+
+        pool_tpl = self.template("pool.xml")
+        xml = pool_tpl.safe_substitute({
+            "type": self.attributes()[0].pool_type,
+            "name": self.entity(),
+            "config": "\n".join(self.xml_pool)
+        })
+
+        self.finalize()
+        try:
+            if self.get_attribute("persistent").is_persistent():
+                self.virt().storagePoolDefineXML(xml)
+            else:
+                self.warn("is beging created as non-persistent pool storage")
+                self.virt().storagePoolCreateXML(xml)
+            pool = self.get_pool(self.entity())
+            self.each_attribute("after_spawn")
+            return pool
+        except libvirt.libvirtError as err:
+            raise error.ExecError("Could create pool {}: {}".format(self.entity(), err))
+
     def start(self):
         self.say("starting...")
-        pool = self.get_pool(self.entity(), raise_exception=False)
-
-        if not pool:
-            pool = self._spawn_pool()
+        pool = self.get_pool(self.entity())
 
         self.each_attribute("start")
         if not pool.isActive():
@@ -69,28 +91,3 @@ class PoolComponent(Component, NeedLibvirt):
         self.each_attribute("destroy", reverse=True)
         pool.undefine()
         self.success("destroyed!")
-
-    def _spawn_pool(self):
-        self.say("spawning...")
-        self.xml_pool = []
-        self.each_attribute("spawn")
-
-        pool_tpl = self.template("pool.xml")
-        xml = pool_tpl.safe_substitute({
-            "type": self.attributes()[0].pool_type,
-            "name": self.entity(),
-            "config": "\n".join(self.xml_pool)
-        })
-
-        self.finalize()
-        try:
-            if self.get_attribute("persistent").is_persistent():
-                self.virt().storagePoolDefineXML(xml)
-            else:
-                self.warn("is beging created as non-persistent pool storage")
-                self.virt().storagePoolCreateXML(xml)
-            pool = self.get_pool(self.entity())
-            self.each_attribute("after_spawn")
-            return pool
-        except libvirt.libvirtError as err:
-            raise error.ExecError("Could create pool {}: {}".format(self.entity(), err))

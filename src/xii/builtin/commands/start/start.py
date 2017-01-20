@@ -9,12 +9,11 @@ def start_command(cmpnt):
 
 class StartCommand(command.Command):
     name = ['start', 's']
-    help = "Load xii definition and start vm's"
+    help = "load xii definition and start vm's"
 
     def run(self):
-
-        parser = self.default_arg_parser()
-        args = parser.parse_args(self.args())
-
+        self.each_component("create")
+        self.each_component("finalize")
+        self.each_component("spawn")
         self.each_component("start")
         self.finalize()

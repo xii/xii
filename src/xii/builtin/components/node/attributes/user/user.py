@@ -4,7 +4,7 @@ import string
 import os
 
 from xii import need
-from xii.validator import Dict, String, VariableKeys, Key, Required
+from xii.validator import Dict, String, VariableKeys, Key, RequiredKey
 
 from xii.components.node import NodeAttribute
 
@@ -25,11 +25,11 @@ class UserAttribute(NodeAttribute, need.NeedGuestFS):
 
     keys = Dict([VariableKeys(
         Dict([
-            Required(Key('password', String())),
-            Key('description', String()),
-            Key('shell', String())
+            RequiredKey('password', String("12345")),
+            Key('description', String("a users description")),
+            Key('shell', String("/usr/bin/bash"))
             ])
-        )])
+        , example="username")])
 
     def default_user(self):
         if not self.settings():

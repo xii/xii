@@ -5,7 +5,7 @@ from multiprocessing import Condition
 
 
 from xii import error, util, need
-from xii.validator import Dict, String, Required, Key, VariableKeys
+from xii.validator import Dict, String, RequiredKey, Key, VariableKeys
 
 from xii.components.node import NodeAttribute
 
@@ -42,10 +42,9 @@ class SSHMountAttribute(NodeAttribute, need.NeedGuestFS, need.NeedSSH, need.Need
 
     keys = Dict([
         VariableKeys(Dict([
-            Required(Key("source", String())),
-            Key("user", String()),
-            Key("mode", String())
-            ]))
+            RequiredKey("source", String("/path/to/source/directory")),
+            Key("user", String("xii"))
+            ]), example="/path/to/dest/directory")
         ])
 
     def sshfs_key_path(self, name):

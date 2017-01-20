@@ -102,7 +102,10 @@ def run_cli():
                  .format(cli_args.command))
             return 1
 
-        instance = cmd["class"](cli_args.command_args, cmd["templates"], store)
+        command_arg_parser = cmd["class"].argument_parser()
+        command_args = command_arg_parser.parse_args(cli_args.command_args)
+
+        instance = cmd["class"](command_args, cmd["templates"], store)
         prepare_command(instance, ext_mgr)
 
         return instance.run()

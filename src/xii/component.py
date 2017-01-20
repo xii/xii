@@ -5,8 +5,22 @@ from xii import error
 
 class Component(Entity, HasStore):
     ctype = ""
+    """
+    Name of the component (eg. 'node')
+    """
+
     default_attributes = []
+    """
+    List of default attributes which are created if not defined in a
+    definition file
+    """
+
     required_attributes = []
+    """
+    Required attributes for this component
+    """
+
+    short_description = None
 
     def __init__(self, name, command, tpls={}):
         Entity.__init__(self, name, parent=command, templates=tpls)
@@ -16,22 +30,58 @@ class Component(Entity, HasStore):
 
     # limit access to component/type/concret_instance
     def store(self):
+        """get the store
+
+        Returns:
+            The store with lens to this components settings
+        """
         path = "components/{}/{}".format(self.ctype, self.entity())
         return self.parent().store().derive(path)
 
     def attributes(self):
+        """get all attributes
+
+        Returns:
+            A list of all already added attributes
+        """
         return self._childs
 
     def add_attribute(self, attribute):
+        """add a new attribute
+
+        Args:
+            attribute: Attribute object to add
+        """
         return self.add_child(attribute)
 
     def each_attribute(self, action, reverse=False):
+        """run a action on each attribute
+
+        ::
+            self.each_attribute("start")
+            # reverse order
+            self.each_attribute("stop", reverse=True)
+
+        Args:
+            action: Action which should be executed
+            reverse: Run the action in reversed order
+        """
         return self.each_child(action, reverse)
 
     def get_attribute(self, name):
+        """get added attribute
+
+        Returns:
+            Attribute object or None if not found
+        """
         return self.get_child(name)
 
     def has_attribute(self, name):
+        """check if component has attribute
+
+        Returns:
+            True if found or False
+        """
         return not self.get_child(name) is None
 
     def run(self, action):

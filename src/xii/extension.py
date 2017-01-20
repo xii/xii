@@ -13,6 +13,7 @@ class ExtensionManager():
     Loads all extensions (commands, components, attributes)
 
     Try to load a directory structure which looks like:
+    ::
 
         path/
         |---- commands/
@@ -63,20 +64,28 @@ class ExtensionManager():
                 return cmd
         return None
 
+    def get_commands(self):
+        return self._known["commands"]
+
     def commands_available(self):
         output = ["", "shortcut  action    description",
                   "-------------------------------"]
 
         for command in [c["class"] for c in self._known["commands"]]:
-            output.append(" {:9}{:10}{}".format(", ".join(command.name[1:]), command.name[0], command.help))
+            output.append(" {:9}{:10}{}"
+                          .format(", ".join(command.name[1:]),
+                                  command.name[0],
+                                  command.help))
         output.append(" ")
         return output
-
 
     def get_component(self, name):
         if name not in self._known["components"]:
             return None
         return self._known["components"][name]
+
+    def get_components(self):
+        return self._known["components"].values()
 
     def get_attribute(self, component, name):
         if component not in self._known["attributes"]:
@@ -85,6 +94,11 @@ class ExtensionManager():
         if name not in self._known["attributes"][component]:
             return None
         return self._known["attributes"][component][name]
+
+    def get_attributes(self, component):
+        if component not in self._known["attributes"]:
+            return None
+        return self._known["attributes"][component].values()
 
     def load(self):
         for base_path in self._paths:
@@ -118,8 +132,7 @@ class ExtensionManager():
         paths = map(partial(os.path.join, base_path), dirs)
 
         for name, path in zip(dirs, paths):
-            if (os.path.isdir(path) or
-                os.path.splitext(path)[1] == ".py"):
+            if os.path.isdir(path) or os.path.splitext(path)[1] == ".py":
                 self._load_attributes(name, component, path)
 
     def _load_attributes(self, name, component, path):
