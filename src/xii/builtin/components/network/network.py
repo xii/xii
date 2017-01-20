@@ -16,12 +16,34 @@ class NetworkComponent(Component, NeedLibvirt):
     def add_xml(self, xml):
         self.xml_net.append(xml)
 
+    def spawn(self):
+        network = self.get_network(self.entity(), raise_exception=False)
+
+        if network is not None:
+            return
+
+        self.say("creating...")
+        self.each_attribute("spawn")
+
+        replace = {'config': "\n".join(self.xml_net),
+                   'name': self.entity()}
+
+        tpl = self.template('network.xml')
+        xml = tpl.safe_substitute(replace)
+
+        # FIXME: Handle case where the network already is used by another
+        # device
+        try:
+            self.virt().networkDefineXML(xml)
+            net = self.get_network(self.entity())
+            self.success("created!")
+            return net
+        except libvirt.libvirtError as err:
+            raise error.ExecError("Could not define {}: {}".format(self.entity(), err))
+
     def start(self):
         self.say("starting...")
-        net = self.get_network(self.entity(), raise_exception=False)
-
-        if not net:
-            net = self._spawn_network()
+        net = self.get_network(self.entity())
 
         self.each_attribute("start")
 
@@ -72,26 +94,6 @@ class NetworkComponent(Component, NeedLibvirt):
 
     def resume(self):
         pass
-
-    def _spawn_network(self):
-        self.say("creating...")
-        self.each_attribute("spawn")
-
-        replace = {'config': "\n".join(self.xml_net),
-                   'name': self.entity()}
-
-        tpl = self.template('network.xml')
-        xml = tpl.safe_substitute(replace)
-
-        # FIXME: Handle case where the network already is used by another
-        # device
-        try:
-            self.virt().networkDefineXML(xml)
-            net = self.get_network(self.entity())
-            self.success("created!")
-            return net
-        except libvirt.libvirtError as err:
-            raise error.ExecError("Could not define {}: {}".format(self.entity(), err))
 
     def _stop_network(self, net):
         self.say("stopping...")
