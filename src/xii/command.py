@@ -119,7 +119,7 @@ class Command(Entity, HasStore):
             raise error.Interrupted()
 
     @classmethod
-    def argument_parser(cls):
+    def argument_parser(cls, subcommand=None):
         """add special arguments to a subcommand
 
         Overwrite this method if additional arguments for the subcommand
@@ -140,7 +140,10 @@ class Command(Entity, HasStore):
         Returns:
             The parser object
         """
-        parser = argparse.ArgumentParser(prog="xii " + cls.name[0])
+        cmd = subcommand
+        if subcommand is None:
+            cmd = cls.name[0]
+        parser = argparse.ArgumentParser(prog="xii " + cmd)
         parser.add_argument("--verbose", action="store_true", default=None,
                             help="Show verbose output")
         return parser

@@ -55,17 +55,6 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         # FIXME: Add error handling
         volume = pool.createXML(xml)
 
-    def start(self):
-        pool = self.other_attribute("pool").used_pool()
-        volume = self.get_volume(pool.name(),
-                                 self.component_entity(),
-                                 raise_exception=False)
-
-        if volume:
-            return
-
-        pool = self.other_attribute("pool").used_pool_name()
-        volume = self.get_volume(pool, self.component_entity())
         def read_handler(stream, data, file_):
             return file_.read(data)
 
@@ -76,9 +65,10 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
             stream.sendAll(read_handler, image)
             stream.finish()
 
+        pool = self.other_attribute("pool").used_pool()
         disk_tpl = self.template("disk.xml")
         xml = disk_tpl.safe_substitute({
-            "pool": pool,
+            "pool": pool.name(),
             "volume": self.component_entity()
         })
 
