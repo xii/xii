@@ -89,7 +89,8 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
 
         # remove template path
         # FIXME: Currently the base path is not deleted
-        self.io().rm(self.get_temp_path())
+        if self.io().exists(self.get_tmp()):
+            self.io().rm(self.get_temp_path())
 
 
     def stop(self, force=False):

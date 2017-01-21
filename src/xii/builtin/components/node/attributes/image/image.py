@@ -30,7 +30,9 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         pool_name = self.other_attribute("pool").used_pool_name()
         # pool_type = self.other_attribute("pool").used_pool_type()
 
-        volume = self.get_volume(pool_name, self.component_entity(), raise_exception=False)
+        volume = self.get_volume(pool_name,
+                                 self.component_entity(),
+                                 raise_exception=False)
 
         if volume:
             self._remove_volume(volume)
@@ -54,6 +56,14 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         volume = pool.createXML(xml)
 
     def start(self):
+        pool = self.other_attribute("pool").used_pool()
+        volume = self.get_volume(pool.name(),
+                                 self.component_entity(),
+                                 raise_exception=False)
+
+        if volume:
+            return
+
         pool = self.other_attribute("pool").used_pool_name()
         volume = self.get_volume(pool, self.component_entity())
         def read_handler(stream, data, file_):
@@ -76,7 +86,9 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
 
     def destroy(self):
         pool = self.other_attribute("pool").used_pool()
-        volume = self.get_volume(pool.name(), self.component_entity(), raise_exception=False)
+        volume = self.get_volume(pool.name(),
+                                 self.component_entity(),
+                                 raise_exception=False)
 
         if volume:
             self._remove_volume(volume, force=True)
