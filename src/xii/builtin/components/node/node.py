@@ -66,11 +66,12 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         self.xml_dfn['meta'] = self._generate_meta_xml()
         self.xml_dfn.update(caps)
 
+        self.finalize()
+        self.each_attribute("after_spawn")
         try:
             self.virt().defineXML(xml.safe_substitute(self.xml_dfn))
         except libvirt.libvirtError as err:
             raise error.ExecError("Could not start {}: {}".format(self.entity(), str(err)))
-        self.each_attribute("after_spawn")
 
 
     def start(self):

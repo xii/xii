@@ -43,7 +43,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         self.say("cloning image...")
         self.io().copy(self._image_path(), self.get_tmp_volume_path())
 
-    def spawn(self):
+    def after_spawn(self):
         pool = self.other_attribute("pool").used_pool()
         size = self.io().stat(self.get_tmp_volume_path()).st_size
         volume_tpl = self.template("volume.xml")
@@ -81,7 +81,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
                                  raise_exception=False)
 
         if volume:
-            self._remove_volume(volume, force=True)
+            self._remove_volume(volume)
 
     def _image_store_path(self):
         home = self.io().user_home()
@@ -92,14 +92,9 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         self.parent().add_meta("image", name)
         return os.path.join(self._image_store_path(), name)
 
-    def _remove_volume(self, volume, force=False):
-        if self.config('global/auto_delete_volumes', False) or force:
-            volume.wipe()
-            return volume.delete()
-        raise error.ExecError(
-                ["Volume `{}` already exists".format(self.component_entity()),
-                    "If you want xii to automatically delete volumes",
-                    "set auto_delete_volumes to True in your xii configuration"])
+    def _remove_volume(self, volume):
+        volume.wipe()
+        volume.delete()
 
     def _fetch_image(self):
         _pending.acquire()
