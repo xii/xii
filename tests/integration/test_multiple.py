@@ -4,14 +4,10 @@ import pytest
 from integration import runner, file
 
 
-def test_single_domain():
+@runner.cleanup_node(["multiple-1", "multiple-2", "multiple-3"], "qemu:///system")
+def test_multi_nodes():
     env_vars = runner.load_variables_from_env()
-    single   = file.get_test_path("single")
-
-    runner.cleanup_instance("single")
+    multiple   = file.get_test_path("multiple")
  
-    runner.run_xii(deffile=single, variables=env_vars, cmd="start")
-    runner.run_xii(deffile=single, variables=env_vars, cmd="destroy")
-
-    runner.cleanup_instance("single")
-
+    runner.run_xii(deffile=multiple, variables=env_vars, cmd="start")
+    runner.run_xii(deffile=multiple, variables=env_vars, cmd="destroy")

@@ -93,8 +93,8 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         return os.path.join(self._image_store_path(), name)
 
     def _remove_volume(self, volume):
-        volume.wipe()
-        volume.delete()
+        volume.wipe(0)
+        volume.delete(0)
 
     def _fetch_image(self):
         _pending.acquire()
