@@ -3,6 +3,8 @@ import os
 import yaml
 import jinja2
 
+from xii import error
+
 
 def file_read(path):
     try:
