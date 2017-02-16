@@ -212,7 +212,7 @@ class NeedLibvirt(HasOutput):
         return emulators[arch]
 
 
-    def domain_get_ip(self, domain_name, retry=20, wait=3):
+    def domain_get_ip(self, domain_name, retry=20, wait=3, quiet=False):
         """fetch ipv4 for a given domain name
 
         Args:
@@ -231,8 +231,8 @@ class NeedLibvirt(HasOutput):
             return False
 
         for i in range(retry):
-
-            self.counted(i, "fetching ip address from {}...".format(domain_name))
+            if not quiet:
+                self.counted(i, "fetching ip address from {}...".format(domain_name))
             nets = domain.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE)
 
             if len(nets):
