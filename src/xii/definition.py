@@ -28,6 +28,7 @@ def get_components(defn):
             raise error.ValidatorError("{} has no type. Check your "
                                        "definition file".format(name))
         ctype = component["type"]
+        component["basename"] = name
 
         if "count" in component and component["count"] > 1:
             tmp = dict(component)

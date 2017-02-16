@@ -125,7 +125,7 @@ def from_definition(definition, command, ext_mgr):
 
 
 def _initialize_attributes(instance, ext_mgr):
-    non_attributes = ["count", "type", "settings"]
+    non_attributes = ["count", "type", "settings", "basename"]
 
     def add_attr(name):
         attr = ext_mgr.get_attribute(instance.ctype, name)

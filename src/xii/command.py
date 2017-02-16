@@ -78,7 +78,7 @@ class Command(Entity, HasStore):
         self.add_child(component)
 
     def get_component(self, name):
-        """aet a component object
+        """get a component object
 
         Args:
             name: The entity name of the component.
@@ -87,6 +87,27 @@ class Command(Entity, HasStore):
             The component object if found, None otherwise
         """
         return self.get_child(name)
+
+    def get_components(self, name, ctype=None):
+        """get all components with name or basename
+
+        Select all components if the name matches the basename or
+        the components entity name
+
+        Args:
+            name: Name or basename of the component
+            ctype: return only components of a certain type
+
+        Returns:
+            A generator which generates all components
+        """
+        for c in self.children():
+            if c.entity() == name or c.get("basename") == name:
+                if ctype is not None:
+                    if ctype == c.ctype:
+                        yield c
+                else:
+                    yield c
 
     def each_component(self, action, reverse=False):
         """run a action on all added components
