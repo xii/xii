@@ -95,8 +95,8 @@ class NeedLibvirt(HasOutput):
             return getattr(self.virt(), mapping[typ])(*args)
         except libvirt.libvirtError:
             if r:
-                raise error.NotFound("Could not find {}"
-                                     "({})".format(typ, name))
+                raise error.NotFound("Could not find {} "
+                                     "({})".format(typ, args[0]))
             return None
 
 
