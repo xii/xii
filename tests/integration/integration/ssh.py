@@ -15,13 +15,30 @@ class SSH():
         self._user   = user
 
     def run(command):
-        pass
+        conn = self.ssh()
+        chan = conn.get_transport().open_session()
+        chan.set_combine_stderr(True)
+        chan.exec_command(command)
+        stdout = chan.makefile('r', -1)
+        return (chan, stdout)
 
-    def file_contains(path):
-        pass
+    def file_contains(path, pattern):
+        hdl = self.sftp().open(path)
+        result = re.match(pattern, hdl.read())
+        hdl.close()
+        return result.groups()
 
-    def exists(path):
-        pass
+    def stat(self, path):
+        return self.sftp().stat(path)
+
+    def exists(self, path):
+        try:
+            self.stat(path)
+        except IOError as e:
+            if e[0] == 2:
+                return False
+            raise
+        return True
 
     def connect(key=None, password=None):
         if self._ssh:
@@ -51,8 +68,8 @@ class SSH():
         self._sftp = self._ssh.open_sftp()
         return self._sftp
 
-    def _find_host():
-        process = subprocess.call(["xii", "ip", "--quiet", domain])
+    def _find_host(self):
+        process = subprocess.call(["xii", "ip", "--quiet", self._domain])
         ip = process.stdout.read()
         
 
