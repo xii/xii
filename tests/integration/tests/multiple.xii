@@ -3,18 +3,16 @@
 multiple:
   type: node
   pool: default
-  count: 3
+  graphic: yes
+  count: 2
 
   image: {{ image }}
 
   user:
-    {{ user }}:
-      password: {{ password }}
     root:
       password: linux
 
   ssh:
     copy-key:
       users:
-        - {{ user }}
         - root

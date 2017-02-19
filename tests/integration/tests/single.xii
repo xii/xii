@@ -3,17 +3,15 @@
 single:
   type: node
   pool: default
+  graphic: yes
 
   image: {{ image }}
 
   user:
-    {{ user }}:
-      password: {{ password }}
     root:
       password: linux
 
   ssh:
     copy-key:
       users:
-        - {{ user }}
         - root
