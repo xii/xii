@@ -4,7 +4,7 @@ ansible-test:
   type: node
   pool: default
   image: {{ image }}
-  count: 2
+  count: 1
 
   graphic: yes
   user:
@@ -18,9 +18,32 @@ ansible-test:
         - felixsch
         - root
 
+ansible-test-root:
+  type: node
+  pool: default
+  image: {{ image }}
+
+  graphic: yes
+  user:
+    felixsch:
+      password: felix
+    root:
+      password: linux
+      default: True
+  ssh:
+    copy-key:
+      users:
+        - felixsch
+        - root
+
 deploy-stuff:
   type: ansible
-  hosts: ansible-test-1 ansible-test-2
+  hosts:
+    foo: [ansible-test-root, ansible-test-1]
+    bar: [ansible-test-root]
+  # hosts:
+  #   foo: [ansible-test-1, ansible-test-2, ansible-test-root]
+  #   bar: [ansible-test-root]
   run: deploy.yml
   env:
-    test-var: fooobar
+    bar_file: bar-test-file.conf

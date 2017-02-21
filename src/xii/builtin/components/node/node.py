@@ -33,7 +33,14 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
     def add_meta(self, key, value):
         self.xml_metadata[key] = value
 
-    # every node has an image
+    def ssh_user(self):
+        if self.get_attribute("user") is None:
+            self.warn("No users where defined but ssh connection is used. "
+                      "Defaulting to user xii")
+            return "xii"
+        return self.get_attribute("user").default_user()
+
+    # every node has an image (only currently)
     def get_domain_image_path(self):
         return self.get_attribute('image').get_domain_image_path()
 

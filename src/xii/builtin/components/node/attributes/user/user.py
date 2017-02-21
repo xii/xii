@@ -4,7 +4,7 @@ import string
 import os
 
 from xii import need
-from xii.validator import Dict, String, VariableKeys, Key, RequiredKey
+from xii.validator import Dict, String, VariableKeys, Key, RequiredKey, Bool
 
 from xii.components.node import NodeAttribute
 
@@ -15,26 +15,36 @@ class UserAttribute(NodeAttribute, need.NeedGuestFS):
     requires = ["image"]
 
     default_settings = {
-            "username": "xii",
-            "description": "xii generated user",
-            "shell": "/bin/bash",
-            "password": "xii",
-            "skel": True,
-            "n": 0
-            }
+        "username": "xii",
+        "description": "xii generated user",
+        "shell": "/bin/bash",
+        "password": "xii",
+        "skel": True,
+        "n": 0
+    }
 
     keys = Dict([VariableKeys(
         Dict([
-            RequiredKey('password', String("12345")),
-            Key('description', String("a users description")),
-            Key('shell', String("/usr/bin/bash"))
+            RequiredKey('password', String("password")),
+            Key('description', String("A nice user")),
+            Key('shell', String("/bin/bash")),
+            Key('default', Bool(True))
             ])
         , example="username")])
 
     def default_user(self):
         if not self.settings():
             return "xii"
-        return self.settings().iterkeys().next()
+
+        for name, user in self.settings().items():
+            if "default" in user:
+                return name
+
+        name = self.settings().iterkeys().next()
+
+        self.say("Assuming default user for {} is {}..."
+                 .format(self.component_entity(), name))
+        return name
 
     def spawn(self):
         if not self.settings():

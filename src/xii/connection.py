@@ -25,6 +25,10 @@ class Connection():
         pass
 
     @abstractmethod
+    def which(self, executable):
+        pass
+
+    @abstractmethod
     def exists(self, path):
         pass
 

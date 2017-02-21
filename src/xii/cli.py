@@ -21,6 +21,8 @@ def cli_arg_parser(ext_mgr):
                         help="Make output more verbose and dump environment")
     parser.add_argument("--deffile", default=None,
                         help="Specify definition file")
+    parser.add_argument("-v", "--verbose", action="store_true", default=False,
+                        help="Show verbose output")
     parser.add_argument("--no-parallel", dest="parallel", action="store_false", default=True,
                         help="Disable parallel processing")
     parser.add_argument("-D", "--define", dest="defines", action="append", default=[],
@@ -47,6 +49,9 @@ def init_runtime(store, args):
 
     if args.parallel is False:
         store.set("global/parallel", args.parallel)
+
+    if args.verbose:
+        store.set("global/verbose", True)
 
     # merge with arguments from commandline
     for define in [d.split("=") for d in args.defines]:

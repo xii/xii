@@ -228,11 +228,12 @@ class NeedLibvirt(HasOutput):
         nets = []
 
         if not domain.isActive():
-            return False
+            return None
 
         for i in range(retry):
             if not quiet:
                 self.counted(i, "fetching ip address from {}...".format(domain_name))
+
             nets = domain.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE)
 
             if len(nets):
