@@ -1,6 +1,9 @@
 from abc import ABCMeta, abstractmethod
 
 import md5
+import paramiko
+import socket
+import time
 
 from xii import error
 from xii.output import HasOutput
@@ -54,6 +57,36 @@ class NeedSSH(HasOutput):
             ssh.close()
 
         return self.share(connection_hash, _create_ssh_conn, _close_ssh_conn)
+
+    def ssh_host_alive(self, host, timeout=20):
+        """check if a ssh server is running
+
+        Args:
+            host: domain or IP Address to connect to
+            timeout: Timeout after n retrys
+
+        Returns:
+            True if a server is running, False otherwise
+        """
+        retry = self.config("ssh/ssh_retry", timeout)
+        wait = self.config("ssh/wait", 2)
+        client = None
+
+        for _ in range(retry):
+            try:
+                client = paramiko.SSHClient()
+                client.connect(host, username="xii", password="xii")
+                return True
+            except socket.error:
+                time.sleep(wait)
+            except (paramiko.BadHostKeyException,
+                    paramiko.AuthenticationException,
+                    paramiko.SSHException):
+                return True
+            finally:
+                if client:
+                    client.close()
+        return False
 
     def _generate_hash(self, host, user):
         return "ssh" + md5.new("{}-{}".format(host, user)).hexdigest()

@@ -1,0 +1,17 @@
+---
+
+- name: touch foobar
+  hosts: foo
+  tasks:
+    - file:
+        path: /home/felixsch/foobar.conf
+        state: touch
+        mode: "u=rw,g=r,o=r"
+
+- name: touch foobar
+  hosts: bar
+  tasks:
+    - file:
+        path: /home/etc/{{ vars.bar_file }}
+        state: touch
+        mode: "u=rw,g=r,o=r"

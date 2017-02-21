@@ -2,29 +2,13 @@ import argparse
 import uuid
 import os
 
-from concurrent.futures import ThreadPoolExecutor, Future
-from functools import partial
 from abc import ABCMeta, abstractmethod
 
-from xii import error
+from xii import error, util
 from xii.store import HasStore
 from xii.entity import Entity
 
 
-# move me to util if time is ready
-def in_parallel(worker_count, objects, executor):
-    try:
-        pool = ThreadPoolExecutor(worker_count)
-        futures = map(partial(pool.submit, executor), objects)
-
-        # handle possible errors
-        errors = filter(None, map(Future.exception, futures))
-
-        if errors:
-            for err in errors:
-                raise err
-    finally:
-        pool.shutdown(wait=False)
 
 
 class Command(Entity, HasStore):
@@ -88,6 +72,7 @@ class Command(Entity, HasStore):
         """
         return self.get_child(name)
 
+<<<<<<< HEAD
     def get_components(self, name, ctype=None):
         """get all components with name or basename
 

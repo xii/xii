@@ -113,6 +113,12 @@ class Entity(HasOutput):
             return self.parent().config(key, default)
         return self.store().get(key, default)
 
+    def is_verbose(self):
+        return self.config("global/verbose", False)
+
+    def is_parallel(self):
+        return self.config("global/parallel", True)
+
     def template(self, key):
         """get template
         Get a template which was added to the filesystem in the corresponding
@@ -219,6 +225,11 @@ class Entity(HasOutput):
             if child.entity() == entity:
                 return child
         return None
+
+    def get_component(self, name):
+        if self.has_parent():
+            return self.parent().get_component(name)
+        return self.get_child(name)
 
     def children(self):
         return self._childs

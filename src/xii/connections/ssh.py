@@ -79,6 +79,13 @@ class Ssh(connection.Connection, HasOutput):
     def stat(self, path):
         return self.sftp().stat(path)
 
+    def which(self, executable):
+        # FIXME: Potential dangerous. Add a more advanced solution
+        result = self.shell("which {}".format(executable))
+        if os.path.isabs(result):
+            return result
+        return None
+
     def exists(self, path):
         try:
             self.stat(path)

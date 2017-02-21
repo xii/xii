@@ -31,6 +31,21 @@ class Local(Connection):
     def stat(self, path):
         return os.stat(path)
 
+    def which(self, executable):
+        def can_exec(file_path):
+            return os.path.isfile(file_path) and os.access(file_path, os.X_OK)
+
+        path, name = os.path.split(executable)
+        if path:
+            if can_exec(executable):
+                return executable
+        else:
+            for p in os.environ["PATH"].split(os.pathsep):
+                test = os.path.join(p.strip('"'), executable)
+                if can_exec(test):
+                    return test
+        return None
+
     def exists(self, path):
         try:
             os.stat(path)

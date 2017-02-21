@@ -1,6 +1,8 @@
 import md5
+
 from Crypto.PublicKey import RSA
-import itertools
+from concurrent.futures import ThreadPoolExecutor, Future
+from functools import partial
 
 def safe_get(name, structure):
     if name not in structure:
@@ -25,6 +27,22 @@ def flatten(to_flatten):
             x = x + flatten(i)
         return x
     return [to_flatten]
+
+
+def in_parallel(worker_count, objects, executor):
+    try:
+        pool = ThreadPoolExecutor(worker_count)
+        futures = map(partial(pool.submit, executor), objects)
+
+        # handle possible errors
+        errors = filter(None, map(Future.exception, futures))
+
+        if errors:
+            for err in errors:
+                raise err
+        return map(Future.result, futures)
+    finally:
+        pool.shutdown(wait=False)
 
 
 def indented(lx, n):
