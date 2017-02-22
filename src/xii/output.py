@@ -36,6 +36,16 @@ class HasOutput:
     def entity_path(self):
         pass
 
+    @abstractmethod
+    def is_verbose(self):
+        pass
+
+    def verbose(self, msg):
+        if self.is_verbose():
+            self._tprint(self._generate_tag(),
+                         msg,
+                         colors.NORMAL)
+
     def say(self, msg):
         self._tprint(self._generate_tag(),
                      msg,
