@@ -9,8 +9,6 @@ from xii.store import HasStore
 from xii.entity import Entity
 
 
-
-
 class Command(Entity, HasStore):
     __meta__ = ABCMeta
 
@@ -72,7 +70,6 @@ class Command(Entity, HasStore):
         """
         return self.get_child(name)
 
-<<<<<<< HEAD
     def get_components(self, name, ctype=None):
         """get all components with name or basename
 
@@ -118,7 +115,7 @@ class Command(Entity, HasStore):
                 count = self.get("global/workers", 3)
                 for name, group in groups:
                     self.say("{}ing {}s..".format(action, name))
-                    in_parallel(count, group, lambda o: o.run(action))
+                    util.in_parallel(count, group, lambda o: o.run(action))
             else:
                 self.each_child(action, reverse)
         except KeyboardInterrupt:
