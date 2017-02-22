@@ -1,6 +1,6 @@
 import libvirt
 from time import sleep, time
-
+from random import randint
 from xii import error
 from xii.component import Component
 from xii.need import NeedLibvirt, NeedIO
@@ -90,6 +90,18 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
 
         self.say("starting ...")
         self.each_attribute("start")
+
+        # try to circumvent libvirt bug:
+        # libvirt.libvirtError: internal error: qemu unexpectedly closed the
+        # monitor: ((null):17109): Spice-Warning **: reds.c:2493:reds_init_socket:
+        # reds_init_socket: binding socket to 127.0.0.1:5900 failed
+        #
+        # 2017-02-22T23:22:56.850419Z qemu-system-x86_64: failed to initialize
+        # spice server
+        wait = randint(3,10)
+        self.verbose("waiting {} seconds before creating the domain...".format(wait))
+        sleep(wait)
+
         domain.create()
 
         self.success("started!")
