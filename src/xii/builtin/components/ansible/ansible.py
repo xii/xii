@@ -3,6 +3,7 @@ import os
 import pkgutil
 import abc
 import subprocess
+import yaml
 
 from xii.need import NeedIO
 from xii import error
@@ -22,11 +23,11 @@ class NeedAnsible(NeedIO):
     def run_playbook(self, inventory, playbook, args=[], env={}):
         executable = self.io().which(self.ansible_executable())
 
+        env["host_key_checking"] = False
+
         args.append("-i")
         args.append(inventory)
-
-        for key, value in env.items():
-            args.append('-e"{}={}"'.format(key, value))
+        args.append("--extra-vars=" + yaml.dump(env).strip())
 
         try:
             process = subprocess.Popen([executable] + args + [playbook],
@@ -44,7 +45,8 @@ class NeedAnsible(NeedIO):
                 line = output.decode('utf-8').strip()
 
                 if (not is_parallel) or is_verbose:
-                    self.say("| " + line)
+                    for l in line.split("\\n"):
+                        self.say("| " + l)
                 else:
                     if line.startswith("PLAY RECAP *"):
                         has_recap = True
