@@ -72,10 +72,14 @@ class NeedSSH(HasOutput):
         wait = self.config("ssh/wait", 2)
         client = None
 
+        self.verbose("check {} ssh's server...".format(host))
         for _ in range(retry):
             try:
                 client = paramiko.SSHClient()
-                client.connect(host, username="xii", password="xii")
+                client.connect(host,
+                               username="xii",
+                               password="xii",
+                               timeout=0.2)
                 return True
             except socket.error:
                 time.sleep(wait)

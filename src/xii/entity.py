@@ -114,7 +114,7 @@ class Entity(HasOutput):
         return self.store().get(key, default)
 
     def is_verbose(self):
-        return self.config("global/verbose", False)
+        return self.config("global/verbose", False) or self.config("command/args/verbose", False)
 
     def is_parallel(self):
         return self.config("global/parallel", True)
