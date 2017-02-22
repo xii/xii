@@ -22,9 +22,7 @@ class AnsibleComponent(Component, NeedAnsible, NeedIO, NeedSSH):
         Component.validate(self)
 
     def start(self):
-        self.say("provision hosts...")
         tmp = self.io().mktempdir("xii-ansible")
-
         inventory = self.get_attribute("hosts").generate_inventory(tmp)
         envvars = self.get_attribute("env").get_vars()
         playbook = self.get_attribute("run").get_playbook(tmp)
