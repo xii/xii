@@ -39,7 +39,7 @@ ansible-test-root:
 deploy-stuff:
   type: ansible
   hosts:
-    foo: [ansible-test-root, ansible-test-1]
+    foo: [ansible-test-root, ansible-test]
     bar: [ansible-test-root]
   # hosts:
   #   foo: [ansible-test-1, ansible-test-2, ansible-test-root]
