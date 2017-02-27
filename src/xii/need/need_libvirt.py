@@ -295,7 +295,7 @@ class NeedLibvirt(HasOutput):
 
             if prefer_kvm:
                 kvm = emulator.find("domain[@type='kvm']")
-                if kvm is not None:
+                if kvm is not None and kvm.find("machine") is not None:
                     emulator = kvm
                     domain_type = 'kvm'
 
