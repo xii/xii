@@ -210,9 +210,12 @@ class Entity(HasOutput):
                 shared["finalizer"](shared['value'])
             del self._shares[name]
 
-    def run(self, action):
+    def run(self, action, args=None):
         if action in dir(self):
-            return getattr(self, action)()
+            if args is None:
+                return getattr(self, action)()
+            else:
+                return getattr(self, action)(**args)
 
     def add_child(self, new):
         for idx, child in enumerate(self._childs):
@@ -235,7 +238,7 @@ class Entity(HasOutput):
     def children(self):
         return self._childs
 
-    def each_child(self, action, reverse=False):
+    def each_child(self, action, args=None, reverse=False):
         result = []
         if reverse:
             run = reversed(self._childs)
@@ -243,7 +246,10 @@ class Entity(HasOutput):
             run = self._childs
 
         for child in run:
-            result.append(child.run(action))
+            if args is None:
+                result.append(child.run(action))
+            else:
+                result.append(child.run(action, args))
         return result
 
     def child_index(self, entity):

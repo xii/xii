@@ -62,7 +62,7 @@ class Component(Entity, HasStore):
         """
         return self.add_child(attribute)
 
-    def each_attribute(self, action, reverse=False):
+    def each_attribute(self, action, args=None, reverse=False):
         """run a action on each attribute
 
         ::
@@ -74,7 +74,7 @@ class Component(Entity, HasStore):
             action: Action which should be executed
             reverse: Run the action in reversed order
         """
-        return self.each_child(action, reverse)
+        return self.each_child(action, args, reverse)
 
     def get_attribute(self, name):
         """get added attribute
@@ -101,10 +101,6 @@ class Component(Entity, HasStore):
             Path to the template directory or file
         """
         return self.command().get_temp_path(self.entity(), *args)
-
-    def run(self, action):
-        if action in dir(self):
-            getattr(self, action)()
 
     def validate(self):
         Entity.validate(self, self.required_attributes)
