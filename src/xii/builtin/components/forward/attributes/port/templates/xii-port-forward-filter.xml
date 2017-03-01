@@ -1,0 +1,5 @@
+<filter name='xii-port-forward' chain='ipv4'>
+  <rule action='accept' direction='in'>
+    <tcp srcportstart='$SOURCE_PORT' dstportstart='$DEST_PORT' srcipaddr='$HOST' dstipaddr='$IP' state='NEW,ESTABLISHED,RELATED' />
+  </rule>
+</filter>

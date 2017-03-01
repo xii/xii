@@ -1,0 +1,5 @@
+<filterref filter='xii-port-forward'>
+  <parameter name='SOURCE_PORT' value='$source'/>
+  <parameter name='DEST_PORT' value='$dest' />
+  <parameter name='HOST' value='$host_ip' />
+</filterref>

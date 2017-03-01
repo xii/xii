@@ -1,4 +1,4 @@
-import libvirt 
+import libvirt
 
 from xii import error
 from xii.component import Component
@@ -18,12 +18,9 @@ class ForwardComponent(Component, NeedLibvirt, NeedIO):
 
     requires = []
 
-    def has_forwards_for(self, instance):
-        nodes = flatten(self.each_attribute("forwarded_nodes"))
-        return instance in nodes
-
-    def get_forwards_for(self, instance):
+    def forwards_for(self, instance):
         forwards = self.each_attribute("forward_for", args={"instance": instance})
+        import pdb; pdb.set_trace()
         return flatten(forwards)
 
     def spawn(self):
@@ -31,4 +28,3 @@ class ForwardComponent(Component, NeedLibvirt, NeedIO):
 
     def destroy(self):
         self.each_attribute("destroy")
-

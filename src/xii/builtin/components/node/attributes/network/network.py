@@ -4,6 +4,7 @@ import xml.etree.ElementTree as etree
 from time import sleep
 
 from xii import error, need
+from xii.util import flatten
 from xii.validator import String, Or, Dict, RequiredKey, Ip
 
 from xii.components.node import NodeAttribute
@@ -59,12 +60,18 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
 
         if not network.isActive():
             self.start()
-
+        import pdb; pdb.set_trace()
         self.add_xml('devices', self._gen_xml())
 
     def _gen_xml(self):
         xml = self.template('network.xml')
-        return xml.safe_substitute({'network': self.network_name()})
+        name = self.component_entity()
+        forwards = flatten(map(lambda f: f.forwards_for(name), self._forward_components()))
+        import pdb; pdb.set_trace()
+        return xml.safe_substitute({
+            'network': self.network_name(),
+            'forwards': "\n".join(forwards)
+        })
 
     def _get_mac_address(self):
         def _uses_network(iface):
@@ -135,3 +142,8 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
             raise error.ExecError("Network {} has not become ready in "
                                   "time. Giving up".format(name))
         return network
+
+    def _forward_components(self):
+        for cmpnt in self.command().children():
+            if cmpnt.ctype == "forward":
+                yield cmpnt

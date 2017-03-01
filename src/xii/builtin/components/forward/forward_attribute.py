@@ -6,10 +6,6 @@ class ForwardAttribute(attribute.Attribute):
     __meta__ = ABCMeta
 
     @abstractmethod
-    def used_nodes(self):
-        pass
-
-    @abstractmethod
     def forward_for(self, instance):
         pass
 
