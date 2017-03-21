@@ -1,7 +1,7 @@
 import os
 import argparse
 
-from xii import paths, command, util, definition, component
+from xii import paths, util, definition, component
 from xii.extension import ExtensionManager
 from xii.store import Store
 from xii.error import XiiError, Interrupted
@@ -27,7 +27,7 @@ def cli_arg_parser(ext_mgr):
                         help="Disable parallel processing")
     parser.add_argument("-D", "--define", dest="defines", action="append", default=[],
                         help="Define local variables")
-    #parser.add_argument("-V", "--varfile", dest="varfile", default=None,
+    # parser.add_argument("-V", "--varfile", dest="varfile", default=None,
     #                   help="load local variables from file")
     parser.add_argument("command", metavar="COMMAND",
                         help="Command to run")

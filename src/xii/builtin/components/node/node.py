@@ -15,8 +15,8 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
     short_description="Define and manage virtual machines"
 
     ctype = "node"
-    required_attributes = ["pool", "image"]
-    default_attributes = ["pool", "network", "hostname"]
+    required_attributes = ["pool", "image", "cpu"]
+    default_attributes = ["pool", "network", "hostname", "cpu"]
 
     requires = ["pool", "network"]
 
@@ -29,6 +29,7 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
 
     def add_xml(self, section, xml):
         self.xml_dfn[section] += "\n" + xml
+
 
     def add_meta(self, key, value):
         self.xml_metadata[key] = value

@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
+
 class Store():
 
     def __init__(self, parent={}):
@@ -9,8 +10,7 @@ class Store():
         path = key.split("/")
         value = self._values
         for node in path[:-1]:
-            # generate path if not exist yet
-            if not node in value:
+            if node not in value:
                 value[node] = {}
             value = value[node]
 
