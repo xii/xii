@@ -1,4 +1,4 @@
-from xii import error, need
+from xii import need
 from xii.validator import Bool
 
 from xii.components.node import NodeAttribute

@@ -2,6 +2,7 @@ import string
 from xii import error, util
 from xii.output import HasOutput
 
+
 class Entity(HasOutput):
     requires = []
     """
@@ -11,7 +12,7 @@ class Entity(HasOutput):
     which is handled first.
     """
 
-    def __init__(self, name,store=None, parent=None, templates={}):
+    def __init__(self, name, store=None, parent=None, templates={}):
         self._entity = name
         self._parent = parent
         self._store = store
@@ -33,7 +34,7 @@ class Entity(HasOutput):
         This method should never called on a parent object.
 
         Returns:
-            The parent objecta
+            The parent object
 
         Throws:
             error.Bug is throw if a parent object trys to access it's parent
@@ -86,7 +87,7 @@ class Entity(HasOutput):
             return False
 
         if (ctype not in components or
-            cmpnt not in components[ctype][cmpnt]):
+          cmpnt not in components[ctype][cmpnt]):
             return False
         return True
 

@@ -1,4 +1,4 @@
-from xii import attribute, entity, need
+from xii import attribute, need
 
 
 class NodeAttribute(attribute.Attribute, need.NeedLibvirt):
