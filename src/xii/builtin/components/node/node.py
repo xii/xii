@@ -28,7 +28,9 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         self._temp_dir = None
 
     def add_xml(self, section, xml):
-        self.xml_dfn[section] += "\n" + xml
+        if section not in self.xml_dfn:
+            self.xml_dfn[section] = ""
+        self.xml_dfn[section] += "\n{}".format(xml)
 
     def add_meta(self, key, value):
         self.xml_metadata[key] = value
