@@ -22,7 +22,6 @@ class PortAttribute(ForwardAttribute, need.NeedLibvirt):
 
     def forwards_for(self, instance):
         result = []
-        tpl = self.template("node-port-forward.xml")
 
         for inst, forwards in self.settings().items():
             if inst != instance:
