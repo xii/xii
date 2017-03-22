@@ -1,7 +1,7 @@
 import libvirt
 from time import sleep, time
 from random import randint
-from xii import error
+from xii import error, util
 from xii.component import Component
 from xii.need import NeedLibvirt, NeedIO
 from xii.util import domain_has_state, domain_wait_state, wait_until_inactive
@@ -12,7 +12,7 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
 
     das ja mehr als strange
     """
-    short_description="Define and manage virtual machines"
+    short_description = "Define and manage virtual machines"
 
     ctype = "node"
     required_attributes = ["pool", "image", "cpu"]
@@ -33,8 +33,8 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         self.xml_dfn[section] += "\n{}".format(xml)
 
 
-    def add_meta(self, key, value):
-        self.xml_metadata[key] = value
+    def add_meta(self, key, text, attrs={}):
+        self.xml_metadata[key] = {"text": text, "attrs": attrs}
 
     def ssh_user(self):
         if self.get_attribute("user") is None:
@@ -81,8 +81,8 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         try:
             self.virt().defineXML(xml.safe_substitute(self.xml_dfn))
         except libvirt.libvirtError as err:
-            raise error.ExecError("Could not start {}: {}".format(self.entity(), str(err)))
-
+            raise error.ExecError("Could not start {}: {}"
+                                  .format(self.entity(), str(err)))
 
     def start(self):
         domain = self.get_domain(self.entity())
@@ -101,8 +101,9 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         #
         # 2017-02-22T23:22:56.850419Z qemu-system-x86_64: failed to initialize
         # spice server
-        wait = randint(3,10)
-        self.verbose("waiting {} seconds before creating the domain...".format(wait))
+        wait = randint(3, 10)
+        self.verbose("waiting {} seconds before creating the domain..."
+                     .format(wait))
         sleep(wait)
 
         domain.create()
@@ -114,7 +115,6 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         # FIXME: Currently the base path is not deleted
         if self.io().exists(self.get_temp_path()):
             self.io().rm(self.get_temp_path())
-
 
     def stop(self, force=False):
         domain = self.get_domain(self.entity())
@@ -139,7 +139,7 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
 
         if domain.isActive():
             raise error.Bug("Could not remove running "
-                            "domain {}".format(self.ident()))
+                            "domain {}".format(self.entity()))
 
         self.each_child("destroy", reverse=True)
         domain.undefine()
@@ -212,7 +212,7 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
 
     def _generate_meta_xml(self):
         meta = "<xii:node xmlns:xii=\"http://xii-project.org/xmlns/node/1.0\">\n"
-        for k, v in self.xml_metadata.items():
-            meta += "<xii:{key}>{value}</xii:{key}>\n".format(key=k, value=v)
+        for key, val in self.xml_metadata.items():
+            meta += util.create_xml_node(key, val["attrs"], val["text"])
         meta += "</xii:node>\n"
         return meta
