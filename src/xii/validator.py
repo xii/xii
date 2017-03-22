@@ -178,7 +178,7 @@ class Key(KeyValidator):
     def validate(self, pre, structure):
         if not isinstance(structure, dict):
             raise error.ValidatorError("{} needs to be a dict".format(pre))
-        value_of_key = util.safe_get(self.name, structure)
+        value_of_key = util.default(self.name, structure)
         if not value_of_key:
             return False
         return self.schema.validate(pre + " > " + self.name, value_of_key)
@@ -192,7 +192,7 @@ class RequiredKey(KeyValidator):
         self.schema = schema
 
     def validate(self, pre, structure):
-        value_of_key = util.safe_get(self.name, structure)
+        value_of_key = util.default(self.name, structure)
         if not value_of_key:
             raise error.ValidatorError("{} must have {} "
                                        "defined".format(pre, self.name))
