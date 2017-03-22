@@ -1,4 +1,5 @@
 import socket
+import re
 
 from xii import error, util
 
@@ -72,6 +73,20 @@ class Ip(TypeCheck):
             except socket.error:
                 pass
         raise error.ValidatorError("{} is not a valid IP address".format(pre))
+
+
+class ByteSize(TypeCheck):
+    want = "memory"
+    want_type = basestring
+    validator = re.compile("(?P<value>\d+)(\ *)(?P<unit>[kMGT])")
+
+    def validate(self, pre, structure):
+        TypeCheck.validate(self, pre, structure)
+        if self.validator.match(structure):
+            return True
+        else:
+            raise error.ValidatorError("{} is not a valid memory size".format(pre))
+
 
 class List(TypeCheck):
     want = "list"
