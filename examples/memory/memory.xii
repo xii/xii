@@ -1,0 +1,23 @@
+# vim: set ts=2 sw=2 tw=0 ft=yaml:
+---
+single:
+  type: node
+  cpu: 3
+  network:
+    source: default
+    ip: 192.168.122.112
+  pool: default
+  memory: 512M
+  image: {{ image }}
+
+  graphic: yes
+  user:
+    felixsch:
+      password: felix
+    root:
+      password: linux
+  ssh:
+    copy-key:
+      users:
+        - felixsch
+        - root
