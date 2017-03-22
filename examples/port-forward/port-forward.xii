@@ -37,8 +37,4 @@ ssh-forward:
   type: forward
   port:
     instances:
-      22: 8022
-      # 80: 8080
-    # test-2:
-    #   22: 8023
-    #   80: 8081
+      - {guest-port: 22, host-port: 8022, proto: tcp }

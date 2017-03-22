@@ -27,6 +27,20 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
             return self.settings("source")
         return self.settings()
 
+    def spawn(self):
+        network = self._get_delayed_network(self.network_name())
+        if not network:
+            raise error.NotFound("Network {} for domain {}".format(
+                self.network_name(),
+                self.component_entity()
+            ))
+
+        if not network.isActive():
+            self.start()
+
+        self.add_meta('forwards', self._gen_forwards())
+        self.add_xml('devices', self._gen_xml())
+
     def start(self):
         network = self._get_delayed_network(self.network_name())
 
@@ -52,25 +66,10 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
             mac = self._get_mac_address()
             self._remove_mac(network, mac, self.settings("ip"))
 
-    def spawn(self):
-        network = self._get_delayed_network(self.network_name())
-        if not network:
-            raise error.NotFound("Network {} for domain "
-                                 "{}".format(self.network_name(), self.component_entity()))
-
-        if not network.isActive():
-            self.start()
-        import pdb; pdb.set_trace()
-        self.add_xml('devices', self._gen_xml())
-
     def _gen_xml(self):
         xml = self.template('network.xml')
-        name = self.component_entity()
-        forwards = flatten(map(lambda f: f.forwards_for(name), self._forward_components()))
-        import pdb; pdb.set_trace()
         return xml.safe_substitute({
             'network': self.network_name(),
-            'forwards': "\n".join(forwards)
         })
 
     def _get_mac_address(self):
@@ -147,3 +146,9 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
         for cmpnt in self.command().children():
             if cmpnt.ctype == "forward":
                 yield cmpnt
+
+    def _gen_forwards(self):
+        forwards = self._forward_components()
+        name = self.component_entity()
+
+        return "\n" + "\n".join(map(lambda f: f.forwards_for(name), forwards))

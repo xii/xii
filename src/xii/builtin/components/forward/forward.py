@@ -15,15 +15,22 @@ class ForwardComponent(Component, NeedLibvirt, NeedIO):
     ctype = "forward"
     required_attributes = []
     default_attributes = []
-
     requires = []
 
+    def hook_exists(self):
+        return True
+        pass
+
+    def install_hook(self):
+        pass
+
     def forwards_for(self, instance):
-        forwards = self.each_attribute("forward_for", args={"instance": instance})
-        import pdb; pdb.set_trace()
-        return flatten(forwards)
+        forwards = self.each_attribute("forwards_for", args={"instance": instance})
+        return "\n".join(flatten(forwards))
 
     def spawn(self):
+        if not self.hook_exists():
+            self.install_hook()
         self.each_attribute("spawn")
 
     def destroy(self):
