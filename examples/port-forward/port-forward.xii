@@ -10,12 +10,12 @@ test-network:
       start: 192.168.111.2
       end: 192.168.111.254
 
-instances:
+instance:
   type: node
   network: test-network
   image: {{ image }}
   graphic: yes
-  count: 1
+  count: 2
   ssh:
     copy-key:
       users:
@@ -36,5 +36,10 @@ instances:
 ssh-forward:
   type: forward
   port:
-    instances:
-      - {guest-port: 22, host-port: 8022, proto: tcp }
+
+    # instance:
+    #   - {guest-port: 22, host-port: 8022, proto: tcp }
+    instance-1:
+      - {guest-port: 22, host-port: 8023, proto: tcp }
+    instance-2:
+      - {guest-port: 22, host-port: 8024, proto: tcp }
