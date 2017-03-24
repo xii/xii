@@ -83,6 +83,7 @@ class NeedLibvirt(HasOutput):
             "domain": "lookupByName",
             "pool": "storagePoolLookupByName",
             "network": "networkLookupByName",
+            "nwfilter": "nwfilterLookupByName"
         }
 
         try:
@@ -134,6 +135,24 @@ class NeedLibvirt(HasOutput):
         """
         r = raise_exception
         return self.get_resource("volume", pool_name, name, throw=r)
+
+    def get_nwfilter(self, name, raise_exception=True):
+        """Get a network filter by name
+
+        Args:
+            name: Name of the network filter
+            raise_exception: Should this method raise a exception if no resource
+                             is found
+
+        Returns:
+            NWFilter object or None if not found
+
+        Throws:
+            A exception if not disabled via raise_exception
+        """
+        r = raise_exception
+        return self.get_resource("nwfilter", name, throw=r)
+
 
     def get_domain(self, name, raise_exception=True):
         """Get a domain resource

@@ -1,4 +1,5 @@
 <interface type='network'>
   <source network='$network'/>
   <model type='virtio'/>
+  $forwards
 </interface>

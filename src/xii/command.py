@@ -76,6 +76,8 @@ class Command(Entity, HasStore):
         Select all components if the name matches the basename or
         the components entity name
 
+        This could be something like: basename* or nodename
+
         Args:
             name: Name or basename of the component
             ctype: return only components of a certain type
@@ -83,15 +85,15 @@ class Command(Entity, HasStore):
         Returns:
             A generator which generates all components
         """
-        for c in self.children():
-            if c.entity() == name or c.get("basename") == name:
+        for child in self.children():
+            if child.entity() == name or (child.get("basename")+"*") == name:
                 if ctype is not None:
-                    if ctype == c.ctype:
-                        yield c
+                    if ctype == child.ctype:
+                        yield child
                 else:
-                    yield c
+                    yield child
 
-    def each_component(self, action, reverse=False):
+    def each_component(self, action, args=None, reverse=False):
         """run a action on all added components
 
         This command can run a action (method) on each child. If parallel
@@ -115,9 +117,9 @@ class Command(Entity, HasStore):
                 count = self.get("global/workers", 3)
                 for name, group in groups:
                     self.say("{}ing {}s..".format(action, name))
-                    util.in_parallel(count, group, lambda o: o.run(action))
+                    util.in_parallel(count, group, lambda o: o.run(action, args))
             else:
-                self.each_child(action, reverse)
+                self.each_child(action, args, reverse)
         except KeyboardInterrupt:
             raise error.Interrupted()
 

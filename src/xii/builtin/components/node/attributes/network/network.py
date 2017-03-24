@@ -4,6 +4,7 @@ import xml.etree.ElementTree as etree
 from time import sleep
 
 from xii import error, need
+from xii.util import flatten
 from xii.validator import String, Or, Dict, RequiredKey, Ip
 
 from xii.components.node import NodeAttribute
@@ -25,6 +26,20 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
         if self._need_ipv4():
             return self.settings("source")
         return self.settings()
+
+    def spawn(self):
+        network = self._get_delayed_network(self.network_name())
+        if not network:
+            raise error.NotFound("Network {} for domain {}".format(
+                self.network_name(),
+                self.component_entity()
+            ))
+
+        if not network.isActive():
+            self.start()
+
+        self.add_meta('forwards', self._gen_forwards())
+        self.add_xml('devices', self._gen_xml())
 
     def start(self):
         network = self._get_delayed_network(self.network_name())
@@ -51,20 +66,11 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
             mac = self._get_mac_address()
             self._remove_mac(network, mac, self.settings("ip"))
 
-    def spawn(self):
-        network = self._get_delayed_network(self.network_name())
-        if not network:
-            raise error.NotFound("Network {} for domain "
-                                 "{}".format(self.network_name(), self.component_entity()))
-
-        if not network.isActive():
-            self.start()
-
-        self.add_xml('devices', self._gen_xml())
-
     def _gen_xml(self):
         xml = self.template('network.xml')
-        return xml.safe_substitute({'network': self.network_name()})
+        return xml.safe_substitute({
+            'network': self.network_name(),
+        })
 
     def _get_mac_address(self):
         def _uses_network(iface):
@@ -135,3 +141,14 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
             raise error.ExecError("Network {} has not become ready in "
                                   "time. Giving up".format(name))
         return network
+
+    def _forward_components(self):
+        for cmpnt in self.command().children():
+            if cmpnt.ctype == "forward":
+                yield cmpnt
+
+    def _gen_forwards(self):
+        forwards = self._forward_components()
+        name = self.component_entity()
+
+        return "\n" + "\n".join(map(lambda f: f.forwards_for(name), forwards))
