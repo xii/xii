@@ -11,7 +11,7 @@ def expect_verified_type(sample_klass, sample, failing_sample=None):
 
 
 def test_type_check():
-    simple = validator.TypeCheck()
+    simple = validator.TypeCheck(3)
     simple.want = "int"
     simple.want_type = int
     assert(simple.validate("test_type_check", 3) is True)
@@ -21,21 +21,21 @@ def test_type_check():
 
 
 def test_int():
-    expect_verified_type(validator.Int(), 3, "not an int")
+    expect_verified_type(validator.Int(3), 3, "not an int")
 
 
 def test_bool():
-    expect_verified_type(validator.Bool(), True, 3)
+    expect_verified_type(validator.Bool(True), True, 3)
 
 
 def test_string():
-    expect_verified_type(validator.String(), "a string", None)
+    expect_verified_type(validator.String("string"), "a string", None)
 
 
 def test_ip():
-    expect_verified_type(validator.Ip(), "127.0.0.1", 127)
+    expect_verified_type(validator.Ip("127.0.1.1"), "127.0.0.1", 127)
 
-    ip_validator = validator.Ip()
+    ip_validator = validator.Ip("127.0.0.1")
 
     assert(ip_validator.validate("test_ip", "127.0.0.1") is True)
     assert(ip_validator.validate("test_ip", "255.255.255.255") is True)
@@ -57,9 +57,9 @@ def test_ip():
 
 
 def test_list():
-    test = validator.List(validator.Int())
+    test = validator.List(validator.Int(3))
 
-    expect_verified_type(test, [1,2,3], {})
+    expect_verified_type(test, [1, 2, 3], {})
 
     assert(test.validate("test_list", [1, 2, 3]) is True)
     assert(test.validate("test_list", []) is False)
@@ -70,8 +70,8 @@ def test_list():
 
 def test_dict():
     test = validator.Dict([
-        validator.RequiredKey("foo", validator.Int()),
-        validator.Key("bar", validator.String())
+        validator.RequiredKey("foo", validator.Int(3)),
+        validator.Key("bar", validator.String("string"))
     ])
 
     expect_verified_type(test, {"foo": 1}, [1, 2, 3])
@@ -86,14 +86,14 @@ def test_dict():
 def test_or():
     non_exclusive = validator.Dict([
         validator.Or([
-            validator.RequiredKey("foo", validator.Int()),
-            validator.RequiredKey("bar", validator.String())
+            validator.RequiredKey("foo", validator.Int(3)),
+            validator.RequiredKey("bar", validator.String("a"))
         ], exclusive=False)
     ])
     exclusive = validator.Dict([
         validator.Or([
-            validator.Key("foo", validator.Int()),
-            validator.Key("bar", validator.String())
+            validator.Key("foo", validator.Int(3)),
+            validator.Key("bar", validator.String("a"))
         ], exclusive=True)
     ])
 
@@ -109,7 +109,7 @@ def test_or():
 
 
 def test_key():
-    test = validator.Key("bar", validator.Int())
+    test = validator.Key("bar", validator.Int(3))
 
     assert(test.validate("test_key", {}) is False)
     assert(test.validate("test_key", {"foo": 2}) is False)
@@ -120,7 +120,7 @@ def test_key():
 
 
 def test_variable_keys():
-    test = validator.VariableKeys(validator.String())
+    test = validator.VariableKeys(validator.String("e"), "test")
 
     assert(test.validate("test_variable_keys", {"foo": "bar"}) is True)
     assert(test.validate("test_variable_keys", {"baz": "bar"}) is True)
@@ -128,8 +128,9 @@ def test_variable_keys():
     with raises(error.ValidatorError):
         test.validate("test_variable_keys", {"foo": 1})
 
+
 def test_required_key():
-    check = validator.RequiredKey("test", validator.String())
+    check = validator.RequiredKey("test", validator.String("test"))
 
     assert(check.validate("test_required_key", {"test": "foo"}) is True)
 
@@ -138,5 +139,3 @@ def test_required_key():
 
     with raises(error.ValidatorError):
         check.validate("test_required_key", {"test": 1})
-
-
