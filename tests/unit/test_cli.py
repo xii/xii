@@ -1,6 +1,12 @@
 from pytest import raises
 
 from xii import cli
+from xii.extension import ExtensionManager
+
+# test ext_mgr
+ext_mgr = ExtensionManager()
+ext_mgr.add_builtin_path()
+ext_mgr.load()
 
 
 class FakeRegisterAvailable():
@@ -11,18 +17,17 @@ class FakeRegisterAvailable():
         return self._commands
 
 
-def test_usage_text(monkeypatch):
-    monkeypatch.setattr("xii.command.Register", FakeRegisterAvailable(["command1, command2"]))
-
-    result = cli.usage_text()
+def test_usage_text():
+    result = cli.usage_text(ext_mgr)
 
     assert("xii [OPTIONS]" in result)
     assert("Commands available:" in result)
-    assert("command1, command2" in result)
+    assert("d        destroy" in result)
+    assert("s        start" in result)
 
 
 def test_cli_arg_parser():
-    parser = cli.cli_arg_parser()
+    parser = cli.cli_arg_parser(ext_mgr)
 
     result = parser.parse_args([
         "--no-parallel",
