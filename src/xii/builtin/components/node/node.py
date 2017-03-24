@@ -32,7 +32,6 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
             self.xml_dfn[section] = ""
         self.xml_dfn[section] += "\n{}".format(xml)
 
-
     def add_meta(self, key, text, attrs={}):
         self.xml_metadata[key] = {"text": text, "attrs": attrs}
 
