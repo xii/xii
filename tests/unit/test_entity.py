@@ -180,7 +180,7 @@ def test_each_child():
     assert(pa.each_child("entity") == ["a", "b", "c"])
     assert(pa.each_child("entity", reverse=True) == ["c", "b", "a"])
 
-def test__child_index():
+def test_child_index():
     pa  = factories.EntityWithStore(name="pa")
     a  = factories.Entity(name="a", parent=pa)
     b  = factories.Entity(name="b", parent=pa)
@@ -190,10 +190,10 @@ def test__child_index():
     pa.add_child(b)
     pa.add_child(c)
 
-    assert(pa._child_index("b") == 1)
-    assert(pa._child_index("x") == None)
+    assert(pa.child_index("b") == 1)
+    assert(pa.child_index("x") == None)
 
-def test__reorder_childs():
+def test_reorder_childs():
     pa  = factories.EntityWithStore(name="pa")
     a  = factories.Entity(name="a", parent=pa)
     a.requires = ["c"]
@@ -206,11 +206,11 @@ def test__reorder_childs():
     pa.add_child(c)
 
     assert(pa.children() == [a, b , c])
-    pa._reorder_childs()
+    pa.reorder_childs()
     assert(pa.children() == [c, a , b])
 
 
-def test__reorder_childs_cycle():
+def test_reorder_childs_cycle():
     pa  = factories.EntityWithStore(name="pa")
     a  = factories.Entity(name="a", parent=pa)
     a.requires = ["b"]
@@ -223,4 +223,4 @@ def test__reorder_childs_cycle():
     assert(pa.children() == [a, b])
 
     with raises(error.Bug):
-        pa._reorder_childs()
+        pa.reorder_childs()
