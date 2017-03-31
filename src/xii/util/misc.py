@@ -4,6 +4,25 @@ from Crypto.PublicKey import RSA
 from concurrent.futures import ThreadPoolExecutor, Future
 from functools import partial
 
+
+def create_xml_node(name, attrs={}, text=""):
+    """create a xml node with optional attributes
+
+    > create_xml_node("test", {"foo": "bar"}, "some text")
+    <test foo="bar">some text</test>
+
+    Args:
+        name:    name of the node
+        attrs:   additional attributes for the node
+        text:    text between opening/closing tag
+
+    Returns:
+        A xml node as string
+    """
+    attrs_xml = " ".join(map(lambda v: "{}=\"{}\"".format(*v), attrs.items()))
+    return "<{} {}>{}</{}>".format(name, attrs_xml, text, name)
+
+
 def safe_get(name, structure):
     if name not in structure:
         return None
