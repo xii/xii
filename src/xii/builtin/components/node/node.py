@@ -8,9 +8,35 @@ from xii.util import domain_has_state, domain_wait_state, wait_until_inactive
 
 
 class NodeComponent(Component, NeedLibvirt, NeedIO):
-    """Define, create, manage virtual machines
+    """
+    This component defines one or more virtual machine using
+    qemu.
 
-    das ja mehr als strange
+    The minimal definition for a virtual machine is:
+
+    ::
+
+      # vim: set ts=2 sw=2 tw=0 ft=yaml:
+      ---
+      one-instance:
+          type: node
+          pool: default
+
+      image: {{ image }}
+
+    When using default values for `pool` and `network`, make sure default pool
+    and network is already defined.
+
+    When more than one instance of the same virtual machine is required, the 
+    `count` attribute can be used.
+
+    .. note::
+        When using the count attribute all instances are numbered. Eg. An
+        instance `some-instance` with `count: 3` will translate to:
+        `some-instance-1`, `some-instance-2`, `some-instance-3`
+
+    Please keep in mind that not all images are working with qemu, therefor
+    xii will not able to start any image, too.
     """
     short_description="Define and manage virtual machines"
 
