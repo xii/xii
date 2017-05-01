@@ -7,6 +7,61 @@ from xii import util
 
 
 class HostsAttribute(AnsibleAttribute, NeedLibvirt, NeedIO, NeedSSH):
+    """
+    The ansible hosts defines how the ansible inventory is populated.
+
+    To simply define all in one group you can use a list of hosts which should
+    be added.
+
+    Example:
+    ::
+      privision-vms:
+        type: ansible
+        hosts: [ vm-1, vm-2, vm-5 ]
+
+    Or if you need more than one group you can define multiple groups:
+    ::
+      privision-vms:
+        type: ansible
+        hosts:
+            first-group: [ vm-1, vm-2 ]
+            second-group: [ vm-3, vm-4 ]
+
+    .. note::
+
+        You can use also use the basename of a node. For example if you define:
+        ::
+
+            test-vms:
+                type: node
+                image: {{ image }}
+                count: 4
+
+        You can use:
+        ::
+
+            hosts: [ test-vms ]
+
+        to match all nodes at once
+    """
+
+    example = """
+    vm:
+      type: node
+      pool: default
+      network: default
+      image: {{ image }}
+      count: 6
+    
+    provision-it:
+        type: ansible
+        hosts:
+            basic-config: [ vm ]
+            webservers: [ vm-1, vm-2, vm-3 ]
+            db: [ vm-4 ]
+            haproxy: [ vm-5, vm-6 ]
+    """
+
     atype = "hosts"
     defaults = None
     keys = Or([
