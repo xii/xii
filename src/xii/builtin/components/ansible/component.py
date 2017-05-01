@@ -7,6 +7,45 @@ from ansible import NeedAnsible
 
 
 class AnsibleComponent(Component, NeedAnsible, NeedIO, NeedSSH):
+    """
+    Easily provision created images using standard ansible.
+
+    .. note::
+        Make sure the ansible commandline tool is installed and working
+        if you want to use this feature.
+
+    Example definition:
+    ::
+
+      # vim: set ts=2 sw=2 tw=0 ft=yaml:
+      ---
+      my-vms:
+        type: node
+        pool: default
+        image: {{ image }}
+        count: 4
+        user:
+          root:
+            password: linux
+        ssh:
+            copy-key:
+              users:
+                - root
+      privision-vms:
+        type: ansible
+        hosts:
+          all: my-vms
+          group-A: [my-vms-1, my-vms-3]
+          group-B: [my-vms-2, my-vms-4]
+        run: privison-vms.yml
+        env:
+          extra_env: additional_variables.conf
+
+    Checkout the :doc:`/components/ansible/hosts` for more information about
+    how to populate the inventor list
+    """
+    short_description="Provision virtual hosts using ansible"
+
     ctype = "ansible"
     required_attributes = ["hosts", "run"]
     default_attributes = ["hosts", "env"]
