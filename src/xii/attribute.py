@@ -41,6 +41,12 @@ class Attribute(Entity, HasStore):
         keys = Or([String(), Bool()])
     """
 
+    example = None
+    """
+    Add a text string here if you want to show a usage example in the
+    documentation
+    """
+
     @classmethod
     def has_defaults(cls):
         if cls.defaults is None:
