@@ -12,6 +12,9 @@ class NeedLibvirt(HasOutput):
 
     @abstractmethod
     def get_virt_url(self):
+        """ Defines the connection url which is connected when the 
+        need mixin is used.
+        """
         pass
 
     def virt(self):
