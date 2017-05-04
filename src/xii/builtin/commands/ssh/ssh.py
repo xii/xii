@@ -9,6 +9,27 @@ from xii.need import NeedLibvirt, NeedSSH
 
 
 class SSHCommand(command.Command, NeedLibvirt, NeedSSH):
+    """Connects to a node using the ssh command.
+
+    ::
+
+        $ xii ssh single root
+        [ssh][single][#0] .......................: fetching ip address from single...
+        [ssh] ...................................: single has IP 192.168.122.166
+        [ssh][#0] ...............................: connecting to single...
+        Have a lot of fun...
+        single:~ #
+
+    To connect to a host you need atleast the node name.
+    When only a node name is specified xii try's to use the default user.
+    When no default user was specified the first defined user is used.
+    As fallback 'xii' is used.
+
+    .. note::
+
+        Checkout :docs:`/components/node/user' for how to specify a
+        default user
+    """
     name = ['ssh']
     help = "connect to a domain"
 
