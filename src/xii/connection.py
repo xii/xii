@@ -14,32 +14,100 @@ class Connection():
 
     @abstractmethod
     def open(self, path, mode):
+        """Open a file
+
+        open files works as python's builtin method. Make sure that the 
+        path exists on the host where the file will be opend (remote + local)
+
+        Args:
+            path:    Path to the file which should be opend
+            mode:    Mode in which the file should be opened
+
+            TODO: Add link to builtin method
+
+        Returns:
+            The file object for the given path
+
+        Throws:
+            Can throw IOError
+        """
         pass
 
     @abstractmethod
     def mkdir(self, directory, recursive=False):
+        """Creates a new directory
+
+        Creates one or more directories.
+
+        Args:
+            directory: The path which should be created
+            recursive: If True the path will be created recursivly as required
+        """
         pass
 
     @abstractmethod
     def stat(self, path):
+        """Get stat of a inode
+
+        Args:
+            path: path to stat
+
+        Returns:
+            the stats object
+        """
         pass
 
     @abstractmethod
     def which(self, executable):
+        """Get the path of a executable
+
+        This will return the path to the search exectuable if available
+
+        Args:
+            executable:     The application which is searched
+
+        Returns:
+            The path to the executable if found, None otherwise
+        """
         pass
 
     @abstractmethod
     def exists(self, path):
+        """Check if a path exists.
+
+        Args:
+            path:   Path which should be checked
+
+        Returns:
+            True if found, False otherwise
+        """
         pass
 
     @abstractmethod
     def user(self):
+        """Get current username
+
+        This method also returns the correct user name if a remote host
+        is used.
+
+        Returns:
+            The name of the current user
+        """
         pass
 
     @abstractmethod
     def user_home(self):
+        """Get current user home
+
+        This method also returns the correct user home if a remote host
+        is used.
+
+        Returns:
+            The path to home for the current user
+        """
         pass
 
+    # FIXME: Make this more clear whats happening
     @abstractmethod
     def copy(self, msg, source, dest):
         pass
@@ -50,25 +118,76 @@ class Connection():
 
     @abstractmethod
     def chmod(self, path, new_mode, append=False):
+        """Set permissions for a path
+
+        Without append=True this function overwrites existing
+        permissions.
+
+        Args:
+            path:       Path where permission should be changed
+            new_mode:   New mode for the path
+            append:     Just add new permissions to old one
+        """
         pass
 
     @abstractmethod
     def chown(self, path, uid=None, guid=None):
+        """Set ownership of a path
+
+        Only change the user id is working like
+
+        :: 
+
+            self.chown(some_path, uid=1000)
+
+        Args:
+            path:       The patch which should be changed
+            uid:        User id which should own the file
+            guid:       Group user id which should be owned
+        """
         pass
 
     @abstractmethod
     def get_users(self):
+        """Get all users defined
+
+        This method fetches all users defined from the used host (remote +
+        local) and returns them.
+
+        Returns:
+            A list of all users defined
+        """
         pass
 
     @abstractmethod
     def rm(self, path):
+        """Delete a path
+
+        Args:
+            path:   Path which should be deleted
+        """
         pass
 
     @abstractmethod
     def get_groups(self):
+        """Get all groups with extradata
+
+        This method fetches groups from the used host (remote + local) and
+        returns them.
+
+        Returns:
+            Returns a list of groups defined in the host system
+        """
         pass
 
     def ensure_path_exists(self, path):
+        """Make sure a path exsists if not create it
+
+        When a path is not exisiting, it will be recursivly created
+
+        Args:
+            path: The path which should exist
+        """
         if self.exists(path):
             return
 
@@ -76,6 +195,15 @@ class Connection():
         self.chmod(path, S_IRWXU)
 
     def mktempdir(self, prefix):
+        """Creates a temporary directory under /var/tmp/<user>
+
+        Args:
+            prefix: Prefix for the temprary directory (eg. xii -> /var/tmp/xii-2d72ddk9d3)
+
+        Returns:
+            The path for the new created directory
+        """
+
         user = self.user()
         users = self.get_users()
         group = self.get_groups()
