@@ -9,6 +9,18 @@ from xii.need import NeedLibvirt, NeedSSH
 
 
 class IpCommand(command.Command, NeedLibvirt):
+    """Get the current ip address of a node
+
+    Using the `--quiet` switch to fetch the ip address for scripts
+
+    ::
+
+        $ xii ip --quiet test-vm
+        192.168.120.33
+
+    When called directly after starting a node no ip address is assigned and
+    nothing can be printed.
+    """
     name = ['ip']
     help = "get ip address from host"
 
