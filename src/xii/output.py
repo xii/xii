@@ -68,6 +68,24 @@ class HasOutput:
                      colors.SUCCESS + colors.BOLD)
 
     def show_table(self, columns, rows, spacing=8):
+        """print a table
+
+        Example:
+        ::
+            columns = ["component", "type", "uptime", "status"]
+
+            data = [["mutiple-1", "node", "2 days", "running"],
+                    ["mutiple-2", "node", "1 days", "running"],
+                    ["mutiple-2", "node", "-", "stopped"],
+                    ["test-network", "network", "50 days", "created"]]
+
+            self.show_table(columns, data)
+
+        Args:
+            columns: A list of all columns names
+            rows:    All data which should be displayed
+            spacing: Spacing between each column
+        """
         header = []
         data = []
         col_spacings = []
