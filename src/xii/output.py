@@ -67,6 +67,42 @@ class HasOutput:
                      msg,
                      colors.SUCCESS + colors.BOLD)
 
+    def show_table(self, columns, rows, spacing=8):
+        header = []
+        data = []
+        col_spacings = []
+
+        # calculate spacing dependig on column width
+        def spacings(col_index, data):
+            data_len = len(str(data))
+            return " " * (col_spacings[col_index] - data_len)
+
+        # calculate required sizes
+        for i, col in enumerate(columns):
+            col_len = max(map(lambda r: len(str(r[i])), rows))
+            if col_len < len(col):
+                col_len = len(col)
+            col_spacings.append(col_len)
+
+        # create column header
+        for i, col in enumerate(columns):
+            header.append("{}{}".format(col.upper(), spacings(i, col)))
+
+        # create table rows
+        for row in rows:
+            row_data = []
+            for i, cell in enumerate(row):
+                row_data.append("{}{}".format(cell, spacings(i, cell)))
+            data.append(row_data)
+
+        # print everthing
+        output_lock.acquire()
+        seperator = "{}".format(" " * spacing)
+        print(seperator.join(header))
+        for row in data:
+            print(seperator.join(row))
+        output_lock.release()
+
     def _tprint(self, tag, msg, wrap=None):
         stop = 40
         fill = stop - len(tag)
