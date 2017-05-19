@@ -1,9 +1,13 @@
+from abc import ABCMeta, abstractmethod
+
 from xii.entity import Entity
 from xii.store import HasStore
-from xii import error
+from xii import error, util
 
 
 class Component(Entity, HasStore):
+    __metaclass__ = ABCMeta
+
     ctype = ""
     """
     Name of the component (eg. 'node')
@@ -23,7 +27,63 @@ class Component(Entity, HasStore):
     short_description = None
 
     def __init__(self, name, command, tpls={}):
+        self._meta = {}
         Entity.__init__(self, name, parent=command, templates=tpls)
+
+    @abstractmethod
+    def fetch_metadata(self):
+        """fetch metadata from component
+        This method needs to be implemented to make xii work properly.
+
+        It should fetch the metadata and return them as dict.
+
+        For each component must set the created_at metadata!
+
+        If no metadata is available return None
+
+        Returns:
+            A dict of key value pairs or None if not available
+        """
+        pass
+
+    def add_meta(self, key_or_dict, value=None):
+        """add metadata to component
+
+        Value is converted to string, make sure added values
+        have a usefull __repr__ method.
+
+        Key which have been already defined are overwritten.
+
+        Args:
+            key_or_dict : name for the metadata attribute or a dict to add
+            value: value you want to set
+        """
+        if isinstance(key_or_dict, dict):
+            self._meta.update(key_or_dict)
+        else:
+            self._meta[key_or_dict] = str(value)
+
+
+    def meta_to_xml(self):
+        """get a xml representation for the metadata
+
+        This function can be used to add metadata to libvirt based
+        components more easy.
+
+        Returns:
+            The xml created or an empty string if no meta data was added
+        """
+        if not len(self._meta):
+            return ""
+
+        url = "https://xii-project.org/xmlns/" + self.ctype + "/1.0"
+        attrs = reduce(lambda m, (k,v): m + util.create_xml_node(k, text=v),
+                       self._meta.iteritems(),
+                       "")
+
+        return util.create_xml_node("xii:" + self.ctype,
+                                    {"xmlns:xii": url},
+                                    attrs)
 
     def get_virt_url(self):
         return self.get("settings/connection", "qemu://system")
