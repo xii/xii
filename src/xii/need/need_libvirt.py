@@ -52,6 +52,40 @@ class NeedLibvirt(HasOutput):
 
         return self.share("libvirt", _create_connection, _close_connection)
 
+
+    def fetch_resource_metadata(self, typ, entity, ctype=None):
+        """fetch metadata from any libvirt based resource
+
+        .. note:
+
+            This can only be used on a component and will not work with
+            an attribute!
+
+        Args:
+            typ:    Specifies which libvirt object type you want to fetch
+            entity: The name of the entity you search
+            ctype:  In case you want to change the corresponding ctype otherwise
+                    the components ctype is used
+
+        Returns:
+            A dict of key values or None if not found
+        """
+        if ctype is None:
+            ctype = self.ctype
+
+        resource = self.get_resource(typ, entity, raise_exception=False)
+
+        if resource is None:
+            return None
+
+        xml = etree.fromstring(resource.XMLDesc())
+        ns = {"xii": "https://xii-project.org/xmlns/" + ctype + "/1.0"}
+
+        obj = xml.find("metadata/xii:" + ctype, ns)
+
+        return dict(map(lambda e: (e.tag, e.text), obj.getchildren()))
+
+
     def get_resource(self, typ, *args, **kwargs):
         """returns a libvirt resource
 
