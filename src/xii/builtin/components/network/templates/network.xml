@@ -1,4 +1,7 @@
 <network>
   <name>$name</name>
+  <metadata>
+    $meta
+  </metadata>
   $config
 </network>

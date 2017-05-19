@@ -1,11 +1,12 @@
 import libvirt
+from time import time
 
 from xii.component import Component
-from xii.need import NeedLibvirt
+from xii.need import NeedLibvirt, NeedIO
 from xii import error, util
 
 
-class NetworkComponent(Component, NeedLibvirt):
+class NetworkComponent(Component, NeedLibvirt, NeedIO):
     ctype = "network"
 
     required_attributes = ["stay", "mode"]
@@ -16,19 +17,33 @@ class NetworkComponent(Component, NeedLibvirt):
     def add_xml(self, xml):
         self.xml_net.append(xml)
 
+    def fetch_metadata(self):
+        return self.fetch_resource_metadata("network", self.entity())
+
     def spawn(self):
         network = self.get_network(self.entity(), raise_exception=False)
 
         if network is not None:
             return
 
+        self.add_meta({
+            "created" : time(),
+            "definition": self.config("runtime/definition"),
+            "user": self.io().user()
+            })
+
         self.say("creating...")
         self.each_attribute("spawn")
 
-        replace = {'config': "\n".join(self.xml_net),
-                   'name': self.entity()}
+        replace = {
+            "config": "\n".join(self.xml_net),
+            "name": self.entity(),
+            "meta": self.meta_to_xml()
+            }
 
-        tpl = self.template('network.xml')
+        import pdb; pdb.set_trace()
+
+        tpl = self.template("network.xml")
         xml = tpl.safe_substitute(replace)
 
         # FIXME: Handle case where the network already is used by another
