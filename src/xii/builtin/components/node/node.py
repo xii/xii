@@ -47,19 +47,18 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
     requires = ["pool", "network"]
 
     xml_dfn = {'devices': ""}
-    xml_metadata = {}
 
     def __init__(self, name, command, tpls):
         Component.__init__(self, name, command, tpls)
         self._temp_dir = None
 
+    def fetch_metadata(self):
+        return self.fetch_resource_metadata("domain", self.entity())
+
     def add_xml(self, section, xml):
         if section not in self.xml_dfn:
             self.xml_dfn[section] = ""
         self.xml_dfn[section] += "\n{}".format(xml)
-
-    def add_meta(self, key, value):
-        self.xml_metadata[key] = value
 
     def ssh_user(self):
         if self.get_attribute("user") is None:
@@ -92,13 +91,16 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         self.each_attribute("spawn")
 
         caps = self.get_capabilities()
-        self.add_meta('created', time())
-        self.add_meta('definition', self.config("runtime/definition"))
-        self.add_meta('user', self.io().user())
+
+        self.add_meta({
+            "created" : time(),
+            "definition": self.config("runtime/definition"),
+            "user": self.io().user(),
+            })
 
         xml = self.template('node.xml')
         self.xml_dfn['name'] = self.entity()
-        self.xml_dfn['meta'] = self._generate_meta_xml()
+        self.xml_dfn['meta'] = self.meta_to_xml()
         self.xml_dfn.update(caps)
 
         self.finalize()
@@ -234,10 +236,3 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
                 self.warn("could not be stopped")
                 return
         self.success("stopped!")
-
-    def _generate_meta_xml(self):
-        meta = "<xii:node xmlns:xii=\"http://xii-project.org/xmlns/node/1.0\">\n"
-        for k, v in self.xml_metadata.items():
-            meta += "<xii:{key}>{value}</xii:{key}>\n".format(key=k, value=v)
-        meta += "</xii:node>\n"
-        return meta
