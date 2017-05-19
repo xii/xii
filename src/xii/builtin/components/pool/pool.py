@@ -1,11 +1,12 @@
 import libvirt
+from time import time
 
 from xii.component import Component
-from xii.need import NeedLibvirt
+from xii.need import NeedLibvirt, NeedIO
 from xii import error
 
 
-class PoolComponent(Component, NeedLibvirt):
+class PoolComponent(Component, NeedLibvirt, NeedIO):
     ctype = "pool"
 
     xml_pool = []
@@ -25,16 +26,26 @@ class PoolComponent(Component, NeedLibvirt):
     def add_xml(self, xml):
         self.xml_pool.append(xml)
 
+    def fetch_metadata(self):
+        return self.fetch_resource_metadata("pool", self.entity())
+
     def spawn(self):
         self.say("spawning...")
         self.xml_pool = []
         self.each_attribute("spawn")
 
+        self.add_meta({
+            "created" : time(),
+            "definition": self.config("runtime/definition"),
+            "user": self.io().user()
+            })
+
         pool_tpl = self.template("pool.xml")
         xml = pool_tpl.safe_substitute({
             "type": self.attributes()[0].pool_type,
             "name": self.entity(),
-            "config": "\n".join(self.xml_pool)
+            "config": "\n".join(self.xml_pool),
+            "meta": self.meta_to_xml()
         })
 
         self.finalize()
