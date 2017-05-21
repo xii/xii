@@ -19,6 +19,9 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
     requires = ['pool']
     keys = String("~/images/openSUSE-leap-42.2.qcow2")
 
+    def get_virt_url(self):
+        return self.component().get_virt_url()
+
     def get_tmp_volume_path(self):
         ext = os.path.splitext(self.settings())[1]
         return self.get_temp_path("image" + ext)
@@ -39,12 +42,15 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
 
         if not self.io().exists(self._image_path()):
             self._fetch_image()
+        self.verbose("image path = {}".format(self._image_path()))
 
         self.say("cloning image...")
+        self.verbose("tmp_path = {}".format(self.get_tmp_volume_path()))
         self.io().copy(self._image_path(), self.get_tmp_volume_path())
 
     def after_spawn(self):
         pool = self.other_attribute("pool").used_pool()
+        self.verbose("tmp_path = {}".format(self.get_tmp_volume_path()))
         size = self.io().stat(self.get_tmp_volume_path()).st_size
         volume_tpl = self.template("volume.xml")
         xml = volume_tpl.safe_substitute({
@@ -65,7 +71,20 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
             stream.sendAll(read_handler, image)
             stream.finish()
 
-        pool = self.other_attribute("pool").used_pool()
+
+        # self.verbose("size = " + str(size))
+
+        # self.io().call("virsh", "-c", "qemu:///system",
+        #                "vol-create-as", pool.name(),
+        #                self.component_entity(),
+        #                str(size+1024), "--format", "raw")
+        # self.say("importing...")
+        # self.io().call("virsh", "-c", "qemu:///system",
+        #                "vol-upload",
+        #                "--pool", pool.name(),
+        #                self.component_entity(),
+        #                self.get_tmp_volume_path())
+
         disk_tpl = self.template("disk.xml")
         xml = disk_tpl.safe_substitute({
             "pool": pool.name(),
@@ -104,7 +123,7 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
 
         if self.settings().startswith("http"):
             self.say("downloading image...")
-            self.io().download(self.settings(), self._image_path())
+            self.io().download_url(self.settings(), self._image_path())
         else:
             self.say("copy image...")
             self.io().copy(self.settings(), self._image_path())
