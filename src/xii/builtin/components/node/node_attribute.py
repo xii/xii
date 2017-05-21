@@ -3,6 +3,9 @@ from xii import attribute, need
 
 class NodeAttribute(attribute.Attribute, need.NeedLibvirt):
 
+    def get_virt_url(self):
+        return self.component().get_virt_url()
+
     def get_tmp_volume_path(self):
         return self.other_attribute("image").get_tmp_volume_path()
 

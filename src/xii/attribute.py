@@ -185,6 +185,3 @@ class Attribute(Entity, HasStore):
             Path, with no checks if it's valid
         """
         return self.component().get_temp_path(*args)
-
-    def get_virt_url(self):
-        return self.get("settings/connection", "FAILING")

@@ -11,6 +11,9 @@ class PoolAttribute(Attribute, need.NeedLibvirt):
     keys = String("default-pool")
     defaults = "default"
 
+    def get_virt_url(self):
+        return self.component().get_virt_url()
+
     def spawn(self):
         pool = self.used_pool()
 
@@ -22,7 +25,8 @@ class PoolAttribute(Attribute, need.NeedLibvirt):
 
         if not pool:
             if not self.has_component("pool", self.settings()):
-                raise error.NotFound("pool {} does not exist.")
+                raise error.NotFound("pool {} does not exist."
+                                     .format(self.settings()))
 
             for i in range(self.global_get("global/retry_pool", 20)):
                 pool = self.get_pool(name, raise_exception=False)
