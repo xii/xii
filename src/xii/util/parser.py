@@ -2,6 +2,7 @@ import ast
 import os
 import yaml
 import jinja2
+import re
 
 from xii import error
 
@@ -96,3 +97,19 @@ def parse_groups(group):
         if len(group) > 2:
             groups[group[0]]['users'] = group[3].split(',')
     return groups
+
+
+def parse_virt_url(url):
+    matcher = re.compile(r"qemu\+ssh:\/\/((.+)@)?(((.+)\.(.+))|(.+))\/system")
+    matched = matcher.match(url)
+    user = None
+
+    if not matched:
+        return None
+
+    host = matched.group(3)
+
+    if matched.group(2):
+        user = matched.group(2)
+
+    return (user, host)
