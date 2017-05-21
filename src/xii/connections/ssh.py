@@ -1,12 +1,11 @@
 import os
-import re
 import socket
 import stat
 import string
 import random
 from time import sleep
 
-from xii import connection, error
+from xii import connection, error, util
 from xii.output import HasOutput
 
 import paramiko
@@ -111,23 +110,32 @@ class Ssh(connection.Connection, HasOutput):
     def user_home(self):
         return self.shell("echo $HOME")
 
-    def copy(self, msg, source, dest):
-        _, stdout, _ = self.ssh().exec_command("cp {} {}".format(source, dest))
-        while not stdout.channel.eof_received:
-            sleep(1)
+    def copy(self, source, dest):
+        chan = self.ssh().get_transport().open_session()
+        chan.set_combine_stderr(True)
+        chan.exec_command("cp {} {}".format(source, dest))
+        return chan.recv_exit_status() == 0
 
-    def put(self, source, dest):
-        self.sftp().put(source, dest)
-
-    def get(self, source, dest):
-        self.sftp().get(source, dest)
+    def upload(self, source, dest):
+        try:
+            self.sftp().put(source, dest)
+        except IOError, SSHException:
+            return False
+        return True
 
     def download(self, source, dest):
-        command = "wget --progress=dot {} -O {} 2>&1 | grep --color=none -o \"[0-9]\+%\"".format(source, dest)
-        _, stdout, _ = self.ssh().exec_command(command)
+        try:
+            self.sftp().get(source, dest)
+        except IOError, SSHException:
+            return False
+        return True
 
-        # for line in stdout:
-        #     perc = int(line.replace("%", "").strip())
+    def download_url(self, url, dest):
+        command = "wget --progress=dot {} -O {}".format(source, dest)
+        chan = self.ssh().get_transport().open_session()
+        chan.set_combine_stderr(True)
+        chan.exec_command(command)
+        return chan.recv_exit_status() == 0
 
     def chmod(self, path, new_mode, append=False):
         if append:
@@ -180,6 +188,17 @@ class Ssh(connection.Connection, HasOutput):
         with self.open("/etc/group") as source:
             return util.parse_groups([line.rstrip('\n') for line in source])
 
+    def call(self, command, *args):
+        command = " ".join([command] + list(args))
+        chan = self.ssh().get_transport().open_session()
+        chan.set_combine_stderr(True)
+        chan.exec_command(command)
+
+        if self.is_verbose():
+            for line in chan.stdout:
+                self.verbose(line)
+        return chan.recv_exit_status()
+
     @classmethod
     def parse_url(cls, url):
         matcher = re.compile(r"qemu\+ssh:\/\/((.+)@)?(((.+)\.(.+))|(.+))\/system")
@@ -198,6 +217,11 @@ class Ssh(connection.Connection, HasOutput):
         return (user, host)
 
     @classmethod
-    def new_from_url(cls, url):
-        (host, user) = cls.parse_url(url)
-        return cls(host, user, password=None)
+    def new_from_url(cls, entity, url, retry, wait, key=None):
+        parsed = util.parse_virt_url(url)
+
+        if parsed is None:
+            raise error.ConnError("Invalid connection URL specified. `{}` is "
+                                  "invalid!".format(url))
+        (user, host) = parsed
+        return cls(entity, user, host, retry, wait, key)
