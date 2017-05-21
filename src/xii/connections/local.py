@@ -3,6 +3,7 @@ import getpass
 import urllib2
 import errno
 import shutil
+import subprocess
 
 from xii import error, util
 from xii.connection import Connection
@@ -16,12 +17,9 @@ class Local(Connection):
     def open(self, path, mode):
         return open(path, mode)
 
-    def mkdir(self, directory, recursive=False):
+    def mkdir(self, directory):
         try:
-            if recursive:
-                os.makedirs(directory)
-            else:
-                os.mkdir(directory)
+            os.makedirs(directory)
         except OSError as exc:
             if exc.errno == errno.EEXIST and os.path.isdir(directory):
                 pass
@@ -64,14 +62,27 @@ class Local(Connection):
     def user_home(self):
         return os.path.expanduser('~')
 
-    def copy(self, source_path, dest_path):
-        size = os.path.getsize(source_path)
+    def copy(self, source, dest):
+        size = os.path.getsize(source)
         try:
-            with open(source_path, 'rb') as source:
-                with open(dest_path, 'wb') as dest:
-                    self._copy_stream(size, source, dest)
-        except OSError as err:
-            raise error.ExecError(source_path, "Could not copy file: {}".format(err))
+            with open(source, 'rb') as s:
+                with open(dest, 'wb') as d:
+                    self._copy_stream(size, s, d)
+        except OSError:
+            return False
+        return True
+
+    def upload(self, source, dest):
+        return self.copy(source, dest)
+
+    def download(self, source, dest):
+        return self.copy(source, dest)
+
+    def download_url(self, url, dest):
+        source = urllib2.urlopen(url)
+        size = int(source.info().getheaders("Content-Length")[0])
+        with open(dest, 'wb') as d:
+            self._copy_stream(size, source, d)
 
     def chmod(self, path, new_mode, append=False):
         if append:
@@ -80,12 +91,6 @@ class Local(Connection):
 
     def chown(self, path, uid, gid):
         os.chown(path, uid, gid)
-
-    def download(self, url, dest_path):
-        source = urllib2.urlopen(url)
-        size = int(source.info().getheaders("Content-Length")[0])
-        with open(dest_path, 'wb') as dest:
-            self._copy_stream(size, source, dest)
 
     def get_users(self):
         try:
@@ -100,6 +105,9 @@ class Local(Connection):
                 return util.parse_groups([line.rstrip('\n') for line in source])
         except OSError as err:
             raise error.ExecError("Reading /etc/group failed.")
+
+    def call(self, command, *args):
+        return subprocess.call([command] + list(args))
 
     def _copy_stream(self, size, source, dest):
         copied = 0

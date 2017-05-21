@@ -34,14 +34,13 @@ class Connection():
         pass
 
     @abstractmethod
-    def mkdir(self, directory, recursive=False):
+    def mkdir(self, directory):
         """Creates a new directory
 
-        Creates one or more directories.
+        Creates one or more directories recursivly.
 
         Args:
             directory: The path which should be created
-            recursive: If True the path will be created recursivly as required
         """
         pass
 
@@ -107,13 +106,70 @@ class Connection():
         """
         pass
 
-    # FIXME: Make this more clear whats happening
     @abstractmethod
-    def copy(self, msg, source, dest):
+    def copy(self, source, dest):
+        """Copies data from source to destination
+
+        This copies files on host from source to destination.
+
+        Make sure path exists and is writable!
+
+        Args:
+            source: Source of data
+            dest: Destination where data should be copied
+
+        Returns:
+            True if copying was successfull, False otherwise
+        """
         pass
 
     @abstractmethod
-    def download(self, msg, source, dest):
+    def upload(self, source, dest):
+        """Uploads data to host
+
+        This copies files from local to host. If host is also local
+        it copies from local to local.
+
+        Make sure destination exists and has proper rights!
+
+        Args:
+            source: Source of data
+            dest: Destination of data
+
+        Returns:
+            True if transfer was successfull, False otherwise
+        """
+        pass
+
+    @abstractmethod
+    def download(self, source, dest):
+        """Downloads data from host
+
+        This copies from host to local. If host is also local
+        it copies from local to local.
+
+        Args:
+            source: Source of data on host
+            dest: Destination on local
+
+        Returns:
+            True if transfer was successfull, False otherwise
+        """
+        pass
+
+    @abstractmethod
+    def download_url(self, url, dest):
+        """Downloads data from an url
+
+        Make sure dest exists and is writable!
+
+        Args:
+            url: URL to data
+            dest: Destination where to save the data
+
+        Returns:
+            True if transfer was successfull, False otherwise
+        """
         pass
 
     @abstractmethod
@@ -191,7 +247,7 @@ class Connection():
         if self.exists(path):
             return
 
-        self.mkdir(path, recursive=True)
+        self.mkdir(path)
         self.chmod(path, S_IRWXU)
 
     def mktempdir(self, prefix):
@@ -215,3 +271,15 @@ class Connection():
         self.chmod(path, S_IRWXU)
 
         return path
+
+    def call(self, command, *args):
+        """run a command
+
+        Args:
+            command:    The command to spawn
+            *args:      Arguments for the command
+
+        Returns:
+            return code of the exectuted program
+        """
+        pass
