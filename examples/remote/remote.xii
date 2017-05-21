@@ -1,39 +1,21 @@
 # vim: set ts=2 sw=2 tw=0 ft=yaml:
 ---
-xii:
-  connection: qemu+ssh://felixsch@xeon/system
-test_instance:
+
+remote:
+  host: qemu+ssh://dolguldur.fritz.box/system
   type: node
-  image: 'http://192.168.178.88/Fedora-Cloud-Base-24-1.2.x86_64.qcow2'
+  network: default
+  pool: default
+  image: {{ image }}
+  count: 1
+  graphic: yes
+  ssh:
+    copy-key:
+      users:
+        - root
+        - felixsch
   user:
-    - xii: default
-    - felixsch:
+    felixsch:
       password: linux
-      copy_pub_key: true
-    - root:
+    root:
       password: linux
-      copy_pub_key: true 
-      ssh: true 
-
-
-multiple:
-  type: node
-  count: 2
-  image: 'http://192.168.178.88/Fedora-Cloud-Base-24-1.2.x86_64.qcow2'
-  user:
-    - xii: default
-    - felixsch:
-      password: linux
-      copy_pub_key: true
-    - root:
-      password: linux
-      copy_pub_key: true 
-      ssh: true 
-# - crowbar_nodes:
-#     image: 'http://download.suse.de/ibs/home:/fschnizlein:/images:/libvirt/images/sle12-sp1.x86_64.qcow2'
-#     type: node
-#     network: default
-#     user: default
-#     ssh: true
-
-
