@@ -26,7 +26,7 @@ class Component(Entity, HasStore):
         Entity.__init__(self, name, parent=command, templates=tpls)
 
     def get_virt_url(self):
-        return self.get("settings/connection", "qemu://system")
+        return self.get("host", "qemu:///system")
 
     # limit access to component/type/concret_instance
     def store(self):
@@ -125,7 +125,7 @@ def from_definition(definition, command, ext_mgr):
 
 
 def _initialize_attributes(instance, ext_mgr):
-    non_attributes = ["count", "type", "settings", "basename"]
+    non_attributes = ["count", "type", "settings", "basename", "host"]
 
     def add_attr(name):
         attr = ext_mgr.get_attribute(instance.ctype, name)
