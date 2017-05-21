@@ -12,6 +12,10 @@ class NeedGuestFS():
     def get_tmp_volume_path(self):
         pass
 
+    @abstractmethod
+    def get_virt_url(self):
+        pass
+
     def guest(self):
         """get the guestfs handle to the current image
 
@@ -21,9 +25,15 @@ class NeedGuestFS():
         def _start_guestfs():
             try:
                 path = self.get_tmp_volume_path()
+                url = self.get_virt_url()
+                opts = {}
+
+                if url.startswith('qemu+ssh'):
+                    opts = self._remote_opts(url)
+
                 guest = guestfs.GuestFS()
 
-                guest.add_drive(path)
+                guest.add_drive_opts(path, **opts)
                 guest.launch()
                 guest.mount("/dev/sda1", "/")
 
@@ -37,6 +47,7 @@ class NeedGuestFS():
         def _close_guest(guest):
             guest.sync()
             guest.umount("/")
+            guest.shutdown()
             guest.close()
 
         return self.share("guestfs", _start_guestfs, _close_guest)
@@ -76,3 +87,21 @@ class NeedGuestFS():
         """
         content = self.guest().cat('/etc/group').split("\n")
         return util.parse_groups(content)
+
+    def _remote_opts(self, url):
+        parsed = util.parse_virt_url(url)
+
+        if parsed is None:
+            raise error.ConnError("Invalid connection URL specified. `{}` is "
+                                  "invalid!".format(url))
+        (user, host) = parsed
+
+        opts = {
+            "server": [host],
+            "protocol": "ssh"
+        }
+
+        if user is not None:
+            opts["username"] = user
+
+        return opts
