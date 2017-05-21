@@ -22,12 +22,15 @@ class NeedIO():
         """
         def _create_connection():
             url = self.get_virt_url()
+            self.verbose("connection url = {}".format(url))
 
             if not url:
                 raise error.ConnError("[io] No connection url supplied")
 
             if url.startswith('qemu+ssh'):
-                return Ssh.new_from_url(url)
+                retry = self.config("ssh/ssh_retry", 20)
+                wait = self.config("ssh/wait", 3)
+                return Ssh.new_from_url(self, url, retry, wait)
             if url.startswith('qemu'):
                 return Local()
 
