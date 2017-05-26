@@ -11,7 +11,7 @@ from xii.connections.ssh import Ssh
 
 
 class NeedSSH(HasOutput):
-    __meta__ = ABCMeta
+    __metaclass__ = ABCMeta
 
     @abstractmethod
     def default_ssh_connection(self):

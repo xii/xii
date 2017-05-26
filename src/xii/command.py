@@ -10,7 +10,7 @@ from xii.entity import Entity
 
 
 class Command(Entity, HasStore):
-    __meta__ = ABCMeta
+    __metaclass__ = ABCMeta
 
     name = None
     """

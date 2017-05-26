@@ -30,7 +30,7 @@ def warn(msg, tag="[xii]"):
 
 
 class HasOutput:
-    __meta__ = ABCMeta
+    __metaclass__ = ABCMeta
 
     @abstractmethod
     def entity_path(self):
