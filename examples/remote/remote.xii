@@ -2,7 +2,7 @@
 ---
 
 remote:
-  host: qemu+ssh://dolguldur.fritz.box/system
+  host: {{ remote }}
   type: node
   network: default
   pool: default

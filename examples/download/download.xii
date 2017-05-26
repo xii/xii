@@ -1,0 +1,21 @@
+# vim: set ts=2 sw=2 tw=0 ft=yaml:
+---
+download:
+  type: node
+  network:
+    source: default
+    ip: 192.168.122.112
+  pool: default
+  image: https://download.fedoraproject.org/pub/fedora/linux/releases/25/CloudImages/x86_64/images/Fedora-Cloud-Base-25-1.3.x86_64.qcow2
+
+  graphic: yes
+  user:
+    felixsch:
+      password: felix
+    root:
+      password: linux
+  ssh:
+    copy-key:
+      users:
+        - felixsch
+        - root
