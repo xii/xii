@@ -6,6 +6,19 @@ from xii.need import NeedLibvirt, NeedSSH
 
 class ListCommand(command.Command):
     """List all currently defined components
+
+    Currently not every component supports uptime, therefor no
+    uptime is displayed nevertheless if it's running or not.
+
+    ::
+
+        $ xii ls
+        TYPE           NAME                  HOST                  UPTIME        STATUS
+        network        simple-cluster        qemu:///system        ---           NOT CREATED
+        node           admin                 qemu:///system        ---           NOT CREATED
+        node           worker-1              qemu:///system        ---           NOT CREATED
+        node           worker-2              qemu:///system        ---           NOT CREATED
+
     """
     name = ['list', 'ls']
     help = "list all currently defined components"
