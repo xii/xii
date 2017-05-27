@@ -29,6 +29,14 @@ class PoolComponent(Component, NeedLibvirt, NeedIO):
     def fetch_metadata(self):
         return self.fetch_resource_metadata("pool", self.entity())
 
+    def status(self):
+        domain = self.get_pool(self.entity(), raise_exception=False)
+        if domain is None:
+            return colors.WARN + "NOT CREATED" + colors.CLEAR
+        if domain.isActive():
+            return colors.SUCCESS + "RUNNING" + colors.CLEAR
+        return "STOPPED/SUSPENDED"
+
     def spawn(self):
         self.say("spawning...")
         self.xml_pool = []
