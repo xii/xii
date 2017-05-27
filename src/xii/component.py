@@ -46,6 +46,18 @@ class Component(Entity, HasStore):
         """
         pass
 
+    @abstractmethod
+    def status(self):
+        """get status from the component
+        This method needs to be implemented by each component to make
+        xii work properly.
+
+        Returns:
+            A string indicating the status
+        pass
+        """
+        pass
+
     def add_meta(self, key_or_dict, value=None):
         """add metadata to component
 
