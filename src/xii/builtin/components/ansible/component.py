@@ -52,6 +52,14 @@ class AnsibleComponent(Component, NeedAnsible, NeedIO, NeedSSH):
 
     requires = ["network", "node"]
 
+    def fetch_metadata(self):
+        # no metadata here
+        return None
+
+    def status(self):
+        # FIXME: Find a way to get status if ansible has run or not
+        return "UNKNOWN"
+
     def ansible_executable(self):
         return "ansible-playbook"
 
