@@ -1,8 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 
-class Store():
-
+class Store(object):
     def __init__(self, parent={}):
         self._values = parent
 
@@ -64,7 +63,7 @@ class Store():
         pprint.pprint(self._values)
 
 
-class HasStore():
+class HasStore(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
