@@ -3,6 +3,7 @@ from time import time
 
 from xii.component import Component
 from xii.need import NeedLibvirt, NeedIO
+from xii.output import colors
 from xii import error, util
 
 
@@ -19,6 +20,14 @@ class NetworkComponent(Component, NeedLibvirt, NeedIO):
 
     def fetch_metadata(self):
         return self.fetch_resource_metadata("network", self.entity())
+
+    def status(self):
+        domain = self.get_network(self.entity(), raise_exception=False)
+        if domain is None:
+            return colors.WARN + "NOT CREATED" + colors.CLEAR
+        if domain.isActive():
+            return colors.SUCCESS + "RUNNING" + colors.CLEAR
+        return "STOPPED/SUSPENDED"
 
     def spawn(self):
         network = self.get_network(self.entity(), raise_exception=False)
