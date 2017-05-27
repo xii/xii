@@ -2,6 +2,7 @@ import libvirt
 from time import sleep, time
 from random import randint
 from xii import error
+from xii.output import colors
 from xii.component import Component
 from xii.need import NeedLibvirt, NeedIO
 from xii.util import domain_has_state, domain_wait_state, wait_until_inactive
@@ -54,6 +55,14 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
 
     def fetch_metadata(self):
         return self.fetch_resource_metadata("domain", self.entity())
+
+    def status(self):
+        domain = self.get_domain(self.entity(), raise_exception=False)
+        if domain is None:
+            return colors.WARN + "NOT CREATED" + colors.CLEAR
+        if domain.isActive():
+            return colors.SUCCESS + "RUNNING" + colors.CLEAR
+        return "STOPPED/SUSPENDED"
 
     def add_xml(self, section, xml):
         if section not in self.xml_dfn:
