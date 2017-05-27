@@ -51,9 +51,10 @@ class ListCommand(command.Command):
                 created_at = float(meta["created"])
                 create = self._get_uptime(created_at)
 
-            rows.append((c.entity(),
+            rows.append((c.ctype,
+                c.entity(),
                 c.get_virt_url(),
                 create,
                 c.status()
                 ))
-        self.show_table(["name", "host", "uptime", "status"], rows)
+        self.show_table(["type", "name", "host", "uptime", "status"], rows)
