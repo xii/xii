@@ -28,7 +28,7 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
     When using default values for `pool` and `network`, make sure default pool
     and network is already defined.
 
-    When more than one instance of the same virtual machine is required, the 
+    When more than one instance of the same virtual machine is required, the
     `count` attribute can be used.
 
     .. note::
@@ -111,8 +111,7 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         self.xml_dfn['name'] = self.entity()
         self.xml_dfn['meta'] = self.meta_to_xml()
         self.xml_dfn.update(caps)
-
-        self.finalize()
+        self.finalize("guestfs")
         self.each_attribute("after_spawn")
         try:
             self.virt().defineXML(xml.safe_substitute(self.xml_dfn))
@@ -137,7 +136,7 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         #
         # 2017-02-22T23:22:56.850419Z qemu-system-x86_64: failed to initialize
         # spice server
-        wait = randint(3,10)
+        wait = randint(3,5)
         self.verbose("waiting {} seconds before creating the domain...".format(wait))
         sleep(wait)
 
@@ -145,6 +144,8 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
 
         self.success("started!")
         self.each_child("after_start")
+
+        self.finalize()
 
         # remove template path
         # FIXME: Currently the base path is not deleted
@@ -158,14 +159,15 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         self.each_child("stop", reverse=True)
         self._stop_domain(domain, force)
         self.each_child("after_stop", reverse=True)
+        self.finalize()
 
     def destroy(self):
         self.say("destroying...")
         domain = self.get_domain(self.entity(), raise_exception=False)
 
         if not domain:
-            self.warn("does not exist")
-            return
+            raise error.NotFound("Could not find node {}"
+                                 .format(self.entity()))
 
         if domain_has_state(domain, libvirt.VIR_DOMAIN_PAUSED):
             domain.resume()
@@ -181,6 +183,7 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
         domain.undefine()
         self.success("removed!")
         self.each_child("after_destroy", reverse=True)
+        self.finalize()
 
     def suspend(self):
         self.say("suspending...")
@@ -201,6 +204,7 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
             self.warn("failed to suspend")
             return
         self.success("suspended!")
+        self.finalize()
 
     def resume(self):
         self.say("resuming...")
@@ -227,6 +231,7 @@ class NodeComponent(Component, NeedLibvirt, NeedIO):
 
         self.success("resumed!")
         self.each_child("after_resume")
+        self.finalize()
 
     def _stop_domain(self, domain, force=False):
         if not domain.isActive():
