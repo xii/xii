@@ -100,7 +100,6 @@ class Component(Entity, HasStore):
     def get_virt_url(self):
         return self.get("host", "qemu:///system")
 
-    # limit access to component/type/concret_instance
     def store(self):
         """get the store
 
@@ -175,8 +174,12 @@ class Component(Entity, HasStore):
         return self.command().get_temp_path(self.entity(), *args)
 
     def run(self, action):
-        if action in dir(self):
-            getattr(self, action)()
+        try:
+            if action in dir(self):
+                getattr(self, action)()
+        except Exception as e:
+            self.finalize()
+            raise e
 
     def validate(self):
         Entity.validate(self, self.required_attributes)
