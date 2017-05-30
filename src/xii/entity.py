@@ -198,16 +198,26 @@ class Entity(HasOutput):
             }
         return self._shares[name]['value']
 
-    def finalize(self):
+    def finalize(self, name=None):
         """run finalizer on all shared object
 
         Remove all shared objects and run finalizer if specified
+
+        Args:
+            name:   Name of the shared object
         """
-        for child in self._childs:
-            child.finalize()
-        for name, shared in self._shares.items():
-            if shared["finalizer"] is not None:
-                shared["finalizer"](shared['value'])
+        names = [name]
+        if name is None:
+            names = self._shares.keys()
+
+        for name in names:
+            if name not in self._shares:
+                self.verbose("Try to finalize non existing shared object {}!"
+                             .format(name))
+                continue
+            if self._shares[name]["finalizer"] is not None:
+                self.verbose("finalizing {}...".format(name))
+                self._shares[name]["finalizer"](self._shares[name]["value"])
             del self._shares[name]
 
     def run(self, action):
