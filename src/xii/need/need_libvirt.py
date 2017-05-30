@@ -12,7 +12,7 @@ class NeedLibvirt(HasOutput):
 
     @abstractmethod
     def get_virt_url(self):
-        """ Defines the connection url which is connected when the 
+        """ Defines the connection url which is connected when the
         need mixin is used.
         """
         pass
@@ -39,6 +39,8 @@ class NeedLibvirt(HasOutput):
             if not url:
                 raise error.ConnError("[libvirt] No connection url supplied")
 
+            self.verbose("establish libvirt connection ({})..."
+                         .format(url))
             virt = libvirt.open(url)
 
             if not virt:
