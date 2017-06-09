@@ -26,6 +26,9 @@ def test_warn(capsys):
 
 
 class TestHasOutput(output.HasOutput):
+    def is_verbose(self):
+        return True
+
     def entity_path(self):
         return ["test", "hasOutput"]
 
