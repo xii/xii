@@ -7,7 +7,7 @@ single:
     source: default
     ip: 192.168.122.112
   pool: default
-  memory: 512M
+  memory: 128M
   image: {{ image }}
 
   graphic: yes

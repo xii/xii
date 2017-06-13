@@ -71,19 +71,12 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
             stream.sendAll(read_handler, image)
             stream.finish()
 
-
-        # self.verbose("size = " + str(size))
-
-        # self.io().call("virsh", "-c", "qemu:///system",
-        #                "vol-create-as", pool.name(),
-        #                self.component_entity(),
-        #                str(size+1024), "--format", "raw")
-        # self.say("importing...")
-        # self.io().call("virsh", "-c", "qemu:///system",
-        #                "vol-upload",
-        #                "--pool", pool.name(),
-        #                self.component_entity(),
-        #                self.get_tmp_volume_path())
+        self.say("importing...")
+        self.io().call("virsh", "-c", "qemu:///system",
+                       "vol-upload",
+                       "--pool", pool.name(),
+                       self.component_entity(),
+                       self.get_tmp_volume_path())
 
         disk_tpl = self.template("disk.xml")
         xml = disk_tpl.safe_substitute({
