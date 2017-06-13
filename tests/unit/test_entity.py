@@ -98,36 +98,6 @@ def test_finalize(capsys):
     out, _ = capsys.readouterr()
     assert("test_finalizer_called" in out)
 
-
-def test_finalize_childs(capsys):
-
-    def add_test_share(f):
-        def _cr():
-            return f.entity()
-
-        def _fin(value):
-            print("finalize-{}".format(value))
-            assert(value == f.entity())
-        return f.share("test-{}".format(f.entity()), _cr, _fin)
-
-    pa  = factories.EntityWithStore(name="pa")
-    a  = factories.Entity(name="a", parent=pa)
-    b  = factories.Entity(name="b", parent=pa)
-    c  = factories.Entity(name="c", parent=pa)
-
-    pa.add_child(a)
-    pa.add_child(b)
-    pa.add_child(c)
-
-    add_test_share(pa)
-    add_test_share(c)
-
-    pa.finalize()
-    out, _ = capsys.readouterr()
-    assert("finalize-pa" in out)
-    assert("finalize-c" in out)
-
-
 def test_run(capsys):
     class Test(entity.Entity):
         def test(self):
