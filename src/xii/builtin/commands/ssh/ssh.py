@@ -8,7 +8,7 @@ from xii import definition, command, error
 from xii.need import NeedLibvirt, NeedSSH
 
 
-class SSHCommand(command.Command, NeedLibvirt, NeedSSH):
+class SSHCommand(command.Command):
     """Connects to a node using the ssh command.
 
     ::

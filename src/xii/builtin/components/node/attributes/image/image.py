@@ -61,16 +61,6 @@ class ImageAttribute(Attribute, need.NeedIO, need.NeedLibvirt):
         # FIXME: Add error handling
         volume = pool.createXML(xml)
 
-        def read_handler(stream, data, file_):
-            return file_.read(data)
-
-        self.say("importing...")
-        with open(self.get_tmp_volume_path(), 'r') as image:
-            stream = self.virt().newStream(0)
-            volume.upload(stream, 0, 0, 0)
-            stream.sendAll(read_handler, image)
-            stream.finish()
-
         self.say("importing...")
         self.io().call("virsh", "-c", "qemu:///system",
                        "vol-upload",

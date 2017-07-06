@@ -19,7 +19,7 @@ def cli_arg_parser(ext_mgr):
     parser = argparse.ArgumentParser(usage=usage_text(ext_mgr))
     parser.add_argument("--debug", action="store_true", default=False,
                         help="Make output more verbose and dump environment")
-    parser.add_argument("--deffile", default=None,
+    parser.add_argument("-d", "--deffile", default=None,
                         help="Specify definition file")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                         help="Show verbose output")

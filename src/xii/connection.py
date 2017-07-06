@@ -16,7 +16,7 @@ class Connection():
     def open(self, path, mode):
         """Open a file
 
-        open files works as python's builtin method. Make sure that the 
+        open files works as python's builtin method. Make sure that the
         path exists on the host where the file will be opend (remote + local)
 
         Args:
@@ -192,7 +192,7 @@ class Connection():
 
         Only change the user id is working like
 
-        :: 
+        ::
 
             self.chown(some_path, uid=1000)
 
@@ -254,15 +254,12 @@ class Connection():
         """Creates a temporary directory under /var/tmp/<user>
 
         Args:
-            prefix: Prefix for the temprary directory (eg. xii -> /var/tmp/xii-2d72ddk9d3)
+            prefix: Prefix for the temprary directory
+            (eg. xii -> /var/tmp/xii-2d72ddk9d3)
 
         Returns:
             The path for the new created directory
         """
-
-        user = self.user()
-        users = self.get_users()
-        group = self.get_groups()
 
         suffix = ''.join(random.choice(string.lowercase) for i in range(8))
         path = os.path.join("/var/tmp", prefix + "-" + suffix)
@@ -280,6 +277,20 @@ class Connection():
             *args:      Arguments for the command
 
         Returns:
-            return code of the exectuted program
+            return a tuple with (returncode, output) of the
+            executed command
+        """
+        pass
+
+    def sudo_call(self, command, *args):
+        """run a command using sudo
+
+        Args:
+            command:    The command to spawn with different rights
+            *args:      Arguments for the command
+
+        Returns:
+            return a tuple with (returncode, output) of the
+            executed command
         """
         pass

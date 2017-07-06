@@ -5,10 +5,13 @@ import errno
 import shutil
 import subprocess
 
+from threading import Lock
+
 from xii import error, util
 from xii.connection import Connection
 
 
+SUDO_LOCK = Lock()
 BUF_SIZE = 16 * 1024
 
 
@@ -96,18 +99,32 @@ class Local(Connection):
         try:
             with self.open('/etc/passwd', 'r') as source:
                 return util.parse_passwd([line.rstrip('\n') for line in source])
-        except OSError as err:
+        except OSError:
             raise error.ExecError("Reading /etc/passwd failed.")
 
     def get_groups(self):
         try:
             with self.open('/etc/group', 'r') as source:
                 return util.parse_groups([line.rstrip('\n') for line in source])
-        except OSError as err:
+        except OSError:
             raise error.ExecError("Reading /etc/group failed.")
 
     def call(self, command, *args):
-        return subprocess.call([command] + list(args))
+        process = subprocess.Popen([command] + list(args),
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT)
+        return (process.stdout.read(), process.returncode)
+
+    def sudo_call(self, command, *args):
+        SUDO_LOCK.acquire()
+        print("Want to run '{}' as root:".format(command))
+        process = subprocess.Popen(["sudo", command] + list(args),
+                                   stdin=subprocess.PIPE,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT)
+
+        SUDO_LOCK.release()
+        return (process.stdout.read(), process.returncode)
 
     def _copy_stream(self, size, source, dest):
         copied = 0
