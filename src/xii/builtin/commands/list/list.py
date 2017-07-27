@@ -20,13 +20,11 @@ class ListCommand(command.Command):
         node           worker-2              qemu:///system        ---           NOT CREATED
 
     """
-    name = ['list', 'ls']
+    name = "list"
     help = "list all currently defined components"
 
     @classmethod
-    def argument_parser(cls):
-        parser = command.Command.argument_parser(cls.name[0])
-
+    def argument_parser(cls, parser):
         parser.add_argument("-d", "--definition", default=None,
                             help="Define which xii definition file should be used")
 
@@ -38,7 +36,6 @@ class ListCommand(command.Command):
 
         parser.add_argument("--only", type=str, default=None,
                             help="Show only secified components [nodes,pools,networks]")
-        return parser
 
     def _get_uptime(self, time):
         now  = datetime.datetime.now()

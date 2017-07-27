@@ -21,17 +21,15 @@ class IpCommand(command.Command, NeedLibvirt):
     When called directly after starting a node no ip address is assigned and
     nothing can be printed.
     """
-    name = ['ip']
+    name = "ip"
     help = "get ip address from host"
 
     @classmethod
-    def argument_parser(cls):
-        parser = command.Command.argument_parser(cls.name[0])
+    def argument_parser(cls, parser):
         parser.add_argument("--quiet", action="store_true", default=False,
                             help="Only output the ip or nothing if requesting failed")
         parser.add_argument("domain", nargs="?", default=None,
                             help="Name of the domain you want to connect")
-        return parser
 
     def domain_name(self):
         if self.args().domain is not None:

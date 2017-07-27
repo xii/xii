@@ -9,7 +9,7 @@ class StopCommand(command.Command):
 
     This will stop all components including network setups.
     """
-    name = ['stop']
+    name = "stop"
     help = "Stop xii instances"
 
     def run(self):

@@ -2,7 +2,7 @@ from xii import definition, command
 
 
 class ResumeCommand(command.Command):
-    name = ["resume"]
+    name = "resume"
     help = "resume all paused domains"
 
     def run(self):
