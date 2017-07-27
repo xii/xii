@@ -67,18 +67,6 @@ class ExtensionManager():
     def get_commands(self):
         return self._known["commands"]
 
-    def commands_available(self):
-        output = ["", "shortcut  action    description",
-                  "-------------------------------"]
-
-        for command in [c["class"] for c in self._known["commands"]]:
-            output.append(" {:9}{:10}{}"
-                          .format(", ".join(command.name[1:]),
-                                  command.name[0],
-                                  command.help))
-        output.append(" ")
-        return output
-
     def get_component(self, name):
         if name not in self._known["components"]:
             return None

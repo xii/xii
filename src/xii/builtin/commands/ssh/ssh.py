@@ -30,19 +30,17 @@ class SSHCommand(command.Command):
         Checkout :docs:`/components/node/user' for how to specify a
         default user
     """
-    name = ['ssh']
+    name = "ssh"
     help = "connect to a domain"
 
     @classmethod
-    def argument_parser(cls):
-        parser = command.Command.argument_parser(cls.name[0])
+    def argument_parser(cls, parser):
         parser.add_argument("domain", nargs="?", default=None,
                             help="Name of the domain you want to connect")
         parser.add_argument("user", nargs="?", default=None,
                             help="Name of the user you want to connect")
         parser.add_argument("--port", default=None,
                             help="Port where the ssh daemon listens to")
-        return parser
 
     def user_name(self, cmpnt):
         if self.args().user is not None:

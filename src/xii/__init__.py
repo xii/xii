@@ -1,5 +1,6 @@
 import sys
-import cli
+
+from xii import cli
 
 
 def main():

@@ -8,7 +8,7 @@ def start_command(cmpnt):
 
 
 class StartCommand(command.Command):
-    name = ['start', 's']
+    name = "start"
     help = "load xii definition and start vm's"
 
     def run(self):

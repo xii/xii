@@ -26,11 +26,13 @@ def make_temp_name(seed):
     return "/tmp/xii-" + hashed
 
 def find_definition_file(path):
-    if not path:
-        cwd = os.getcwd()
-        path = os.path.join(cwd, os.path.basename(cwd) + ".xii")
+    if path is None:
+        pwd = os.getcwd()
+        path = os.path.join(pwd, os.path.basename(pwd) + ".xii")
+    else:
+        path = os.path.abspath(path)
     if not os.path.exists(path):
-        raise error.NotFound("Could not open definition: No such file or directory")
+        raise error.NotFound("{}: No such file or directory.".format(path))
     return path
 
 
