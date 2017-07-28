@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from functools import reduce
 
 from xii.entity import Entity
 from xii.store import HasStore
@@ -75,7 +76,6 @@ class Component(Entity, HasStore):
         else:
             self._meta[key_or_dict] = str(value)
 
-
     def meta_to_xml(self):
         """get a xml representation for the metadata
 
@@ -85,13 +85,15 @@ class Component(Entity, HasStore):
         Returns:
             The xml created or an empty string if no meta data was added
         """
+        def merge(m, k_v):
+            k, v = k_v
+            return m + util.create_xml_node(k, text=v)
+
         if not len(self._meta):
             return ""
 
         url = "https://xii-project.org/xmlns/" + self.ctype + "/1.0"
-        attrs = reduce(lambda m, (k,v): m + util.create_xml_node(k, text=v),
-                       self._meta.iteritems(),
-                       "")
+        attrs = reduce(merge, self._meta.items(), "")
 
         return util.create_xml_node("xii:" + self.ctype,
                                     {"xmlns:xii": url},
