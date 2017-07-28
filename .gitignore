@@ -16,3 +16,4 @@ dist
 .xii-env
 htmlcov
 .coverage
+tags
