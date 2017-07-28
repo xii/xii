@@ -53,12 +53,12 @@ class Bool(TypeCheck):
 
 class String(TypeCheck):
     want = "string"
-    want_type = basestring
+    want_type = str
 
 
 class Ip(TypeCheck):
     want = "ip"
-    want_type = basestring
+    want_type = str
 
     def validate(self, pre, structure):
         TypeCheck.validate(self, pre, structure)
@@ -77,7 +77,7 @@ class Ip(TypeCheck):
 
 class ByteSize(TypeCheck):
     want = "memory"
-    want_type = basestring
+    want_type = str
     validator = re.compile("(?P<value>\d+)(\ *)(?P<unit>[kMGT])")
 
     def validate(self, pre, structure):
