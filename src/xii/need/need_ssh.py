@@ -1,6 +1,5 @@
 from abc import ABCMeta, abstractmethod
 
-import md5
 import paramiko
 import socket
 import time
@@ -8,6 +7,7 @@ import time
 from xii import error
 from xii.output import HasOutput
 from xii.connections.ssh import Ssh
+from xii.util import md5digest
 
 
 class NeedSSH(HasOutput):
@@ -93,4 +93,4 @@ class NeedSSH(HasOutput):
         return False
 
     def _generate_hash(self, host, user):
-        return "ssh" + md5.new("{}-{}".format(host, user)).hexdigest()
+        return "ssh" + md5digest("{}-{}".format(host, user)).hexdigest()

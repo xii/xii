@@ -1,4 +1,4 @@
-import md5
+import hashlib
 
 from Crypto.PublicKey import RSA
 from concurrent.futures import ThreadPoolExecutor, Future
@@ -30,7 +30,7 @@ def safe_get(name, structure):
 
 
 def md5digest(input):
-    return md5.new(input).hexdigest()
+    return hashlib.md5(input).hexdigest()
 
 
 def generate_rsa_key_pair():
@@ -67,7 +67,7 @@ def in_parallel(worker_count, objects, executor):
 def indented(lx, n):
     if not isinstance(lx, list):
         return (" " * n) + lx
-    #FIXME: Make generator after debugging
+    # FIXME: Make generator after debugging
     x = []
     for l in lx:
         x.append( (" " * n) + l)
