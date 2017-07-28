@@ -1,10 +1,10 @@
 import os
 import getpass
-import urllib2
 import errno
 import shutil
 import subprocess
 
+from urllib.request import urlopen
 from threading import Lock
 
 from xii import error, util
@@ -82,7 +82,7 @@ class Local(Connection):
         return self.copy(source, dest)
 
     def download_url(self, url, dest):
-        source = urllib2.urlopen(url)
+        source = urlopen(url)
         size = int(source.info().getheaders("Content-Length")[0])
         with open(dest, 'wb') as d:
             self._copy_stream(size, source, d)
