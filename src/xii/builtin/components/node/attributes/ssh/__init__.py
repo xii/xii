@@ -1,1 +1,1 @@
-from ssh import SSHAttribute
+from .ssh import SSHAttribute

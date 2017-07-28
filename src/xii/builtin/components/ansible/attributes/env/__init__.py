@@ -1,1 +1,1 @@
-from env import EnvAttribute
+from .env import EnvAttribute

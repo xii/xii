@@ -1,1 +1,1 @@
-from persistent import PersistentAttribute
+from .persistent import PersistentAttribute

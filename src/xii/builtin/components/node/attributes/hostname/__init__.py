@@ -1,1 +1,1 @@
-from hostname import HostnameAttribute
+from .hostname import HostnameAttribute

@@ -1,1 +1,1 @@
-from hosts import HostsAttribute
+from .hosts import HostsAttribute

@@ -1,1 +1,1 @@
-from shell import ShellAttribute
+from .shell import ShellAttribute

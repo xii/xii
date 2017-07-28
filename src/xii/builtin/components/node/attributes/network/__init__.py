@@ -1,1 +1,1 @@
-from network import NetworkAttribute
+from .network import NetworkAttribute

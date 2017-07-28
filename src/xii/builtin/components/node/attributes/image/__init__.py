@@ -1,1 +1,1 @@
-from image import ImageAttribute
+from .image import ImageAttribute

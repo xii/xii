@@ -1,1 +1,1 @@
-from destroy import DestroyCommand
+from .destroy import DestroyCommand

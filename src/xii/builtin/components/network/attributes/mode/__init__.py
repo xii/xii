@@ -1,1 +1,1 @@
-from mode import ModeAttribute
+from .mode import ModeAttribute

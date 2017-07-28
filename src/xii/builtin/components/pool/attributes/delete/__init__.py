@@ -1,1 +1,1 @@
-from delete import DeleteAttribute
+from .delete import DeleteAttribute
