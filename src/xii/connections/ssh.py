@@ -1,14 +1,11 @@
 import os
 import socket
-import stat
-import string
-import random
+import re
+import paramiko
 from time import sleep
 
 from xii import connection, error, util
 from xii.output import HasOutput
-
-import paramiko
 
 
 BUF_SIZE = 16 * 1024
@@ -19,7 +16,7 @@ class Ssh(connection.Connection, HasOutput):
     def __init__(self, entity, user, host, retry, wait, password=None, keyfile=None):
         connection.Connection.__init__(self)
 
-        #TODO: Add password and key support
+        # TODO: Add password and key support
         self._user = user
         self._host = host
 
@@ -119,19 +116,19 @@ class Ssh(connection.Connection, HasOutput):
     def upload(self, source, dest):
         try:
             self.sftp().put(source, dest)
-        except IOError, SSHException:
+        except (IOError, paramiko.SSHException):
             return False
         return True
 
     def download(self, source, dest):
         try:
             self.sftp().get(source, dest)
-        except IOError, SSHException:
+        except (IOError, paramiko.SSHException):
             return False
         return True
 
     def download_url(self, url, dest):
-        command = "wget --progress=dot {} -O {}".format(source, dest)
+        command = "wget --progress=dot {} -O {}".format(url, dest)
         chan = self.ssh().get_transport().open_session()
         chan.set_combine_stderr(True)
         chan.exec_command(command)
