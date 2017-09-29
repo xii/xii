@@ -73,7 +73,7 @@ class NetworkAttribute(NodeAttribute, need.NeedLibvirt):
         node    = self.get_domain(self.component_entity())
         desc    = etree.fromstring(node.XMLDesc())
 
-        ifaces  = filter(_uses_network, desc.findall("devices/interface"))
+        ifaces  = list(filter(_uses_network, desc.findall("devices/interface")))
 
         if len(ifaces) == 0:
             raise error.NotFound("Could not find domain interface")
