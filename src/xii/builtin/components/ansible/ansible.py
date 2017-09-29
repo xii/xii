@@ -43,19 +43,19 @@ class NeedAnsible(NeedIO):
 
             for output in iter(process.stdout.readline, ""):
                 line = output.decode('utf-8').strip()
+                if line == '' and process.poll() is not None:
+                    break
 
                 if (not is_parallel) or is_verbose:
-                    for l in line.split("\\n"):
-                        self.say("| " + l)
+                        self.say("| " + line)
                 else:
                     if line.startswith("PLAY RECAP *"):
                         has_recap = True
                     if has_recap:
                         recap.append(line)
 
-
             if has_recap:
-                map(self.say, recap)
+                list(map(self.say, recap))
 
             if process.wait() != 0:
                 return False
