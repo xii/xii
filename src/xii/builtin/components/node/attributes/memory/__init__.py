@@ -1,1 +1,1 @@
-from .memory import MemoryAttribute
+from memory import MemoryAttribute

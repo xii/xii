@@ -1,1 +1,1 @@
-from .copy import CopyAttribute
+from copyfiles import CopyAttribute

@@ -1,6 +1,6 @@
 
 def _to_list(string_or_list):
-    if isinstance(string_or_list, basestring):
+    if isinstance(string_or_list, str):
         return [string_or_list]
     return string_or_list
 

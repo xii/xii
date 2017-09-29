@@ -1,5 +1,4 @@
 import os
-from functools import partial
 
 from xii import error, util
 from xii.entity import Entity
@@ -7,8 +6,7 @@ from xii.component import Component
 from xii.attribute import Attribute
 from xii.command import Command
 
-
-class ExtensionManager():
+class ExtensionManager:
     """
     Loads all extensions (commands, components, attributes)
 
@@ -16,20 +14,25 @@ class ExtensionManager():
     ::
 
         path/
+        |
         |---- commands/
-        |---- command1/
-        |     |---- __init__.py
+        |     |---- command1/
+        |     |     |---- __init__.py
         |     |     '---- ...
         |     |---- ...
         |     '---- commandN
+        |
         '---- components/
-              |---- __init__.py
-              |---- ...
-              '---- attributes/
-                    |---- attribute1
-                    |     |---- __init__.py
-                    |     '---- ...
-                    '---- attributeN
+              |---- component1/
+              |     |---- __init__.py
+              |     |---- ...
+              |     |
+              |     '---- attributes/
+              |           |---- attribute1
+              |           |     |---- __init__.py
+              |           |     '---- ...
+              |           '---- attributeN
+              '---- componentN
 
     each subdirectory can have a 'templates/' directory containing all
     templates to be loaded
@@ -45,8 +48,14 @@ class ExtensionManager():
             "components": {}
         }
         self._paths = set()
-        util.new_namespace("xii.components")
-        util.new_namespace("xii.attributes")
+
+        self._init_namespaces()
+
+    def _init_namespaces(self):
+        namespaces = ["commands", "attributes", "components"]
+        for ns in namespaces:
+            ns_mod = util.new_package("xii", ns)
+            util.add_submodule(ns_mod, ns, "xii")
 
     def add_path(self, path):
         if not os.path.exists(path):
@@ -59,6 +68,8 @@ class ExtensionManager():
         self.add_path(path)
 
     def get_command(self, name):
+        if name is None:
+            return None
         for cmd in self._known["commands"]:
             if name in cmd["class"].name:
                 return cmd
@@ -94,89 +105,77 @@ class ExtensionManager():
             components = os.path.join(base_path, "components")
 
             if os.path.exists(components):
-                self._find_components(components)
+                self._load_components(components)
 
             if os.path.exists(commands):
-                self._find_commands(commands)
+                self._load_commands(commands)
 
-    def _find_components(self, base_path):
-        dirs = os.listdir(base_path)
-        paths = map(partial(os.path.join, base_path), dirs)
+    def _collect_paths(self, base_path):
+        if not os.path.exists(base_path):
+            return []
 
-        for name, path in zip(dirs, paths):
+        for dir in os.listdir(base_path):
+            path = os.path.join(base_path, dir)
             if not os.path.isdir(path):
                 continue
-            self._load_components(name, path)
-
-            # load all attributes
-            attr_path = os.path.join(path, "attributes")
-            if not os.path.exists(attr_path):
+            if dir.startswith("__"):
                 continue
+            yield (dir, path)
 
-            self._find_attributes(name, attr_path)
+    def _load_commands(self, base_path):
+        for name, path in self._collect_paths(base_path):
+            init = os.path.join(path, "__init__.py")
+            mod = util.load_module(init, name, "xii", "commands")
 
-    def _find_attributes(self, component, base_path):
-        dirs = os.listdir(base_path)
-        paths = map(partial(os.path.join, base_path), dirs)
+            classes = util.classes_from_module(mod, [Entity, Command])
 
-        for name, path in zip(dirs, paths):
-            if os.path.isdir(path) or os.path.splitext(path)[1] == ".py":
-                self._load_attributes(name, component, path)
+            for cmd in classes:
+                # FIXME: Find a better way to check if base class was detected
+                if cmd.name == "":
+                    continue
+                self._known["commands"].append({
+                    "class": cmd,
+                    "templates": self._find_templates(path)
+                    })
 
-    def _load_attributes(self, name, component, path):
-        module_name = "xii.attributes." + component
-        mod = util.load_module(module_name, path)
-        classes = util.classes_from_module(mod, [Entity, Attribute])
+    def _load_components(self, base_path):
+        for name, path in self._collect_paths(base_path):
+            init = os.path.join(path, "__init__.py")
+            mod = util.load_module(init, name, "xii", "components")
 
-        for klass in classes:
-            if klass.atype == "":
-                continue
-            if component not in self._known["attributes"]:
-                self._known["attributes"][component] = {}
+            classes = util.classes_from_module(mod, [Entity, Component])
 
-            # FIXME: Check why is the duplication happing
-            if klass.atype in self._known["attributes"][component]:
-                continue
+            for cmpnt in classes:
+                # FIXME: Find a better way to check if base class was detected
+                if cmpnt.ctype == "":
+                    continue
+                self._known["components"][cmpnt.ctype] = {
+                    "class": cmpnt,
+                    "templates": self._find_templates(path)
+                    }
+            self._load_attributes(path, name)
 
-            self._known["attributes"][component][klass.atype] = {
-                "class": klass,
-                "templates": self._find_templates(path)
-            }
+    def _load_attributes(self, component_path, component):
+        base_path = os.path.join(component_path, "attributes")
+        base_mod = util.new_package("xii", "attributes", component)
+        util.add_submodule(base_mod, component, "xii", "attributes")
 
-    def _load_components(self, name, path):
-        mod = util.load_module("xii.components." + name, path)
-        classes = util.classes_from_module(mod, [Entity, Component])
+        for name, path in self._collect_paths(base_path):
+            init = os.path.join(path, "__init__.py")
+            mod = util.load_module(init, name, "xii", "attributes", component)
+            classes = util.classes_from_module(mod, [Entity, Attribute])
 
-        for klass in classes:
-            # skip base component class
-            if klass.ctype == "":
-                continue
-            util.new_namespace("xii.attributes." + name)
-            self._known["components"][klass.ctype] = {
-                "class": klass,
-                "templates": self._find_templates(path)
-            }
+            for attr in classes:
+                # FIXME: Find a better way to check if base class was detected
+                if attr.atype == "":
+                    continue
+                if component not in self._known["attributes"]:
+                    self._known["attributes"][component] = {}
 
-    def _find_commands(self, base_path):
-        dirs = os.listdir(base_path)
-        paths = map(partial(os.path.join, base_path), dirs)
-
-        for name, path in zip(dirs, paths):
-            if not os.path.isdir(path):
-                continue
-            self._load_commands(name, path)
-
-    def _load_commands(self, name, path):
-        mod = util.load_module("xii.commands." + name, path)
-        classes = util.classes_from_module(mod, [Entity, Command])
-
-        for klass in classes:
-            if klass.name == []:
-                continue
-            self._known["commands"].append({
-                "class": klass,
-                "templates": self._find_templates(path)
-            })
+                self._known["attributes"][component][attr.atype] = {
+                    "class": attr,
+                    "templates": self._find_templates(path)
+                    }
 
     def _find_templates(self, path):
         tpl_path = os.path.join(path, "templates/")

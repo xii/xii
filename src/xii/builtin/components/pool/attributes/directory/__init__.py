@@ -1,1 +1,1 @@
-from .directory import DirectoryAttribute
+from directory import DirectoryAttribute

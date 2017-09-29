@@ -110,7 +110,6 @@ def init_command(store, cli_args, ext_mgr):
 
 def run_cli():
     try:
-
         # load all components
         ext_mgr = ExtensionManager()
         ext_mgr.add_builtin_path()
@@ -130,6 +129,11 @@ def run_cli():
         init_config(store)
         init_defines(store, cli_args)
         init_cli_settings(store, cli_args)
+
+        if cli_args.command is None:
+            parser.print_usage()
+            return 0
+
         cmd = init_command(store, cli_args, ext_mgr)
 
         return cmd.run()
@@ -138,11 +142,11 @@ def run_cli():
         warn("interrupted... stopping immediately!")
         return 1
 
-    except XiiError as e:
-        it = iter(e.error())
-        warn(e.error_title() + ": " + next(it))
+    # except XiiError as e:
+    #     it = iter(e.error())
+    #     warn(e.error_title() + ": " + next(it))
 
-        for line in it:
-            warn(line)
+    #     for line in it:
+    #         warn(line)
 
-        return 1
+    #     return 1

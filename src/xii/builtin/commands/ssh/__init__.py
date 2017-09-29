@@ -1,1 +1,1 @@
-from .ssh import SSHCommand
+from ssh import SSHCommand

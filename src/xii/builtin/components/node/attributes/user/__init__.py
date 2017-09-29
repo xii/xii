@@ -1,1 +1,1 @@
-from .user import UserAttribute
+from user import UserAttribute

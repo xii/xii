@@ -1,1 +1,1 @@
-from .graphic import GraphicAttribute
+from graphic import GraphicAttribute

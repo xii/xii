@@ -1,1 +1,1 @@
-from .stay import StayAttribute
+from stay import StayAttribute

@@ -1,1 +1,1 @@
-from .sshmount import SSHMountAttribute
+from sshmount import SSHMountAttribute

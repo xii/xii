@@ -1,1 +1,1 @@
-from .cpu import CPUAttribute
+from cpu import CPUAttribute

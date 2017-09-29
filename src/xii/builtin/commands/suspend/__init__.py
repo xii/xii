@@ -1,1 +1,1 @@
-from .suspend import SuspendCommand
+from suspend import SuspendCommand

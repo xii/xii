@@ -1,1 +1,1 @@
-from .run import RunAttribute
+from run import RunAttribute

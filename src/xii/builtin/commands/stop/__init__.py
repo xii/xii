@@ -1,1 +1,1 @@
-from .stop import StopCommand
+from stop import StopCommand

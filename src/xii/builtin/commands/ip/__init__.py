@@ -1,1 +1,1 @@
-from .ip import IpCommand
+from ip import IpCommand

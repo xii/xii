@@ -44,7 +44,7 @@ class AnsibleComponent(Component, NeedAnsible, NeedIO, NeedSSH):
     Checkout the :doc:`/components/ansible/hosts` for more information about
     how to populate the inventor list
     """
-    short_description="Provision virtual hosts using ansible"
+    short_description = "Provision virtual hosts using ansible"
 
     ctype = "ansible"
     required_attributes = ["hosts", "run"]
