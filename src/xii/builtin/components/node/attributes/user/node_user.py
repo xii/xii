@@ -40,7 +40,7 @@ class UserAttribute(NodeAttribute, need.NeedGuestFS):
             if "default" in user:
                 return name
 
-        name = self.settings().iterkeys().next()
+        name = next(iter(self.settings().keys()))
 
         self.say("Assuming default user for {} is {}..."
                  .format(self.component_entity(), name))
