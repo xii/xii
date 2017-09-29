@@ -1,1 +1,1 @@
-from list import ListCommand
+from command_list import ListCommand

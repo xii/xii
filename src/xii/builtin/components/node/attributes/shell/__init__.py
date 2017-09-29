@@ -1,1 +1,1 @@
-from shell import ShellAttribute
+from node_shell import ShellAttribute

@@ -1,1 +1,1 @@
-from hosts import HostsAttribute
+from ansible_hosts import HostsAttribute

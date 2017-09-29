@@ -1,1 +1,1 @@
-from cpu import CPUAttribute
+from node_cpu import CPUAttribute

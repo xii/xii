@@ -1,1 +1,1 @@
-from stay import StayAttribute
+from network_stay import StayAttribute

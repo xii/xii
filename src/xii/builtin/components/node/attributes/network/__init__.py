@@ -1,1 +1,1 @@
-from network import NetworkAttribute
+from node_network import NetworkAttribute

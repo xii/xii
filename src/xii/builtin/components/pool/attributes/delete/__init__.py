@@ -1,1 +1,1 @@
-from delete import DeleteAttribute
+from pool_delete import DeleteAttribute

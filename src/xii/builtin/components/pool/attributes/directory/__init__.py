@@ -1,1 +1,1 @@
-from directory import DirectoryAttribute
+from pool_directory import DirectoryAttribute

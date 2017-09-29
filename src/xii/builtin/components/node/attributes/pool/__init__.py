@@ -1,1 +1,1 @@
-from pool import PoolAttribute
+from node_pool import PoolAttribute

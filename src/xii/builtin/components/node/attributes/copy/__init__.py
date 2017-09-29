@@ -1,1 +1,1 @@
-from copyfiles import CopyAttribute
+from node_copy import CopyAttribute

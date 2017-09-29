@@ -1,1 +1,1 @@
-from user import UserAttribute
+from node_user import UserAttribute

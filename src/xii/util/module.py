@@ -8,12 +8,25 @@ import contextlib
 
 from xii import error
 
+def module_env():
+    mods = {}
+    filtered = ["xii.attributes", "xii.components", "xii.commands"]
+    for name, mod in sys.modules.items():
+        if name.startswith("xii.attributes"):
+            continue
+        if name.startswith("xii.components"):
+            continue
+        if name.startswith("xii.commands"):
+            continue
+        mods[name] = mod
+    return mods
+
 
 @contextlib.contextmanager
 def additional_sys_path(path: str):
-    old_path = sys.path.copy()
-    sys.path.append(path)
     old_modules = sys.modules.copy()
+    old_path = sys.path.copy()
+    sys.path.insert(0,path)
     try:
         yield
     finally:

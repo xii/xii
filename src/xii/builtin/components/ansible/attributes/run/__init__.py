@@ -1,1 +1,1 @@
-from run import RunAttribute
+from ansible_run import RunAttribute

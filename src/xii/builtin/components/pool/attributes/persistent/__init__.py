@@ -1,1 +1,1 @@
-from persistent import PersistentAttribute
+from pool_persistent import PersistentAttribute

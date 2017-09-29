@@ -1,2 +1,2 @@
 from node_attribute import NodeAttribute
-from node import NodeComponent
+from node_component import NodeComponent

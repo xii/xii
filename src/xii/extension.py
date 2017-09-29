@@ -38,7 +38,9 @@ class ExtensionManager:
     templates to be loaded
 
     Note: classes/methods from component exports can be accessed via
-    "xii.components.<component name>.<target>"
+    "xii.components.<component name>.<target>" the same for attributes
+    and commands:
+        "xii.attributes.<component name>.<target>" or "xii.commands.<target>"
     """
 
     def __init__(self):

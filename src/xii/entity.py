@@ -208,7 +208,7 @@ class Entity(HasOutput):
         """
         names = [name]
         if name is None:
-            names = self._shares.keys()
+            names = list(self._shares.keys())
 
         for name in names:
             if name not in self._shares:

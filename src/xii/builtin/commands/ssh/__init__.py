@@ -1,1 +1,1 @@
-from ssh import SSHCommand
+from command_ssh import SSHCommand

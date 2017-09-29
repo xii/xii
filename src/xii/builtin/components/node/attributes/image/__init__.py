@@ -1,1 +1,1 @@
-from image import ImageAttribute
+from node_image import ImageAttribute

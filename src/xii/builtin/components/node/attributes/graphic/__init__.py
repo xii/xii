@@ -1,1 +1,1 @@
-from graphic import GraphicAttribute
+from node_graphic import GraphicAttribute

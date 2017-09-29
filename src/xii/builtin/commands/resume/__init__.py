@@ -1,1 +1,1 @@
-from resume import ResumeCommand
+from command_resume import ResumeCommand

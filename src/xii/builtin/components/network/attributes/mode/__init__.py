@@ -1,1 +1,1 @@
-from mode import ModeAttribute
+from network_mode import ModeAttribute
