@@ -261,7 +261,7 @@ class Connection():
             The path for the new created directory
         """
 
-        suffix = ''.join(random.choice(string.lowercase) for i in range(8))
+        suffix = ''.join(random.choice(string.ascii_lowercase) for i in range(8))
         path = os.path.join("/var/tmp", prefix + "-" + suffix)
 
         self.mkdir(path)
