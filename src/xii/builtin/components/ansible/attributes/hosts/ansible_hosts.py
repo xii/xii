@@ -52,7 +52,7 @@ class HostsAttribute(AnsibleAttribute, NeedLibvirt, NeedIO, NeedSSH):
       network: default
       image: {{ image }}
       count: 6
-    
+
     provision-it:
         type: ansible
         hosts:
@@ -100,7 +100,8 @@ class HostsAttribute(AnsibleAttribute, NeedLibvirt, NeedIO, NeedSSH):
             to_write.append("[{}]".format(group))
 
             for host in hosts:
-                ip = self.domain_get_ip(host, quiet=self.is_verbose())
+                self.say("Waiting for {} to get a IP address...".format(host))
+                ip = self.domain_get_ip(host, verbose=self.is_verbose())
 
                 cmpnt = self.get_component(host)
 
