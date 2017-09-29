@@ -1,4 +1,5 @@
 import datetime
+from math import floor
 
 from xii import definition, command, error
 from xii.need import NeedLibvirt, NeedSSH
@@ -45,10 +46,10 @@ class ListCommand(command.Command):
             return "{} days".format(delta.days)
 
         if delta.seconds / 3600 > 1:
-            return "{} hours".format(delta.seconds / 3600)
+            return "{} hours".format(floor(delta.seconds / 3600))
 
         if delta.seconds / 60 > 1:
-            return "{} minutes".format(delta.seconds / 60)
+            return "{} minutes".format(floor(delta.seconds / 60))
         return "{} seconds".format(delta.seconds)
 
     def run(self):
