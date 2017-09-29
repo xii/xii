@@ -30,7 +30,7 @@ def safe_get(name, structure):
 
 
 def md5digest(input):
-    return hashlib.md5(input).hexdigest()
+    return hashlib.md5(input.encode("utf-8")).hexdigest()
 
 
 def generate_rsa_key_pair():
@@ -51,10 +51,10 @@ def flatten(to_flatten):
 def in_parallel(worker_count, objects, executor):
     try:
         pool = ThreadPoolExecutor(worker_count)
-        futures = map(partial(pool.submit, executor), objects)
+        futures = list(map(partial(pool.submit, executor), objects))
 
         # handle possible errors
-        errors = filter(None, map(Future.exception, futures))
+        errors = list(filter(None, map(Future.exception, futures)))
 
         if errors:
             for err in errors:
