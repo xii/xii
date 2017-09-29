@@ -26,10 +26,11 @@ class NeedLibvirt(HasOutput):
             A libvirt handle connected to the libvit host
         """
         def _error_handler(_, err):
-            if err[3] != libvirt.VIR_ERR_ERROR:
-                self.warn("Non-error from libvirt: '{}'".format(err[2]))
-            else:
-                raise error.ConnError("[libvirt] {}".format(err[2]))
+            pass
+            # if err[3] != libvirt.VIR_ERR_ERROR:
+            #     self.warn("Non-error from libvirt: '{}'".format(err[2]))
+            # else:
+            #     raise error.ConnError("[libvirt] {}".format(err[2]))
 
         def _create_connection():
             libvirt.registerErrorHandler(_error_handler, ctx=None)
@@ -251,7 +252,7 @@ class NeedLibvirt(HasOutput):
         return emulators[arch]
 
 
-    def domain_get_ip(self, domain_name, retry=20, wait=3, quiet=False):
+    def domain_get_ip(self, domain_name, retry=20, wait=3, verbose=False):
         """fetch ipv4 for a given domain name
 
         Args:
@@ -270,10 +271,11 @@ class NeedLibvirt(HasOutput):
             return None
 
         for i in range(retry):
-            if not quiet:
+            if verbose:
                 self.counted(i, "fetching ip address from {}...".format(domain_name))
 
-            nets = domain.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE)
+            nets = domain.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE).values()
+            nets = list(nets)
 
             if len(nets):
                 break
@@ -283,12 +285,15 @@ class NeedLibvirt(HasOutput):
             raise error.ConnError("Could not fetch ip address for {}. Giving up!"
                                   .format(domain_name))
 
-        net = nets.itervalues().next()
-
+        net = nets[0]
         if not len(net['addrs']):
             return False
 
-        return net['addrs'][0]['addr']
+        ip = net['addrs'][0]['addr']
+
+        self.say("{} has {}...".format(domain_name, ip))
+
+        return ip
 
     def network_get_host_ip(self, network_name, version="ipv4"):
         """get host ip for a virtual network
