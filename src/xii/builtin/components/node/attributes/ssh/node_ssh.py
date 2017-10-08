@@ -60,8 +60,8 @@ class SSHAttribute(NodeAttribute, need.NeedGuestFS):
             guest.chown(user['uid'], user['gid'], authorized_file)
 
             # FIXME: Find better way to deal with selinux labels
-            if guest.get_selinux():
-                guest.sh("chcon -R unconfined_u:object_r:user_home_t:s0 {}".format(user_ssh_dir))
+            #if guest.get_selinux():
+            #    guest.sh("chcon -R unconfined_u:object_r:user_home_t:s0 {}".format(user_ssh_dir))
 
 
     def _get_public_keys(self):
