@@ -50,13 +50,16 @@ class NetworkComponent(Component, NeedLibvirt, NeedIO):
             "meta": self.meta_to_xml()
             }
 
-        import pdb; pdb.set_trace()
-
         tpl = self.template("network.xml")
         xml = tpl.safe_substitute(replace)
 
         # FIXME: Handle case where the network already is used by another
         # device
+        # FIXME: libvirt.libvirtError: internal error:
+        # Check the host setup: enabling IPv6 forwarding with RA routes
+        # without accept_ra set to 2 is likely to cause routes loss.
+        # Interfaces to look at: enp0s25
+        # sysctl net.ipv6.conf.all.accept_ra
         try:
             self.virt().networkDefineXML(xml)
             net = self.get_network(self.entity())
