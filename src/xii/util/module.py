@@ -24,14 +24,12 @@ def module_env():
 
 @contextlib.contextmanager
 def additional_sys_path(path: str):
-    old_modules = sys.modules.copy()
     old_path = sys.path.copy()
     sys.path.insert(0,path)
     try:
         yield
     finally:
         sys.path = old_path
-        sys.modules = old_modules
 
 
 def new_package(*args):
