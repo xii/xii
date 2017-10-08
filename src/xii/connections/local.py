@@ -83,7 +83,7 @@ class Local(Connection):
 
     def download_url(self, url, dest):
         source = urlopen(url)
-        size = int(source.info().getheaders("Content-Length")[0])
+        size = int(source.getheader("Content-Length"))
         with open(dest, 'wb') as d:
             self._copy_stream(size, source, d)
 
