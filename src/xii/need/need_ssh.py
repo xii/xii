@@ -93,4 +93,4 @@ class NeedSSH(HasOutput):
         return False
 
     def _generate_hash(self, host, user):
-        return "ssh" + md5digest("{}-{}".format(host, user)).hexdigest()
+        return "ssh-" + md5digest("{}-{}".format(host, user))
