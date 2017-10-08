@@ -26,6 +26,7 @@ class MemoryAttribute(NodeAttribute):
         if unit not in self.factors.keys():
             raise error.DefError("Invalid memory size (kMGT can be used)")
 
+        # FIXME: Move this to only start/spawn command
         if in_bytes < self.warn_on:
             self.warn("It looks like you are trying to start a node with less "
                       "than 512M. Starting the virtual maschine's OS might not "
