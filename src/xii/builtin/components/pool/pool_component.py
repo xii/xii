@@ -6,6 +6,7 @@ from xii.need import NeedLibvirt, NeedIO
 from xii import error
 
 
+# FIXME: Creating pools is not working as expected!
 class PoolComponent(Component, NeedLibvirt, NeedIO):
     ctype = "pool"
 
@@ -15,7 +16,7 @@ class PoolComponent(Component, NeedLibvirt, NeedIO):
     required_attributes = ["persistent", "delete"]
 
     def validate(self):
-        type_spec = len(filter(lambda a: a.pool_type, self.attributes()))
+        type_spec = len(list(filter(lambda a: a.pool_type, self.attributes())))
         if type_spec != 1:
             raise error.ValidatorError("{} component must have exactly one "
                                        "attribute specifing its type (has {} "
