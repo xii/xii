@@ -15,15 +15,9 @@ def prepare_command_instance(command, ext_mgr):
     command.validate()
 
 
-def cli_arg_parser(ext_mgr):
+def cli_arg_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(metavar="COMMAND", dest="command")
-
-    parser.add_argument("definition",
-                        metavar="DEFINITION",
-                        default=None,
-                        nargs="?",
-                        help="Environment definition")
 
     parser.add_argument("-v", "--verbose",
                         action="store_true",
@@ -41,11 +35,17 @@ def cli_arg_parser(ext_mgr):
                         action="append",
                         default=[],
                         help="Define local variables")
+
+    parser.add_argument("definition",
+                        metavar="DEFINITION",
+                        default=None,
+                        nargs="?",
+                        help="Environment definition")
     return parser, subparsers
 
 
 def init_cli_args_parser(ext_mgr):
-    parser, subparsers = cli_arg_parser(ext_mgr)
+    parser, subparsers = cli_arg_parser()
     commands = ext_mgr.get_commands()
 
     for command in map(lambda c: c["class"], commands):
